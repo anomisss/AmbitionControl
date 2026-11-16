@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace AmbitionControl
 {
-    // Exact lifecycle and interface are modeled on the SDK Example-Options mod.
+    // Lifecycle and interface follow the official Example-Options mod.
     [ModEntryOnInitializationLoad]
     public sealed class AmbitionControlMod : IModBigAmbitions
     {
@@ -16,7 +16,7 @@ namespace AmbitionControl
         public Task OnLoadAsync(ModContext context)
         {
             AmbitionControlHost.Install();
-            context.Logger.Info("Ambition Control v0.2.0 loaded. Press F10.");
+            context.Logger.Info("Ambition Control v0.3.0 loaded. Press F10.");
             return Task.CompletedTask;
         }
 
@@ -59,10 +59,7 @@ namespace AmbitionControl
             menu = new TrainerMenu();
         }
 
-        private void OnGUI()
-        {
-            menu?.Render();
-        }
+        private void OnGUI() { menu?.Render(); }
 
         private void OnDestroy()
         {
@@ -70,9 +67,6 @@ namespace AmbitionControl
             if (instance == this) instance = null;
         }
 
-        private void OnApplicationQuit()
-        {
-            menu?.Save();
-        }
+        private void OnApplicationQuit() { menu?.Save(); }
     }
 }

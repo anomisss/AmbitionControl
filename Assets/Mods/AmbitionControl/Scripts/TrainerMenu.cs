@@ -3,23 +3,23 @@ using UnityEngine;
 
 namespace AmbitionControl
 {
-    // Source-only UI. No game state mutators are connected in v0.2.
     internal sealed class TrainerMenu
     {
         private const int WindowId = 1734282;
         private static readonly string[] Tabs = { "Money", "Player", "Time", "Diagnostics", "Settings" };
         private readonly TrainerSettings settings;
+        private readonly MoneyController money = new MoneyController();
         private Rect bounds;
         private Vector2 scroll;
         private string amount = "100000";
-        private string notification = "Game-changing commands are disabled until an adapter is verified.";
-        private bool wantsConfirmation;
+        private string notification = "Use a backup save before money modifications.";
+        private PendingMoneyAction pending;
         private bool reportWritten;
 
         internal TrainerMenu()
         {
             settings = TrainerSettings.Load();
-            bounds = new Rect(settings.windowX, settings.windowY, 580f, 465f);
+            bounds = new Rect(settings.windowX, settings.windowY, 600f, 475f);
             settings.selectedTab = Mathf.Clamp(settings.selectedTab, 0, Tabs.Length - 1);
         }
 
@@ -29,26 +29,24 @@ namespace AmbitionControl
             if (evt != null && evt.type == EventType.KeyDown && evt.keyCode == KeyCode.F10)
             {
                 settings.visible = !settings.visible;
-                wantsConfirmation = false;
+                pending = null;
                 Save();
                 evt.Use();
             }
             if (!settings.visible) return;
 
-            bounds.width = Mathf.Min(580f, Mathf.Max(180f, Screen.width - 12f));
-            bounds.height = Mathf.Min(465f, Mathf.Max(140f, Screen.height - 12f));
+            bounds.width = Mathf.Min(600f, Mathf.Max(180f, Screen.width - 12f));
+            bounds.height = Mathf.Min(475f, Mathf.Max(140f, Screen.height - 12f));
             bounds.x = Mathf.Clamp(bounds.x, 0f, Mathf.Max(0f, Screen.width - bounds.width));
             bounds.y = Mathf.Clamp(bounds.y, 0f, Mathf.Max(0f, Screen.height - bounds.height));
 
-            bounds = GUILayout.Window(WindowId, bounds, DrawWindow, "AMBITION CONTROL  |  v0.2.0",
+            bounds = GUILayout.Window(WindowId, bounds, DrawWindow, "AMBITION CONTROL  |  v0.3.0",
                 GUILayout.Width(bounds.width), GUILayout.Height(bounds.height));
 
-            // IMGUI input isolation only: game input systems may require extra integration.
+            // Unity IMGUI input consumption does not guarantee blocking other game input systems.
             if (evt != null && evt.isMouse && bounds.Contains(evt.mousePosition) &&
                 evt.type != EventType.Used && evt.type != EventType.Repaint && evt.type != EventType.Layout)
-            {
                 evt.Use();
-            }
 
             if (evt != null && evt.rawType == EventType.MouseUp) Save();
         }
@@ -56,12 +54,12 @@ namespace AmbitionControl
         private void DrawWindow(int id)
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Label("F10 to toggle menu");
+            GUILayout.Label("F10 to toggle");
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("X", GUILayout.Width(30)))
             {
                 settings.visible = false;
-                wantsConfirmation = false;
+                pending = null;
                 Save();
             }
             GUILayout.EndHorizontal();
@@ -70,7 +68,7 @@ namespace AmbitionControl
             if (selected != settings.selectedTab)
             {
                 settings.selectedTab = selected;
-                wantsConfirmation = false;
+                pending = null;
                 Save();
             }
 
@@ -91,54 +89,102 @@ namespace AmbitionControl
         private void DrawMoney()
         {
             GUILayout.Label("MONEY & ECONOMY", GUI.skin.box);
-            GUILayout.Label("Balance: unavailable (game adapter not yet connected).");
-            GUILayout.Label("Whole-dollar amount:");
-            amount = GUILayout.TextField(amount, 18);
-            long parsed;
+            float balance;
+            object identity;
             string error;
+            bool loaded = MoneyController.TryRead(out balance, out identity, out error);
+            GUILayout.Label(loaded ? "Current balance: $" + balance.ToString("N2") : error);
+            GUILayout.Label("Amount (whole dollars):");
+            amount = GUILayout.TextField(amount, 18);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("+ $10K")) { amount = "10000"; pending = null; }
+            if (GUILayout.Button("+ $100K")) { amount = "100000"; pending = null; }
+            if (GUILayout.Button("+ $1M")) { amount = "1000000"; pending = null; }
+            GUILayout.EndHorizontal();
+
+            long parsed;
             bool valid = MoneyCommand.TryParse(amount, out parsed, out error);
             if (!valid) GUILayout.Label(error);
-            bool old = GUI.enabled;
-            GUI.enabled = false;
+
+            bool prior = GUI.enabled;
+            GUI.enabled = loaded && valid;
             GUILayout.BeginHorizontal();
-            GUILayout.Button("Add money");
-            GUILayout.Button("Set balance");
+            if (GUILayout.Button("Stage Add")) Stage(MoneyAction.Add, parsed);
+            if (GUILayout.Button("Stage Remove")) Stage(MoneyAction.Remove, parsed);
+            if (GUILayout.Button("Stage Set")) Stage(MoneyAction.Set, parsed);
             GUILayout.EndHorizontal();
-            GUI.enabled = old;
-            GUILayout.Label("These buttons stay locked until we can read, validate and safely modify the real balance.");
+            GUI.enabled = prior;
+
+            if (pending != null)
+            {
+                GUILayout.Label("CONFIRM: " + pending.Action + " $" + pending.Amount.ToString("N0") +
+                                "  |  Before $" + pending.Before.ToString("N2") +
+                                "  |  Expected $" + (pending.Before + pending.Delta).ToString("N2"));
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Confirm change", GUILayout.Height(30)))
+                {
+                    notification = money.TryApply(pending, out string result) ? result : result;
+                    pending = null;
+                }
+                if (GUILayout.Button("Cancel", GUILayout.Height(30)))
+                {
+                    pending = null;
+                    notification = "Money command cancelled.";
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            prior = GUI.enabled;
+            GUI.enabled = loaded && money.HasUndo && pending == null;
+            if (GUILayout.Button("Undo last Ambition Control money action"))
+                money.TryUndo(out notification);
+            GUI.enabled = prior;
+            GUILayout.Label("Limits: $10M change per action, supported total balance $0 to $100M.");
+            GUILayout.Label("Only one-step undo; it expires when the balance or loaded save changes.");
+        }
+
+        private void Stage(MoneyAction action, long value)
+        {
+            PendingMoneyAction candidate;
+            string reason;
+            if (money.TryStage(action, value, out candidate, out reason))
+            {
+                pending = candidate;
+                notification = "Review the proposed change, then confirm.";
+            }
+            else
+            {
+                pending = null;
+                notification = reason;
+            }
         }
 
         private void DrawPlayer()
         {
-            GUILayout.Label("PLAYER NEEDS", GUI.skin.box);
-            GUILayout.Label("Planned: hunger, energy and happiness controls.");
-            bool old = GUI.enabled;
-            GUI.enabled = false;
-            GUILayout.Button("Freeze hunger");
-            GUILayout.Button("Freeze energy");
-            GUILayout.Button("Freeze happiness");
-            GUI.enabled = old;
+            GUILayout.Label("PLAYER STATUS (READ-ONLY)", GUI.skin.box);
+            var save = SaveGameManager.Current;
+            if (save == null) { GUILayout.Label("Load a city save first."); return; }
+            GUILayout.Label("Energy: " + save.Energy.ToString("N1"));
+            GUILayout.Label("Hunger: " + save.Hunger.ToString("N1"));
+            GUILayout.Label("Happiness: " + save.Happiness.ToString("N1"));
+            GUILayout.Label("Needs-changing controls are planned for a later verified release.");
         }
 
         private void DrawTime()
         {
-            GUILayout.Label("WORLD TIME", GUI.skin.box);
-            GUILayout.Label("Simulation speed control needs a verified game-time API.");
-            bool old = GUI.enabled;
-            GUI.enabled = false;
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("Pause");
-            GUILayout.Button("1x");
-            GUILayout.Button("2x");
-            GUILayout.Button("4x");
-            GUILayout.EndHorizontal();
-            GUI.enabled = old;
+            GUILayout.Label("WORLD TIME (READ-ONLY)", GUI.skin.box);
+            var save = SaveGameManager.Current;
+            if (save == null) { GUILayout.Label("Load a city save first."); return; }
+            GUILayout.Label("Day: " + save.Day);
+            GUILayout.Label("Time: " + save.Hour.ToString("00") + ":" + Mathf.FloorToInt(save.Minute).ToString("00"));
+            GUILayout.Label("Simulation speed changes are not implemented in this release.");
         }
 
         private void DrawDiagnostics()
         {
             GUILayout.Label("DIAGNOSTICS", GUI.skin.box);
-            GUILayout.Label("Metadata-only candidate report. No player values or game saves are read.");
+            GUILayout.Label("Opt-in type/member metadata report. Does not read save values.");
             if (GUILayout.Button("Write API candidate report", GUILayout.Height(34)))
             {
                 try
@@ -153,22 +199,21 @@ namespace AmbitionControl
                 }
             }
             GUILayout.Label("Output folder: " + TrainerSettings.DirectoryPath);
-            if (reportWritten) GUILayout.Label("Inspect api-candidates.txt for real integration candidates.");
+            if (reportWritten) GUILayout.Label("Inspect api-candidates.txt for game API candidates.");
         }
 
         private void DrawSettings()
         {
             GUILayout.Label("SETTINGS", GUI.skin.box);
             GUILayout.Label("Shortcut: F10");
-            GUILayout.Label("This build is source-only and must be compiled by the official SDK.");
-            GUILayout.Label("No real gameplay cheats are active.");
+            GUILayout.Label("Safety: test with a backup save; transaction changes persist with the game save.");
             if (GUILayout.Button("Reset window position"))
             {
                 bounds.x = settings.windowX = 80f;
                 bounds.y = settings.windowY = 80f;
                 Save();
             }
-            GUILayout.Label("Source version: 0.2.0");
+            GUILayout.Label("Source version: 0.3.0 (runtime unverified)");
         }
 
         internal void Save()

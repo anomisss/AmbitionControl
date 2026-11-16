@@ -1,19 +1,21 @@
 # Ambition Control
 
-An independent **Big Ambitions** utility and trainer project. Source is maintained in versioned Git history.
+A **Big Ambitions** in-game utility/trainer. Versioned source maintained in GitHub.
 
-## Current: v0.2.0 (source; not yet game-tested)
+## Current: v0.3.0 — Native money controls (untested in-game)
 
-- F10 draggable IMGUI control menu and menu settings persistence.
-- Tabs for Money, Player, Time, Diagnostics and Settings.
-- Read-only, opt-in game API metadata report.
-- **No money, need, or time cheats are enabled yet.** No confirmed game-state adapter has been implemented.
-- Official SDK registration and mod manifest source are included.
+- Open F10 to display a draggable Unity IMGUI menu.
+- **Money:** see live balance; stage Add, Remove, or Set; review expected outcome; confirm to book a native game transaction. One-step undo, available only while the save and balance remain unchanged.
+- **Player:** view current Energy, Hunger and Happiness (read-only).
+- **Time:** view current Day, Hour and Minute (read-only).
+- **Diagnostics:** opt-in metadata report.
+- Other trainer categories remain planned.
 
-**Installation:** see [docs/BUILDING.md](docs/BUILDING.md). Copy `Assets/Mods/AmbitionControl` into the *official SDK project*, import your local game DLLs, then use its Mod Builder. Copying this source repository directly into ModsLocal will not work.
+The first money integration uses `GameManager.ChangeMoneySafe` from publicly available Big Ambitions mod code. This **has not been compiled or tested locally**. Back up your save before use.
 
-**Versions:** [CHANGELOG.md](CHANGELOG.md) and [v0.1 historical baseline](docs/versions/v0.1.0.md).
+See [build guide](docs/BUILDING.md), [changelog](CHANGELOG.md), [v0.3 implementation notes](docs/versions/v0.3.0.md).
 
-**SDK:** https://github.com/hovgaardgames/bigambitions
+## Getting it into the game
+Copy `Assets/Mods/AmbitionControl` into a clone of the [official Big Ambitions SDK](https://github.com/hovgaardgames/bigambitions), import your local game DLLs, then use **Big Ambitions > Mod Builder > Build & Install**. Copying raw C# directly into ModsLocal does not work.
 
-This project is community-developed and not affiliated with Hovgaard Games. Do not commit proprietary game DLLs, player saves, private logs, or local credentials.
+This project is independent from Hovgaard Games. Never commit proprietary game DLLs, saves, or local debug logs.
