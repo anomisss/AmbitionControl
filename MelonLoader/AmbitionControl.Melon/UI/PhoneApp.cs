@@ -81,7 +81,12 @@ namespace AmbitionControl.UI
                 }
 
                 if (!PanelVisible) return;
-                if (OtherAppVisible()) { Hide(); return; }
+                if (OtherAppVisible())
+                {
+                    Hide();
+                    AmbitionControlMod.Log.Msg("Phone app hidden: another phone app was opened.");
+                    return;
+                }
                 if (Time.unscaledTime >= nextRefresh)
                 {
                     nextRefresh = Time.unscaledTime + 0.2f;

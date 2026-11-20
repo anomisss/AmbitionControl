@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0-alpha.2] — 2026-11-19 — Phase 3 test evidence logging
+- Log lines for UAT evidence: `Session: save loaded, balance $X, day N`, `Session ended ... cleared`, `Scene loaded: <scene> (staged action and undo cleared)`, `Phone app hidden: another phone app was opened.`
+- Added Phase 3 UAT checklist (`.planning/phases/03-money-feature-verification/03-UAT.md`).
+- **Status:** Build verified; tests 12/12. Logging only; behaviour unchanged from 0.5.0-alpha.1.
+
 ## [0.5.0-alpha.1] — 2026-11-19 — In-game phone app (GSD Phase 2, plan 02-02)
 - New **Ambition Control app on the in-game smartphone**: an app button cloned from the phone's own app bar (`FullMenu._appButtons`) with a fresh click event, and a panel built from the game's uGUI (`Image`, `Button`, `TextMeshProUGUI` with the phone's font) inside `FullMenu.appsContainer`.
 - Panel: balance, amount picker, Stage Add/Remove/Set, preview, Confirm/Cancel, Undo, status, limits/blocked reason, day/time and needs readout. Uses the same readback-verified `MoneyService` as the overlay.

@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 ## Current Position
 
 Phase: 3 of 5 (Money Feature Verification)
-Plan: 0 of TBD in current phase
-Status: Ready to plan — Phase 2 complete (phone app runtime verified: Add $1.11M verified)
-Last activity: 2026-11-19 — Phone app verified in-game (02-02-SUMMARY.md)
+Plan: UAT (03-UAT.md) — 8 owner tests
+Status: Testing — v0.5.0-alpha.2 installed (DLL 4ae7098d…), awaiting owner UAT run
+Last activity: 2026-11-19 — Phase 3 UAT checklist + evidence logging
 
 Progress: [████░░░░░░] 40%
 
@@ -42,4 +42,4 @@ Progress: [████░░░░░░] 40%
 
 Last session: 2026-11-19
 Stopped at: Phase 2 complete; next is Phase 3 (Remove, Set, Undo, persistence, save switching)
-Resume file: .planning/ROADMAP.md (Phase 3)
+Resume file: .planning/phases/03-money-feature-verification/03-UAT.md

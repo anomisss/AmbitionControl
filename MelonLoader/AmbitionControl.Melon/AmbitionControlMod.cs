@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.5.0-alpha.1", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.5.0-alpha.2", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -19,7 +19,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.5.0-alpha.1";
+        internal const string VersionLabel = "v0.5.0-alpha.2";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -84,6 +84,7 @@ namespace AmbitionControl
             money.ResetForSessionChange();
             InputBlocker.RestoreActions();
             phone?.Reset();
+            Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };
             nextSnapshot = 0f;
         }
@@ -140,7 +141,12 @@ namespace AmbitionControl
                 {
                     GameSnapshot fresh = GameBridge.Capture();
                     if (snapshot.Loaded && !fresh.SameSession(snapshot.Identity()))
+                    {
                         money.ResetForSessionChange();
+                        Log.Msg("Session ended (save closed or switched); staged action and undo cleared.");
+                    }
+                    if (fresh.Loaded && !(snapshot.Loaded && fresh.SameSession(snapshot.Identity())))
+                        Log.Msg("Session: save loaded, balance $" + fresh.Money.ToString("N2") + ", day " + fresh.Day + ".");
                     snapshot = fresh;
                     nextSnapshot = Time.unscaledTime + SnapshotInterval;
                 }
