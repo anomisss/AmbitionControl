@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.3", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.4", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -19,11 +19,12 @@ namespace AmbitionControl
         internal bool PlayerToolsEnabled = true;
         internal bool EconomyControlsEnabled = true;
         internal bool WorldToolsEnabled = true;
+        internal bool EmployeeToolsEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.3";
+        internal const string VersionLabel = "v0.7.0-alpha.4";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -83,6 +84,8 @@ namespace AmbitionControl
                 description: "Show the Economy tab (tax, prices, salaries, rival difficulty, presets).").Value;
             settings.WorldToolsEnabled = prefs.CreateEntry("WorldToolsEnabled", true,
                 description: "Show the World tab (vehicle repair/refuel, pause, speed, traffic, save).").Value;
+            settings.EmployeeToolsEnabled = prefs.CreateEntry("EmployeeToolsEnabled", true,
+                description: "Show the Staff tab (employee list, temporary max satisfaction).").Value;
 
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
@@ -97,6 +100,7 @@ namespace AmbitionControl
             InputBlocker.RestoreActions();
             phone?.Reset();
             WorldTools.ResetScene();
+            EmployeeTools.ResetSession();
             PlayerTools.ResetSession();
             Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };

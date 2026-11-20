@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 8 — Vehicles & world (Phase 7 UAT partial)
+**Current focus:** Phase 9 — Employees (part 1)
 
 ## Current Position
 
-Phase: 8 (Vehicles & world)
-Plan: Phase 8 implemented
-Status: v0.7.0-alpha.3 installed (DLL 551eb361…); awaiting owner UAT (08-UAT.md). Phase 7 UAT: presets + cycle verified; preset confirm/unlocks skipped by owner
-Last activity: 2026-11-19 — World tab: vehicle repair/refuel, pause, speed, traffic, save
+Phase: 9 (Employees, part 1)
+Plan: Phase 9 implemented
+Status: v0.7.0-alpha.4 installed (DLL 5d53d475…); awaiting owner UAT (09-UAT.md). Phase 8 UAT partial (traffic OFF verified); owner chose to continue
+Last activity: 2026-11-19 — Staff tab: employee list, temporary max satisfaction
 
 Progress: [██████████] 100%
 
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 8 awaiting install + in-game test
-Resume file: .planning/phases/08-vehicles-world/08-UAT.md
+Stopped at: Phase 9 awaiting in-game test
+Resume file: .planning/phases/09-employees/09-UAT.md

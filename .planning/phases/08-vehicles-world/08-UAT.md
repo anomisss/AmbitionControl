@@ -1,5 +1,5 @@
 ---
-status: partial (run 1 21:52, ~45 s session)
+status: partial (run 1 21:52, ~45 s session) — owner chose to continue to next milestone
 phase: 08-vehicles-world (Milestone C)
 build: v0.7.0-alpha.3 (DLL SHA-256 551eb36161a3f378a16eee3591fcffef3f0066a4c844ad50cb5e0728b9210862)
 started: 2026-11-19

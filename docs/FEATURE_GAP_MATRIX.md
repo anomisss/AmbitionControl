@@ -54,8 +54,8 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Gameplay | Teleport | — | Yes | Cmd `GameManager.Command_TeleportPlayerToAddress(int, StreetName)`, `…ToDestination()`, `…ToQuestTarget()`, `…ToBusiness(…)`, `…ToWaypoint(string)` | M | 2 | Missing | — |
 | Gameplay | Deliver pending imports | — | Yes | No direct "deliver now" method found; `LogisticsManagerPlanDestination.Deliver(...)` is internal logistics | H | 4 | Investigate | — |
 | Gameplay | Save game | World tab (two-press confirm) | Yes | `GameManager.SaveGame(string, bool)`; `SaveGameManager.CanSave()` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
-| Employees | View employees | — | Yes | `GameInstance.EmployeeInstances` (List<EmployeeInstance>) | L | 2 | Missing | — |
-| Employees | Set satisfaction | — | Yes | `EmployeeInstance.satisfaction` (float, direct) | M | 3 | Investigate | — |
+| Employees | View employees | Staff tab (read-only, paged) | Yes | `GameInstance.EmployeeInstances` (List<EmployeeInstance>) | L | 2 | Implemented v0.7.0-alpha.4, awaiting UAT | — |
+| Employees | Set satisfaction | Staff tab "Max satisfaction" (temporary, preview + confirm) | Yes | `EmployeeInstance.satisfaction` (direct); game recalculates via `EmployeeInstance.UpdateSatisfaction()`; scale check via `EmployeeHelper.LowSatisfactionThreshold` | M | 3 | Implemented v0.7.0-alpha.4 (temporary effect), awaiting UAT | — |
 | Employees | Salary multiplier | Economy tab cycle (preset values) | Yes | GV `employeeHourlySalaryMultiplier` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Employees | Set wages (bulk / individual) | — | Yes | `EmployeeInstance.hourlyWage` (float, direct) | M | 3 | Investigate | — |
 | Employees | Generate candidates by skill | — | Yes | Cmd `RecruitmentHelper.Command_GenerateCandidate(SkillName, int, …)` | M | 3 | Investigate | — |

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0-alpha.4] — 2026-11-19 — Milestone E (part 1): Employees
+- New **Staff** tab (tabs: Money | Player | Economy | World | Staff | Options).
+- **Read-only employee list** from `GameInstance.EmployeeInstances` (hired staff only; candidates excluded): name via the game's `GetEmployeeNameWithInfo()`, hourly wage, satisfaction, absent/unassigned flags; summary with count, average satisfaction and total wages per hour; 7 per page.
+- **Max satisfaction (temporary)**: first press shows how many of N employees would change, second press ("Confirm") sets `EmployeeInstance.satisfaction` to 100 and reads each back. Only runs when the 0–100 scale is confirmed (game `EmployeeHelper.LowSatisfactionThreshold` between 1 and 100 and no observed value above 100). The game recalculates satisfaction itself (`EmployeeInstance.UpdateSatisfaction()`), so the effect is temporary — stated in the UI.
+- Not yet: wage edits (change payroll and feed back into satisfaction) and candidate generation — remain "Investigate" in the gap matrix. The salary **multiplier** is already on the Economy tab.
+- New preference `EmployeeToolsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/09-employees/09-UAT.md`.
+
 ## [0.7.0-alpha.3] — 2026-11-19 — Milestone C: Vehicles & world
 - New **World** tab (tabs: Money | Player | Economy | World | Options).
 - **Repair vehicle** (`VehicleHelper.RepairVehicle()`, readback `VehicleInstance.damage`) and **Refuel vehicle** (`VehicleController.SetFuel(VehicleType.maxFuel)`, readback `VehicleInstance.fuel`). Only work while you are inside a motor vehicle **that is in your own `GameInstance.VehicleInstances`** — taxis/NPC/other vehicles are refused. No cost charged.

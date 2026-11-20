@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AmbitionControl.Core;
 using AmbitionControl.Game;
 using Il2Cpp;
@@ -36,8 +37,13 @@ namespace AmbitionControl.UI
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabOptions = 4;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabOptions = 5;
+        private TextMeshProUGUI staffSummary, staffList, staffMaxLabel;
+        private int staffPage;
+        private float nextStaffRead;
+        private List<EmployeeRow> staffRows = new List<EmployeeRow>();
+        private string staffError, lastStaffStatus;
         private TextMeshProUGUI pauseLabel, trafficLabel, saveLabel, vehicleText;
         private string lastWorldStatus;
         private readonly TextMeshProUGUI[] econLabels = new TextMeshProUGUI[GameEconomy.All.Length];
@@ -390,6 +396,19 @@ namespace AmbitionControl.UI
             wy += 58f;
             vehicleText = Text(wpage, "", x0, wy, full, sharedTop - wy - 4f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
+            // Staff page: read-only employee list (paged) + temporary max satisfaction with preview/confirm.
+            float sy = contentTop;
+            Transform spage = pages[TabStaff].transform;
+            staffSummary = Text(spage, "", x0, sy, full, 30f, 20f, TextMain, TextAlignmentOptions.Left);
+            sy += 34f;
+            staffList = Text(spage, "", x0, sy, full, EmployeeTools.PageSize * 30f, 18f, TextDim, TextAlignmentOptions.TopLeft);
+            sy += EmployeeTools.PageSize * 30f + 8f;
+            Func<GameSnapshot, bool> staffOk = s => settings != null && EmployeeTools.BlockReason(s, settings) == null;
+            MakeButton(spage, "< Prev", x0, sy, tw, 50f, BtnNeutral, () => { staffPage = Math.Max(0, staffPage - 1); nextStaffRead = 0f; }, null);
+            MakeButton(spage, "Next >", x0 + tw + 8f, sy, tw, 50f, BtnNeutral, () => { staffPage++; nextStaffRead = 0f; }, null);
+            staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnNeutral,
+                () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
@@ -432,19 +451,64 @@ namespace AmbitionControl.UI
         private bool TabEnabled(int tab) =>
             settings == null ||
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
-             tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled : true);
+             tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled :
+             tab == TabStaff ? settings.EmployeeToolsEnabled : true);
 
         private void ShowTab(int tab)
         {
             currentTab = TabEnabled(tab) ? tab : TabMoney;
             GameEconomy.ClearPending();
             WorldTools.ClearPending();
+            EmployeeTools.ClearPending();
+            nextStaffRead = 0f;
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].SetActive(i == currentTab);
                 tabLabels[i].text = i == currentTab ? "[ " + TabNames[i] + " ]" : TabNames[i];
             }
             nextRefresh = 0f;
+        }
+
+        /// <summary>Re-read the employee list at most once per second while the Staff tab is open.</summary>
+        private void RefreshStaff(GameSnapshot s)
+        {
+            if (Time.unscaledTime >= nextStaffRead)
+            {
+                nextStaffRead = Time.unscaledTime + 1f;
+                staffRows = s.Loaded ? EmployeeTools.ReadRows(s, out staffError) : new List<EmployeeRow>();
+                if (!s.Loaded) staffError = s.NotLoadedReason;
+            }
+
+            int pages = Math.Max(1, (staffRows.Count + EmployeeTools.PageSize - 1) / EmployeeTools.PageSize);
+            staffPage = Math.Min(staffPage, pages - 1);
+            if (staffError != null)
+            {
+                staffSummary.text = staffError;
+                staffList.text = "";
+            }
+            else if (staffRows.Count == 0)
+            {
+                staffSummary.text = "No hired employees.";
+                staffList.text = "";
+            }
+            else
+            {
+                staffSummary.text = staffRows.Count + " employees   avg satisfaction " +
+                    staffRows.Average(r => r.Satisfaction).ToString("0") + "   wages $" +
+                    staffRows.Sum(r => r.Wage).ToString("N0") + "/h   page " + (staffPage + 1) + "/" + pages;
+                var sb = new System.Text.StringBuilder();
+                foreach (EmployeeRow r in staffRows.Skip(staffPage * EmployeeTools.PageSize).Take(EmployeeTools.PageSize))
+                {
+                    string name = r.Name.Length > 34 ? r.Name.Substring(0, 33) + "…" : r.Name;
+                    sb.Append(name).Append("  $").Append(r.Wage.ToString("0.##")).Append("/h  sat ")
+                      .Append(r.Satisfaction.ToString("0"));
+                    if (r.Absent) sb.Append("  (absent)");
+                    if (!r.Assigned) sb.Append("  (unassigned)");
+                    sb.Append('\n');
+                }
+                staffList.text = sb.ToString();
+            }
+            if (staffMaxLabel != null) staffMaxLabel.text = EmployeeTools.ConfirmPending ? "Confirm" : "Max satisfaction";
         }
 
         private string Block(GameSnapshot s) =>
@@ -528,6 +592,7 @@ namespace AmbitionControl.UI
             if (PlayerTools.Status != lastPlayerStatus) { lastPlayerStatus = PlayerTools.Status; shownStatus = PlayerTools.Status; }
             if (GameEconomy.Status != lastEconStatus) { lastEconStatus = GameEconomy.Status; shownStatus = GameEconomy.Status; }
             if (WorldTools.Status != lastWorldStatus) { lastWorldStatus = WorldTools.Status; shownStatus = WorldTools.Status; }
+            if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
@@ -549,6 +614,7 @@ namespace AmbitionControl.UI
                     presetLabels[i].text = GameEconomy.PendingPreset == d ? "Confirm " + d :
                         d + (s.OptionsKnown && s.CurrentDifficulty == d ? " (current)" : " preset");
                 }
+            if (currentTab == TabStaff && staffList != null) RefreshStaff(s);
             if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
@@ -572,6 +638,11 @@ namespace AmbitionControl.UI
                 blockText.text = eBlock == null
                     ? "Values cycle through the game's own Easy/Normal/Hard preset values. Stored in your save when the game saves."
                     : "Economy controls unavailable: " + eBlock;
+            }
+            else if (currentTab == TabStaff)
+            {
+                string stBlock = settings == null ? "Starting..." : EmployeeTools.BlockReason(s, settings);
+                blockText.text = stBlock == null ? "Read-only list. Max satisfaction is temporary (the game recalculates it)." : "Staff tools unavailable: " + stBlock;
             }
             else if (currentTab == TabWorld)
             {

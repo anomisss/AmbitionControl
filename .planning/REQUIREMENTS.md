@@ -47,6 +47,8 @@
 - [ ] **ECON-03**: Unlock courses/contacts/importer products, tutorial switches
 - [ ] **WORLD-01**: Repair / refuel own current vehicle (ownership-checked, readback)
 - [ ] **WORLD-02**: Pause/resume, game speed (experimental), traffic, save game
+- [ ] **STAFF-01**: Read-only employee list (paged, summary)
+- [ ] **STAFF-02**: Temporary max satisfaction with affected-count preview and readback
 
 Deferred; each needs API verification on build 3233 first.
 
