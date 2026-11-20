@@ -61,6 +61,7 @@ Money changes made from the menu apply through the game's own transaction path, 
 | Fixed-rect `GUI.*` only, no GUILayout/Toolbar/Window | IL2CPP stripping | ✓ Good |
 | Menu clicks from Input System, IMGUI only draws | IMGUI clicks failed over game world in-game | ✓ Good |
 | Click-through blocking via Harmony prefixes on `InputActionHelper` | Game centralizes mouse reads there | ⚠️ Failed in-game (likely inlining) |
+| Keep $10M per-change limit (balance $0–$100M), not configurable | Owner decision 2026-11-19; safety cap; picker may exceed it for Set, checked at Stage | ✓ Decided |
 | Menu as an in-game smartphone app built from game uGUI | Game UI owns clicks; matches game look | ✓ Good (verified 2026-11-19) |
 
 ---
