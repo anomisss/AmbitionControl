@@ -22,6 +22,9 @@ namespace AmbitionControl.UI
         private int tab;
         private long amount = 100_000L;
         private float y;
+        private bool dragging;
+        private float dragDx;
+        private float dragDy;
 
         internal bool Visible;
         internal float X = 20f;
@@ -38,17 +41,17 @@ namespace AmbitionControl.UI
             var frame = new Rect(X, Y, W, H);
             GUI.Box(frame, "");
             GUI.Box(frame, "");
-            GUI.Box(new Rect(X, Y, W, 26f), "AMBITION CONTROL  " + AmbitionControlMod.VersionLabel + "   [" + settings.ToggleKey + "]");
-            if (GUI.Button(new Rect(X + W - 28f, Y + 2f, 24f, 22f), "X")) Visible = false;
+            GUI.Box(new Rect(X, Y, W, 26f), "AMBITION CONTROL  " + AmbitionControlMod.VersionLabel + "   [" + settings.ToggleKey + "]   (drag here)");
+            if (Click(new Rect(X + W - 28f, Y + 2f, 24f, 22f), "X")) Visible = false;
 
             // GUI.Toolbar is unusable on this build: it needs GUIContent.Temp(string[]), which is
             // stripped and MelonLoader 0.7.3 fails to unstrip it (runtime NotSupportedException).
-            // Plain GUI.Button(Rect, string) is confirmed working in-game.
+            // Plain Click(Rect, string) is confirmed working in-game.
             float tabW = (W - 2 * Pad - (Tabs.Length - 1) * 4f) / Tabs.Length;
             for (int i = 0; i < Tabs.Length; i++)
             {
                 string label = i == tab ? "[ " + Tabs[i] + " ]" : Tabs[i];
-                if (GUI.Button(new Rect(X + Pad + i * (tabW + 4f), Y + 32f, tabW, Row), label) && i != tab)
+                if (Click(new Rect(X + Pad + i * (tabW + 4f), Y + 32f, tabW, Row), label) && i != tab)
                 {
                     tab = i;
                     if (money.CurrentPhase == MoneyService.Phase.Staged) money.Cancel();
@@ -73,11 +76,49 @@ namespace AmbitionControl.UI
             y += height;
         }
 
+        /// <summary>GUI.Button that also logs clicks, so the log shows whether clicks reach the menu.</summary>
+        private static bool Click(Rect r, string text)
+        {
+            bool clicked = GUI.Button(r, text);
+            if (clicked) AmbitionControlMod.Log.Msg("Menu click: " + text);
+            return clicked;
+        }
+
+        /// <summary>
+        /// Title-bar dragging driven from OnUpdate via the Input System mouse, independent of IMGUI
+        /// events (GUI.DragWindow needs GUI.Window delegates, which we avoid on IL2CPP).
+        /// Returns true when a drag just finished (caller persists the position).
+        /// </summary>
+        internal bool UpdateDrag(UnityEngine.InputSystem.Mouse mouse)
+        {
+            if (!Visible || mouse == null) { dragging = false; return false; }
+            Vector2 p = mouse.position.ReadValue();
+            float gx = p.x;
+            float gy = Screen.height - p.y; // Input System is bottom-left origin; IMGUI is top-left
+            bool inTitle = gx >= X && gx <= X + W - 32f && gy >= Y && gy <= Y + 26f;
+
+            if (mouse.leftButton.wasPressedThisFrame && inTitle)
+            {
+                dragging = true;
+                dragDx = gx - X;
+                dragDy = gy - Y;
+            }
+            if (!dragging) return false;
+            if (!mouse.leftButton.isPressed)
+            {
+                dragging = false;
+                return true;
+            }
+            X = gx - dragDx;
+            Y = gy - dragDy;
+            return false;
+        }
+
         private bool Button(Rect r, string text, bool enabled)
         {
             bool prior = GUI.enabled;
             GUI.enabled = prior && enabled;
-            bool clicked = GUI.Button(r, text);
+            bool clicked = Click(r, text);
             GUI.enabled = prior;
             return clicked && enabled;
         }
@@ -93,9 +134,9 @@ namespace AmbitionControl.UI
             long[] steps = { 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L };
             string[] labels = { "+1K", "+10K", "+100K", "+1M", "+10M" };
             for (int i = 0; i < steps.Length; i++)
-                if (GUI.Button(new Rect(X + Pad + i * (bw + 4f), y, bw, Row), labels[i]))
+                if (Click(new Rect(X + Pad + i * (bw + 4f), y, bw, Row), labels[i]))
                     amount = MoneyCommand.ClampAmount(amount + steps[i]);
-            if (GUI.Button(new Rect(X + Pad + 5 * (bw + 4f), y, bw, Row), "Clear")) amount = 0L;
+            if (Click(new Rect(X + Pad + 5 * (bw + 4f), y, bw, Row), "Clear")) amount = 0L;
             y += Row + 6f;
 
             bool idle = money.CurrentPhase == MoneyService.Phase.Idle;
@@ -115,7 +156,7 @@ namespace AmbitionControl.UI
                      "  ->  $" + op.Expected.ToString("N2"));
                 float hw = (W - 2 * Pad - 6f) / 2f;
                 if (Button(new Rect(X + Pad, y, hw, 28f), "Confirm change", canWrite)) money.RequestConfirm();
-                if (GUI.Button(new Rect(X + Pad + hw + 6f, y, hw, 28f), "Cancel")) money.Cancel();
+                if (Click(new Rect(X + Pad + hw + 6f, y, hw, 28f), "Cancel")) money.Cancel();
                 y += 34f;
             }
 

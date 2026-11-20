@@ -38,6 +38,7 @@ namespace AmbitionControl
         private float nextSnapshot;
         private Key toggleKey = Key.F10;
         private bool loggedBuild;
+        private bool dragBroken;
         private string lastUpdateError;
 
         public override void OnInitializeMelon()
@@ -94,6 +95,19 @@ namespace AmbitionControl
                     menu.Visible = !menu.Visible;
                     if (!menu.Visible) SaveWindow();
                     nextSnapshot = 0f;
+                }
+
+                if (menu.Visible && !dragBroken)
+                {
+                    try
+                    {
+                        if (menu.UpdateDrag(Mouse.current)) SaveWindow();
+                    }
+                    catch (Exception ex)
+                    {
+                        dragBroken = true;
+                        Log.Warning("Window dragging disabled: " + ex.GetBaseException().Message);
+                    }
                 }
 
                 // Read game state only while the menu is open or an operation needs it.
