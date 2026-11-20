@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 2 of 5 (Menu Input Isolation)
 Plan: 1 of 1 in current phase
-Status: Checkpoint — installed (DLL SHA-256 d36973b1…), awaiting owner in-game test (plan task 4)
+Status: alpha.2 failed in-game (clicks still pass through); alpha.3 (action-level blocking + diagnostics, DLL e274007e…) installed, untested. Phone-app UI under consideration.
 Last activity: 2026-11-19 — InputBlocker (Harmony prefixes on InputActionHelper) implemented and compiled
 
 Progress: [██░░░░░░░░] 20%
@@ -22,7 +22,8 @@ Progress: [██░░░░░░░░] 20%
 
 - [Phase 1]: Menu clicks come from `Mouse.current`; IMGUI only draws (IMGUI clicks failed over the world)
 - [Phase 1]: Only `GUI.Box/Button/Label(Rect, string)` are proven at runtime on this IL2CPP build
-- [Phase 2]: Block click-through by patching `InputActionHelper` mouse reads, filtered to Click/RightClick/Zoom/CursorScroll
+- [Phase 2]: Helper patches alone failed in-game; added disabling of the game InputActions while hovering (alpha.3)
+- [Phase 2]: Candidate: move menu into the in-game smartphone as a uGUI app (pattern seen in the Alunas trainer)
 
 ### Pending Todos
 

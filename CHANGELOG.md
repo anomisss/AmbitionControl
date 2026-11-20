@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0-alpha.3] — 2026-11-19 — Click-through: action-level blocking + diagnostics
+- In-game (alpha.2): all 10 `InputActionHelper` patches applied, but clicks over the menu still reached the world. Hypothesis: helper calls inlined by IL2CPP and/or actions read directly.
+- New layer: while the cursor is over the menu, the game's own `InputAction`s for Click/RightClick/Zoom/CursorScroll (from `InputActionHelper.PlayerInputActionMap`) are disabled, and only those the mod disabled are re-enabled on leave, scene change or shutdown.
+- `Input diag:` log line (every 3 s while the menu is open) reports helper calls/blocked, actions held disabled and re-enables by the game, to show which path the game uses.
+- Reference: the Alunas trainer (owner-supplied, not redistributed) builds a uGUI panel inside the in-game smartphone (`Il2CppUI.Smartphone.FullMenu`); candidate architecture for the menu.
+- **Status:** Build verified; tests 12/12. **Not runtime verified.**
+
 ## [0.4.0-alpha.2] — 2026-11-19 — Menu input isolation (GSD Phase 2)
 - Click-through blocking: Harmony prefixes on the game's `Il2CppBigAmbitions.InputSystem.InputActionHelper` mouse reads (left/right click helpers, scroll, and `Pressed/Pressing/Released/Value` for `Click`, `RightClick`, `Zoom`, `CursorScroll`) report no input while the cursor is over the open menu or a title drag is active. Keyboard actions untouched.
 - Each patch applied independently; the log reports `Click-through blocking: N patches applied`. New preference `BlockClickThrough` (default true).

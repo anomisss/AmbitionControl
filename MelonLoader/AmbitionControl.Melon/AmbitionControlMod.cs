@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.4.0-alpha.2", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.4.0-alpha.3", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -19,7 +19,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.4.0-alpha.2";
+        internal const string VersionLabel = "v0.4.0-alpha.3";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -39,6 +39,7 @@ namespace AmbitionControl
         private Key toggleKey = Key.F10;
         private bool loggedBuild;
         private bool dragBroken;
+        private bool blockClickThrough;
         private string lastStateSummary;
         private string lastUpdateError;
 
@@ -66,7 +67,8 @@ namespace AmbitionControl
 
             MelonPreferences_Entry<bool> prefBlock = prefs.CreateEntry("BlockClickThrough", true,
                 description: "Stop mouse clicks/scroll on the menu from also acting on the game world.");
-            if (prefBlock.Value) InputBlocker.Apply(HarmonyInstance);
+            blockClickThrough = prefBlock.Value;
+            if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
             else Log.Msg("Click-through blocking is off (BlockClickThrough=false).");
             Log.Msg(VersionLabel + " loaded. Press " + settings.ToggleKey + " in-game to open the menu.");
         }
@@ -74,6 +76,7 @@ namespace AmbitionControl
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             money.ResetForSessionChange();
+            InputBlocker.RestoreActions();
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };
             nextSnapshot = 0f;
         }
@@ -122,6 +125,7 @@ namespace AmbitionControl
                 InputBlocker.MenuW = TrainerMenu.W;
                 InputBlocker.MenuH = TrainerMenu.H;
                 InputBlocker.Dragging = menu.IsDragging;
+                InputBlocker.Tick(blockClickThrough);
 
                 // Read game state only while the menu is open or an operation needs it.
                 bool needsState = menu.Visible || money.CurrentPhase != MoneyService.Phase.Idle;
@@ -176,7 +180,11 @@ namespace AmbitionControl
             }
         }
 
-        public override void OnDeinitializeMelon() => SaveWindow();
+        public override void OnDeinitializeMelon()
+        {
+            InputBlocker.RestoreActions();
+            SaveWindow();
+        }
 
         private void SaveWindow()
         {
