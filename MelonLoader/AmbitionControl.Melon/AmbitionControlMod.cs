@@ -102,12 +102,12 @@ namespace AmbitionControl
                 {
                     try
                     {
-                        if (menu.UpdateDrag(Mouse.current)) SaveWindow();
+                        if (menu.UpdateMouse(Mouse.current)) SaveWindow();
                     }
                     catch (Exception ex)
                     {
                         dragBroken = true;
-                        Log.Warning("Window dragging disabled: " + ex.GetBaseException().Message);
+                        Log.Warning("Menu mouse input disabled (clicks and dragging): " + ex.GetBaseException().Message);
                     }
                 }
 
