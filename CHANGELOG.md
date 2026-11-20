@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.11] — 2026-11-20 — Milestone H: skip hours, market wages, candidates
+- **Skip 1h / 4h / 8h** (World tab → Time): the game's own `TimeMachine.StartTimeMachine(goal)` — the fast-forward used for sleeping/waiting, so wages, rent, customers and needs all run. Two-press confirm, on foot only, refused while a skip is running. Readback: `isRunning` right after starting, then the time reached (`TimeHelper.Now()`) is logged when it stops.
+- **Wages to market rate** (Staff tab): each hired employee's wage set to the game's `EmployeeHelper.CalculateHourlyWageForSkill(primary skill, value)`. Preview shows how many change and payroll before → after; second press applies; each wage read back.
+- **Generate candidate** (Staff tab → Hire a candidate): pick a skill (16) and level (25/50/75/100% of `EmployeeInstance.MaxSkillValue`), then the game's `RecruitmentHelper.Command_GenerateCandidate(skill, value)`. Readback: `GameInstance.CandidateEmployeeInstances` count grows; the new candidate is named in the status.
+- Staff list now 5 per page to make room.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/15-staff-time/15-UAT.md`.
+
 ## [0.7.0-alpha.10] — 2026-11-20 — Game-matched phone app style
 - Restyled from the alpha.9 StyleProbe of the game's own apps (Persona, Rivals, MyEmployees, BizMan, EconoView, MarketInsider):
   - No dark panel: the phone's own background shows through (clicks on empty space are still blocked).

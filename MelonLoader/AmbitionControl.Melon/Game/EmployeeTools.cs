@@ -26,7 +26,7 @@ namespace AmbitionControl.Game
     /// </summary>
     internal static class EmployeeTools
     {
-        internal const int PageSize = 7;
+        internal const int PageSize = 5;
         internal static string Status { get; private set; }
 
         private static bool confirmPending;

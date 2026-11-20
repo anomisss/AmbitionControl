@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.10", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.11", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -26,7 +26,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.10";
+        internal const string VersionLabel = "v0.7.0-alpha.11";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -108,6 +108,8 @@ namespace AmbitionControl
             WorldTools.ResetScene();
             EmployeeTools.ResetSession();
             RivalTools.ClearPending();
+            TimeSkip.ResetScene();
+            HiringTools.ClearPending();
             QuestTools.ResetSession();
             PlayerTools.ResetSession();
             Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
@@ -193,6 +195,7 @@ namespace AmbitionControl
                 money.Tick(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);
                 phone?.Update(snapshot, settings);
                 PlayerTools.Tick(snapshot, settings);
+                TimeSkip.Tick();
                 QuestTools.Tick();
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;
                 lastUpdateError = null;

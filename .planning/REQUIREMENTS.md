@@ -55,6 +55,9 @@
 - [ ] **QUEST-02**: Complete current objective / quest (game commands, two-press confirm, readback)
 - [ ] **VEH-03**: Clean own vehicle (game setter, dirtiness readback)
 - [ ] **GOAL-01**: Complete all personal goals (game command, two-press confirm, count readback)
+- [ ] **TIME-01**: Skip hours via the game time machine (two-press, end-time readback)
+- [ ] **EMP-03**: Bulk wages to market rate (payroll preview, two-press, readback)
+- [ ] **EMP-04**: Generate candidate by skill and level (count readback)
 
 Deferred; each needs API verification on build 3233 first.
 

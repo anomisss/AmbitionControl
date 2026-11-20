@@ -54,6 +54,9 @@ namespace AmbitionControl.UI
         private List<EmployeeRow> staffRows = new List<EmployeeRow>();
         private string staffError, lastStaffStatus;
         private TextMeshProUGUI pauseLabel, trafficLabel, saveLabel, vehicleText;
+        private readonly TextMeshProUGUI[] skipLabels = new TextMeshProUGUI[TimeSkip.Hours.Length];
+        private TextMeshProUGUI wageLabel, skillLabel, levelLabel;
+        private string lastSkipStatus, lastHireStatus;
         private string lastWorldStatus;
         private readonly TextMeshProUGUI[] econLabels = new TextMeshProUGUI[GameEconomy.All.Length];
         private readonly TextMeshProUGUI[] presetLabels = new TextMeshProUGUI[GameEconomy.Presets.Length];
@@ -538,6 +541,13 @@ namespace AmbitionControl.UI
                 MakeButton(wpage, (pct / 100f).ToString("0.#") + "x", x0 + i * (sw + 8f), wy, sw, 50f, BtnNeutral,
                     () => WorldTools.SetSpeed(pct, lastSnap, settings), worldOk);
             }
+            wy += 58f;
+            for (int i = 0; i < TimeSkip.Hours.Length; i++)
+            {
+                int hrs = TimeSkip.Hours[i];
+                skipLabels[i] = MakeButton(wpage, "Skip " + hrs + "h", x0 + i * (tw + 8f), wy, tw, 50f, BtnNeutral,
+                    () => TimeSkip.SkipPressed(hrs, lastSnap, settings), s => settings != null && TimeSkip.Block(s, settings) == null);
+            }
             wy += 62f;
             wy = Header(wpage, "Game", x0, wy, full);
             saveLabel = MakeButton(wpage, "Save game", x0, wy, full, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
@@ -555,6 +565,15 @@ namespace AmbitionControl.UI
             MakeButton(spage, "Next >", x0 + tw + 8f, sy, tw, 50f, BtnNeutral, () => { staffPage++; nextStaffRead = 0f; }, null);
             staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnNeutral,
                 () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
+            sy += 58f;
+            wageLabel = MakeButton(spage, "Wages to market rate", x0, sy, full, 50f, BtnNeutral,
+                () => { HiringTools.MarketWagesPressed(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
+            sy += 58f;
+            sy = Header(spage, "Hire a candidate", x0, sy, full);
+            skillLabel = MakeButton(spage, "Skill", x0, sy, tw, 50f, BtnNeutral, () => HiringTools.NextSkill(), staffOk);
+            levelLabel = MakeButton(spage, "Level", x0 + tw + 8f, sy, tw, 50f, BtnNeutral, () => HiringTools.NextLevel(), staffOk);
+            MakeButton(spage, "Generate", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnGo,
+                () => HiringTools.GenerateCandidate(lastSnap, settings), staffOk);
 
             // Rivals page.
             float ry = contentTop;
@@ -658,6 +677,8 @@ namespace AmbitionControl.UI
             EmployeeTools.ClearPending();
             RivalTools.ClearPending();
             QuestTools.ClearPending();
+            TimeSkip.ClearPending();
+            HiringTools.ClearPending();
             nextRivalRead = 0f;
             nextStaffRead = 0f;
             for (int i = 0; i < pages.Length; i++)
@@ -831,6 +852,8 @@ namespace AmbitionControl.UI
             if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
             if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
             if (QuestTools.Status != lastQuestStatus) { lastQuestStatus = QuestTools.Status; shownStatus = QuestTools.Status; }
+            if (TimeSkip.Status != lastSkipStatus) { lastSkipStatus = TimeSkip.Status; shownStatus = TimeSkip.Status; }
+            if (HiringTools.Status != lastHireStatus) { lastHireStatus = HiringTools.Status; shownStatus = HiringTools.Status; }
             statusText.text = shownStatus ?? "Ready.";
             ApplyStatusStyle(shownStatus);
 
@@ -866,6 +889,12 @@ namespace AmbitionControl.UI
             if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
+            for (int i = 0; i < skipLabels.Length; i++)
+                if (skipLabels[i] != null)
+                    skipLabels[i].text = TimeSkip.PendingHours == TimeSkip.Hours[i] ? "Confirm " + TimeSkip.Hours[i] + "h" : "Skip " + TimeSkip.Hours[i] + "h";
+            if (wageLabel != null) wageLabel.text = HiringTools.WagePending ? "Confirm market wages" : "Wages to market rate";
+            if (skillLabel != null) skillLabel.text = HiringTools.SkillLabel;
+            if (levelLabel != null) levelLabel.text = "Level " + HiringTools.LevelLabel;
             if (vehicleText != null)
                 vehicleText.text = !s.InVehicle ? "Not in a vehicle." :
                     !s.VehicleOwned ? "Not your vehicle; vehicle tools disabled." :
@@ -880,8 +909,8 @@ namespace AmbitionControl.UI
             else if (currentTab == TabOptions) { tabBlock = GameOptions.BlockReason(s, settings); hint = "Unlocks and tutorial may need a save reload."; }
             else if (currentTab == TabEconomy) { tabBlock = GameEconomy.BlockReason(s, settings); hint = "Values cycle through the game's Easy / Normal / Hard values."; }
             else if (currentTab == TabRivals) { tabBlock = RivalTools.BlockReason(s, settings); hint = rivalError ?? "Defeat is permanent: the game closes their businesses."; }
-            else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = "Max satisfaction is temporary; the game recalculates it."; }
-            else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools work only in your own vehicle. Speeds above 2x are experimental."; }
+            else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = "Tap Skill / Level to choose, then Generate. Satisfaction changes are temporary."; }
+            else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools: your own vehicle only. Skip works like sleeping; speeds above 2x are experimental."; }
             else if (currentTab == TabPlayer) { tabBlock = PlayerTools.BlockReason(s, settings); hint = "Refills are checked by reading the value back."; }
             else if (currentTab == TabQuest)
             {
