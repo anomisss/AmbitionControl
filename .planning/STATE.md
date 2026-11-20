@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 10 (Rivals)
 Plan: Phase 13 implemented
-Status: v0.7.0-alpha.8 installed (DLL 04354aa3…); awaiting owner UAT (13-UAT.md + 12-UAT.md). Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
+Status: v0.7.0-alpha.8 installed (DLL 04354aa3…); 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
