@@ -29,7 +29,7 @@ Money changes made from the menu apply through the game's own transaction path, 
 ### Out of Scope
 
 - Multiplayer/online use or anti-cheat bypass — single-player utility only
-- Official Hovgaard SDK build (`Assets/Mods/...`, v0.3.0 on `main`) — kept as history; this project targets MelonLoader
+- Official Hovgaard SDK build (`Assets/Mods/...`, v0.3.0) — kept as history in the tree; this project targets MelonLoader
 - Direct save-file editing — changes go through game APIs only, saved by the game's own save flow
 - Committing game DLLs, interop assemblies, saves or logs — proprietary/private; references come from the user's install
 
@@ -48,7 +48,7 @@ Money changes made from the menu apply through the game's own transaction path, 
 - **Compatibility**: build 3233 + MelonLoader 0.7.x only; money writes blocked on other builds unless `AllowOtherBuilds=true` — APIs verified only for 3233.
 - **Safety**: no guessed APIs; every write path needs compile-time binding plus runtime readback; failures latch writes off for the session.
 - **Toolchain**: .NET 8 SDK (user-local `~\.dotnet`), project targets net6.0; references via `GamePath` (local `GamePath.props.user`, git-ignored).
-- **Repository**: work on `compat/ea-0.9.3233-melonloader`; keep `main` intact; no releases/merges without the owner's go-ahead.
+- **Repository**: develop on `compat/ea-0.9.3233-melonloader`; `main` fast-forwarded to it on owner request (2026-11-19, c253c5e). No releases/merges without the owner's go-ahead.
 - **Verification honesty**: distinguish build-verified vs runtime-verified; only the owner can run in-game tests.
 
 ## Key Decisions

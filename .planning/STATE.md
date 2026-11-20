@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 5 of 5 (Release Packaging)
 Plan: 05-01 complete
-Status: Milestone complete — GitHub pre-release https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2 (asset SHA-256 verified after download)
+Status: Milestone complete; main fast-forwarded to the release state — GitHub pre-release https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2 (asset SHA-256 verified after download)
 Last activity: 2026-11-19 — Published pre-release v0.6.0-alpha.2
 
 Progress: [██████████] 100%

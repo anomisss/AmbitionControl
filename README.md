@@ -2,7 +2,7 @@
 
 A **Big Ambitions** in-game utility/trainer. Versioned source maintained in GitHub.
 
-## MelonLoader build: v0.6.0-alpha.2 (branch `compat/ea-0.9.3233-melonloader`)
+## Current: MelonLoader build v0.6.0-alpha.2 (`main`; developed on `compat/ea-0.9.3233-melonloader`)
 
 For players running **MelonLoader 0.7.x on Big Ambitions build 3233 (IL2CPP)**. **Download:** [v0.6.0-alpha.2 pre-release](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2). Install, usage and build steps: [docs/MELONLOADER.md](docs/MELONLOADER.md).
 
