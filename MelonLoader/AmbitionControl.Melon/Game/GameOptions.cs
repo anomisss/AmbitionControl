@@ -14,7 +14,11 @@ namespace AmbitionControl.Game
         Aging,                  // disableAging
         VehicleDamage,          // disableVehicleDamage
         VehicleFuel,            // disableVehicleFuel
-        WholesaleImportLimits   // disableWholesaleAndImportLimits
+        WholesaleImportLimits,  // disableWholesaleAndImportLimits
+        AllCoursesUnlocked,     // allCoursesUnlocked   (positive flag: ON = unlocked)
+        AllContactsUnlocked,    // allContactsUnlocked  (positive flag)
+        AllImporterProducts,    // allProductsAvailableFromImporters (positive flag)
+        Tutorial                // tutorialEnabled      (positive flag)
     }
 
     /// <summary>
@@ -27,8 +31,15 @@ namespace AmbitionControl.Game
         internal static readonly GameOption[] All =
         {
             GameOption.EnergyDrain, GameOption.HappinessDrain, GameOption.Aging,
-            GameOption.VehicleDamage, GameOption.VehicleFuel, GameOption.WholesaleImportLimits
+            GameOption.VehicleDamage, GameOption.VehicleFuel, GameOption.WholesaleImportLimits,
+            GameOption.AllCoursesUnlocked, GameOption.AllContactsUnlocked, GameOption.AllImporterProducts, GameOption.Tutorial
         };
+
+        /// <summary>True for "disableX" flags, where the displayed ON (normal behaviour) means the flag is false.</summary>
+        internal static bool IsDisableFlag(GameOption o) => o <= GameOption.WholesaleImportLimits;
+
+        /// <summary>What the button shows: ON/OFF of the behaviour named by Label().</summary>
+        internal static bool DisplayOn(GameOption o, bool flag) => IsDisableFlag(o) ? !flag : flag;
 
         internal static string Status { get; private set; }
 
@@ -42,7 +53,11 @@ namespace AmbitionControl.Game
                 case GameOption.Aging: return "Aging";
                 case GameOption.VehicleDamage: return "Vehicle damage";
                 case GameOption.VehicleFuel: return "Vehicle fuel use";
-                default: return "Wholesale/import limits";
+                case GameOption.WholesaleImportLimits: return "Wholesale/import limits";
+                case GameOption.AllCoursesUnlocked: return "All courses unlocked";
+                case GameOption.AllContactsUnlocked: return "All contacts unlocked";
+                case GameOption.AllImporterProducts: return "All importer products";
+                default: return "Tutorial";
             }
         }
 
@@ -55,7 +70,11 @@ namespace AmbitionControl.Game
                 case GameOption.Aging: return gv.disableAging;
                 case GameOption.VehicleDamage: return gv.disableVehicleDamage;
                 case GameOption.VehicleFuel: return gv.disableVehicleFuel;
-                default: return gv.disableWholesaleAndImportLimits;
+                case GameOption.WholesaleImportLimits: return gv.disableWholesaleAndImportLimits;
+                case GameOption.AllCoursesUnlocked: return gv.allCoursesUnlocked;
+                case GameOption.AllContactsUnlocked: return gv.allContactsUnlocked;
+                case GameOption.AllImporterProducts: return gv.allProductsAvailableFromImporters;
+                default: return gv.tutorialEnabled;
             }
         }
 
@@ -68,7 +87,11 @@ namespace AmbitionControl.Game
                 case GameOption.Aging: gv.disableAging = value; break;
                 case GameOption.VehicleDamage: gv.disableVehicleDamage = value; break;
                 case GameOption.VehicleFuel: gv.disableVehicleFuel = value; break;
-                default: gv.disableWholesaleAndImportLimits = value; break;
+                case GameOption.WholesaleImportLimits: gv.disableWholesaleAndImportLimits = value; break;
+                case GameOption.AllCoursesUnlocked: gv.allCoursesUnlocked = value; break;
+                case GameOption.AllContactsUnlocked: gv.allContactsUnlocked = value; break;
+                case GameOption.AllImporterProducts: gv.allProductsAvailableFromImporters = value; break;
+                default: gv.tutorialEnabled = value; break;
             }
         }
 
@@ -92,7 +115,7 @@ namespace AmbitionControl.Game
             string block = BlockReason(snap, settings);
             if (block != null) { Status = name + " not changed: " + block; return; }
 
-            bool disabled = !snap.OptionDisabled[(int)option];
+            bool newFlag = !snap.OptionDisabled[(int)option];
             try
             {
                 GameInstance gi = SaveGameManager.Current;
@@ -104,17 +127,17 @@ namespace AmbitionControl.Game
                 GameVariables gv = gi.gameVariables;
                 if (gv == null) { Status = name + " not changed: game options unavailable."; return; }
 
-                WriteDisabled(gv, option, disabled);
+                WriteDisabled(gv, option, newFlag);
                 bool readBack = ReadDisabled(gv, option);
-                if (readBack == disabled)
+                if (readBack == newFlag)
                 {
                     snap.OptionDisabled[(int)option] = readBack;
-                    Status = name + " " + (disabled ? "OFF" : "ON") + " (verified). Stored in your save when the game saves.";
-                    AmbitionControlMod.Log.Msg(name + " " + (disabled ? "OFF" : "ON") + " verified.");
+                    Status = name + " " + (DisplayOn(option, readBack) ? "ON" : "OFF") + " (verified). Stored in your save when the game saves.";
+                    AmbitionControlMod.Log.Msg(name + " " + (DisplayOn(option, readBack) ? "ON" : "OFF") + " verified.");
                 }
                 else
                 {
-                    Status = name + " change did not stick (read back " + (readBack ? "OFF" : "ON") + ").";
+                    Status = name + " change did not stick (read back " + (DisplayOn(option, readBack) ? "ON" : "OFF") + ").";
                     AmbitionControlMod.Log.Error(Status);
                 }
             }

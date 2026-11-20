@@ -26,6 +26,8 @@ namespace AmbitionControl.Game
         internal bool Invincible;
         internal bool OptionsKnown;
         internal bool[] OptionDisabled = new bool[GameOptions.All.Length];
+        internal float[] Econ = new float[GameEconomy.All.Length];
+        internal Difficulty CurrentDifficulty;
 
         internal bool SameSession(SaveIdentity id) =>
             Loaded && id != null && id.InstancePtr == InstancePtr &&
@@ -137,6 +139,9 @@ namespace AmbitionControl.Game
                     snap.OptionsKnown = true;
                     foreach (GameOption o in GameOptions.All)
                         snap.OptionDisabled[(int)o] = GameOptions.ReadDisabled(gv, o);
+                    foreach (EconSetting e in GameEconomy.All)
+                        snap.Econ[(int)e] = GameEconomy.Read(gv, e);
+                    snap.CurrentDifficulty = gv.difficulty;
                 }
                 snap.Loaded = true;
             }

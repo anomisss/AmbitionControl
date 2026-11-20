@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.1", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.2", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -17,11 +17,12 @@ namespace AmbitionControl
         internal bool AllowOtherBuilds;
         internal bool PlayerTogglesEnabled = true;
         internal bool PlayerToolsEnabled = true;
+        internal bool EconomyControlsEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.1";
+        internal const string VersionLabel = "v0.7.0-alpha.2";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -77,6 +78,8 @@ namespace AmbitionControl
                 description: "Show the game option switches (energy/happiness drain, aging, vehicle damage/fuel, wholesale limits) in the phone app.").Value;
             settings.PlayerToolsEnabled = prefs.CreateEntry("PlayerToolsEnabled", true,
                 description: "Show the Player tab (need refills, invincibility, hold hunger).").Value;
+            settings.EconomyControlsEnabled = prefs.CreateEntry("EconomyControlsEnabled", true,
+                description: "Show the Economy tab (tax, prices, salaries, rival difficulty, presets).").Value;
 
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);

@@ -13,10 +13,10 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Money | Add / Remove / Set cash | MoneyService + phone Money tab | Yes | `GameManager.ChangeMoneySafe(float, TransactionType.Cheat, …)` | M | — | Verified | 03-UAT: Add, Remove, Undo log-verified; Set owner-reported |
 | Money | Preset amounts | +1K…+10M picker | Yes | n/a (UI) | L | — | Verified | in-game clicks logged |
 | Money | Custom amount entry | Picker only (no text field: IMGUI/keyboard reaches game hotkeys) | Yes | uGUI `InputField` exists in UnityEngine.UI | L | 3 | Partial | — |
-| Money | Tax rate | — | Yes | GV `taxPercentage` (int); `Entities.Taxes.taxPercentage` | M | 2 | Missing | — |
-| Money | Market price multiplier | — | Yes | GV `marketPriceMultiplier` (float) | M | 2 | Missing | — |
+| Money | Tax rate | Economy tab cycle (preset values) | Yes | GV `taxPercentage` (int); `Entities.Taxes.taxPercentage` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
+| Money | Market price multiplier | Economy tab cycle (preset values) | Yes | GV `marketPriceMultiplier` (float) | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Money | Export value multiplier | — | Yes | **No `exportMultiplier` in build 3233** (reference trainer itself throws `MissingMethodException: GameVariables.get_exportMultiplier` on this build) | — | — | Unsupported | owner's MelonLoader log 2026-11-16 |
-| Money | Bank interest multiplier / rate | — | No | GV `bankInterestMultiplier`, `bankInterestRate` | M | 3 | Missing | — |
+| Money | Bank interest multiplier / rate | Economy tab cycle (preset values) | No | GV `bankInterestMultiplier`, `bankInterestRate` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Money | Force IRS tax payment | — | No | Cmd `TaxHelper.Command_IRSForcePayment(float)` | M | 4 | Investigate | — |
 | Player | Refill energy | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | `EnergyHelper.SetCurrentEnergy(float)`; Cmd `GameManager.Command_SetEnergy(float)` | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
 | Player | Refill hunger | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | `EnergyHelper.SetCurrentHunger(float)`; Cmd `GameManager.Command_ChangeHunger(int)` | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
@@ -38,31 +38,31 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Vehicles | Spawn vehicle | — | No | Cmd `VehicleHelper.Command_GetCar(VehicleTypeName[, color])` | M | 4 | Investigate | — |
 | Business | Read customer satisfaction | — | Yes | `BuildingRegistration.satisfaction` → `Satisfaction{overall, customerService, pricing, cleanliness, facility}` | L | 2 | Missing | — |
 | Business | Maximize customer satisfaction | — | Yes | Direct write to `Satisfaction` fields; game may recompute | M | 3 | Investigate | — |
-| Business | Unlock courses | — | Yes | Cmd `EducationHelper.Command_UnlockAllCourses()`; GV `allCoursesUnlocked` | M | 2 | Missing | — |
-| Business | Unlock contacts | — | Yes | GV `allContactsUnlocked` | M | 2 | Missing | — |
-| Business | Unlock wholesalers / importers | — | Yes | GV `allProductsAvailableFromImporters`; limits via GV `disableWholesaleAndImportLimits` (have) | M | 2 | Partial | — |
+| Business | Unlock courses | Options switch (GV allCoursesUnlocked) | Yes | Cmd `EducationHelper.Command_UnlockAllCourses()`; GV `allCoursesUnlocked` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
+| Business | Unlock contacts | Options switch (GV allContactsUnlocked) | Yes | GV `allContactsUnlocked` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
+| Business | Unlock wholesalers / importers | Options switches (all importer products + no limits) | Yes | GV `allProductsAvailableFromImporters`; limits via GV `disableWholesaleAndImportLimits` (have) | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Business | Revenue / income multiplier | — | Yes | No revenue multiplier in GameVariables; `baseCustomerPromotionMultiplier` exists (effect unknown) | — | — | Investigate | — |
-| Business | Urgent delivery fee multipliers | — | No | GV `wholesaleUrgentFeeMultiplier`, `importerUrgentFeeMultiplier` | M | 3 | Missing | — |
+| Business | Urgent delivery fee multipliers | Economy tab cycle (preset values) | No | GV `wholesaleUrgentFeeMultiplier`, `importerUrgentFeeMultiplier` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Business | Market events / demand | — | No | Cmd `ProductMarketHelper.Command_CreateMarketEvent`, `Command_UpdateMarketDemand` | M | 4 | Investigate | — |
 | Gameplay | Game speed 0×–10× | — | Yes | Cmd `TimeHelper.Command_SetTimeSpeed(int percentage)` | L | 2 | Missing | — |
 | Gameplay | Pause / resume | — | Yes | via time speed 0 (game also has pause in FullMenu) | L | 2 | Missing | — |
 | Gameplay | Skip hours | — | Yes | `Timemachine.TimeMachine.SkipTime(string)` — must confirm it runs hourly simulation | H | 2 | Investigate | — |
 | Gameplay | Set custom time | — | Yes | `TimeHelper.SetCurrentTime(Timestamp)` — direct jump may skip scheduled events | H | 4 | Investigate | — |
 | Gameplay | Traffic on/off | — | Yes | Cmd `GameManager.Command_ToggleTraffic()`; `ParkingLaneGenerator/PedestrianSpawner.Command_ToggleSpawning()` | L | 2 | Missing | — |
-| Gameplay | Tutorial toggle | — | Yes | GV `tutorialEnabled` | M | 3 | Missing | — |
+| Gameplay | Tutorial toggle | Options switch (GV tutorialEnabled) | Yes | GV `tutorialEnabled` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Gameplay | Complete quest / objective | — | Yes | Cmd `TutorialHelper.Command_CompleteQuest()`, `Command_CompleteObjective()` | H | 3 | Investigate | — |
 | Gameplay | Teleport | — | Yes | Cmd `GameManager.Command_TeleportPlayerToAddress(int, StreetName)`, `…ToDestination()`, `…ToQuestTarget()`, `…ToBusiness(…)`, `…ToWaypoint(string)` | M | 2 | Missing | — |
 | Gameplay | Deliver pending imports | — | Yes | No direct "deliver now" method found; `LogisticsManagerPlanDestination.Deliver(...)` is internal logistics | H | 4 | Investigate | — |
 | Gameplay | Save game | — | Yes | `GameManager.SaveGame(string, bool)`; `SaveGameManager.CanSave()` | M | 2 | Missing | — |
 | Employees | View employees | — | Yes | `GameInstance.EmployeeInstances` (List<EmployeeInstance>) | L | 2 | Missing | — |
 | Employees | Set satisfaction | — | Yes | `EmployeeInstance.satisfaction` (float, direct) | M | 3 | Investigate | — |
-| Employees | Salary multiplier | — | Yes | GV `employeeHourlySalaryMultiplier` | M | 2 | Missing | — |
+| Employees | Salary multiplier | Economy tab cycle (preset values) | Yes | GV `employeeHourlySalaryMultiplier` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Employees | Set wages (bulk / individual) | — | Yes | `EmployeeInstance.hourlyWage` (float, direct) | M | 3 | Investigate | — |
 | Employees | Generate candidates by skill | — | Yes | Cmd `RecruitmentHelper.Command_GenerateCandidate(SkillName, int, …)` | M | 3 | Investigate | — |
 | Rivals | View rivals | — | Yes | `UI.Smartphone.Apps.Rivals.RivalLeaderboardData.isDefeated`; `GameInstance` rival ids | L | 3 | Investigate | — |
 | Rivals | Defeat rival (per neighbourhood) / all | — | Yes | `BigAmbitions.Rivals.RivalTimeline.DefeatRival(Neighbourhood, bool)` | H | 3 | Investigate | — |
-| Rivals | Rival difficulty | — | Yes | GV `rivalsDifficultyMultiplier` (float) | M | 2 | Missing | — |
-| Rivals | Difficulty presets | — | Yes | GV `difficulty` (`Il2Cpp.Difficulty`), `DifficultySetting` | M | 3 | Investigate | — |
+| Rivals | Rival difficulty | Economy tab cycle (preset values) | Yes | GV `rivalsDifficultyMultiplier` (float) | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
+| Rivals | Difficulty presets | Economy tab Easy/Normal/Hard (game DifficultySetting assets, two-press confirm) | Yes (Easy/Normal/Hard/Brutal) | `DifficultySetting.GetDifficultySettings(Difficulty)`; enum `Difficulty` = Custom, Easy, Normal, Hard — **no Brutal in build 3233** | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT (Brutal: Unsupported) | — |
 
 ## Milestone order (adjusted to API evidence)
 

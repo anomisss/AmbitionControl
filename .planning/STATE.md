@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 6 — Player Utilities (Milestone B of trainer expansion)
+**Current focus:** Phase 7 — Economy & difficulty controls
 
 ## Current Position
 
-Phase: 6 (Player Utilities)
-Plan: Milestone B implemented
-Status: Milestone B verified in-game (06-UAT: 7 pass, 1 partial, 1 not run). Next: game-variable controls (Phase 7)
-Last activity: 2026-11-19 — Milestone B UAT recorded
+Phase: 7 (Economy & difficulty controls)
+Plan: Phase 7 implemented
+Status: Checkpoint — v0.7.0-alpha.2 installed (DLL 8c4703a2…); awaiting owner UAT (07-UAT.md)
+Last activity: 2026-11-19 — Economy tab, presets, unlock switches
 
 Progress: [██████████] 100%
 
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Milestone B complete
-Resume file: docs/FEATURE_GAP_MATRIX.md
+Stopped at: Phase 7 awaiting in-game test
+Resume file: .planning/phases/07-economy-controls/07-UAT.md

@@ -12,6 +12,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [ ] **Phase 4: Expanded Features** - Player needs and time controls, each behind verified APIs
 - [x] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
 - [x] **Phase 6: Player Utilities (Milestone B)** - Need refills, invincibility, hunger hold; Player tab
+- [ ] **Phase 7: Economy & difficulty controls** - Presets, nine economy settings, unlock/tutorial switches
 - [ ] **Phase 7+: Trainer expansion** - Game-variable controls, vehicles/time, business, employees, rivals (see docs/FEATURE_GAP_MATRIX.md)
 
 ## Phase Details

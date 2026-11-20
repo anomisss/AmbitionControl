@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0-alpha.2] — 2026-11-19 — Milestone C/D: Economy & difficulty controls
+- New **Economy** tab (tabs: Money | Player | Economy | Options).
+- **Difficulty presets Easy / Normal / Hard**: values are read at runtime from the game's own `DifficultySetting.GetDifficultySettings(...)` assets and logged; first press shows how many of 9 settings would change, second press ("Confirm …") applies them and sets `gameVariables.difficulty`. Build 3233 has no "Brutal" preset (enum: Custom, Easy, Normal, Hard).
+- **Nine settings** — tax %, market prices, staff salaries, rival difficulty, bank interest, bank negative rate, customer promotion, wholesale urgent fee, importer urgent fee — each cycles **only through values the game's presets use** (no invented ranges); label shows which preset a value matches or "(custom)". Each write is read back.
+- **Options** tab gains **All courses unlocked, All contacts unlocked, All importer products, Tutorial** (game's own custom-game options; positive flags display ON = enabled).
+- Not changed mid-game on purpose: starting age, starting money, days per year.
+- New preference `EconomyControlsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/07-economy-controls/07-UAT.md`.
+
 ## [0.7.0-alpha.1] — 2026-11-19 — Milestone B: Player utilities (trainer expansion)
 - New **Player** tab in the phone app (tabs are now Money | Player | Game options; tab system generalized for more categories).
 - **Refill energy / hunger / happiness / all** via the game's own setters (`EnergyHelper.SetCurrentEnergy`, `EnergyHelper.SetCurrentHunger`, `HappinessHelper.Happiness`); each refill is read back from `GameInstance` and logged `Refill verified: <need> before -> after`.

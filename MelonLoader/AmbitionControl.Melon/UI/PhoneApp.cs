@@ -36,8 +36,11 @@ namespace AmbitionControl.UI
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Game options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabOptions = 2;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabOptions = 3;
+        private readonly TextMeshProUGUI[] econLabels = new TextMeshProUGUI[GameEconomy.All.Length];
+        private readonly TextMeshProUGUI[] presetLabels = new TextMeshProUGUI[GameEconomy.Presets.Length];
+        private string lastEconStatus;
         private readonly GameObject[] pages = new GameObject[TabNames.Length];
         private readonly TextMeshProUGUI[] tabLabels = new TextMeshProUGUI[TabNames.Length];
         private int currentTab;
@@ -342,6 +345,24 @@ namespace AmbitionControl.UI
                         "experimental: the game has no hunger option, so it tops hunger up when it drops.",
                 x0, py, full, sharedTop - py - 8f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
+            // Economy page: the game's own difficulty presets, then one cycle button per setting (2 columns).
+            float ey = contentTop;
+            Transform epage = pages[TabEconomy].transform;
+            Func<GameSnapshot, bool> econOk = s => settings != null && GameEconomy.BlockReason(s, settings) == null;
+            for (int i = 0; i < GameEconomy.Presets.Length; i++)
+            {
+                Difficulty preset = GameEconomy.Presets[i];
+                presetLabels[i] = MakeButton(epage, preset + " preset", x0 + i * (tw + 8f), ey, tw, 50f, BtnNeutral,
+                    () => GameEconomy.PresetPressed(preset, lastSnap, settings), econOk);
+            }
+            ey += 58f;
+            for (int i = 0; i < GameEconomy.All.Length; i++)
+            {
+                EconSetting setting = GameEconomy.All[i];
+                econLabels[i] = MakeButton(epage, GameEconomy.Label(setting), x0 + (i % 2) * (hw + 8f), ey + (i / 2) * 58f, hw, 50f,
+                    BtnNeutral, () => GameEconomy.Cycle(setting, lastSnap, settings), econOk);
+            }
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
@@ -353,10 +374,10 @@ namespace AmbitionControl.UI
                     () => GameOptions.Toggle(option, lastSnap, settings),
                     s => GameOptions.BlockReason(s, settings) == null);
             }
-            oy += ((GameOptions.All.Length + 1) / 2) * 62f + 6f;
-            Text(opage, "These are the game's own custom-game options. ON = normal game behaviour. A change is stored in " +
-                        "your save when the game saves; switch back ON to restore normal behaviour.",
-                x0, oy, full, sharedTop - oy - 8f, 20f, TextDim, TextAlignmentOptions.TopLeft);
+            oy += ((GameOptions.All.Length + 1) / 2) * 62f + 4f;
+            Text(opage, "The game's own custom-game options, stored in your save when it saves. Unlocks and tutorial may " +
+                        "need a save reload to take effect.",
+                x0, oy, full, sharedTop - oy - 4f, 18f, TextDim, TextAlignmentOptions.TopLeft);
 
             y = sharedTop;
             statusText = Text(panel.transform, "", x0, y, full, 70f, 22f, TextMain, TextAlignmentOptions.TopLeft);
@@ -383,11 +404,13 @@ namespace AmbitionControl.UI
 
         private bool TabEnabled(int tab) =>
             settings == null ||
-            (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled : true);
+            (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
+             tab == TabEconomy ? settings.EconomyControlsEnabled : true);
 
         private void ShowTab(int tab)
         {
             currentTab = TabEnabled(tab) ? tab : TabMoney;
+            GameEconomy.ClearPending();
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].SetActive(i == currentTab);
@@ -475,12 +498,28 @@ namespace AmbitionControl.UI
             if (money.Status != lastMoneyStatus) { lastMoneyStatus = money.Status; shownStatus = money.Status; }
             if (GameOptions.Status != lastToggleStatus) { lastToggleStatus = GameOptions.Status; shownStatus = GameOptions.Status; }
             if (PlayerTools.Status != lastPlayerStatus) { lastPlayerStatus = PlayerTools.Status; shownStatus = PlayerTools.Status; }
+            if (GameEconomy.Status != lastEconStatus) { lastEconStatus = GameEconomy.Status; shownStatus = GameEconomy.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
                 if (optionLabels[i] != null)
                     optionLabels[i].text = GameOptions.Label(GameOptions.All[i]) + ": " +
-                        (s.OptionsKnown ? (s.OptionDisabled[i] ? "OFF" : "ON") : "?");
+                        (s.OptionsKnown ? (GameOptions.DisplayOn(GameOptions.All[i], s.OptionDisabled[i]) ? "ON" : "OFF") : "?");
+            for (int i = 0; i < econLabels.Length; i++)
+                if (econLabels[i] != null)
+                {
+                    EconSetting e = GameEconomy.All[i];
+                    string from = s.OptionsKnown ? GameEconomy.PresetNames(e, s.Econ[i]) : null;
+                    econLabels[i].text = GameEconomy.Label(e) + ": " + (s.OptionsKnown ? GameEconomy.Format(e, s.Econ[i]) : "?") +
+                                         (from != null ? " (" + from + ")" : s.OptionsKnown ? " (custom)" : "");
+                }
+            for (int i = 0; i < presetLabels.Length; i++)
+                if (presetLabels[i] != null)
+                {
+                    Difficulty d = GameEconomy.Presets[i];
+                    presetLabels[i].text = GameEconomy.PendingPreset == d ? "Confirm " + d :
+                        d + (s.OptionsKnown && s.CurrentDifficulty == d ? " (current)" : " preset");
+                }
             if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
             if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");
 
@@ -488,6 +527,13 @@ namespace AmbitionControl.UI
             {
                 string optBlock = settings == null ? "Starting..." : GameOptions.BlockReason(s, settings);
                 blockText.text = optBlock == null ? "" : "Switches unavailable: " + optBlock;
+            }
+            else if (currentTab == TabEconomy)
+            {
+                string eBlock = settings == null ? "Starting..." : GameEconomy.BlockReason(s, settings);
+                blockText.text = eBlock == null
+                    ? "Values cycle through the game's own Easy/Normal/Hard preset values. Stored in your save when the game saves."
+                    : "Economy controls unavailable: " + eBlock;
             }
             else if (currentTab == TabPlayer)
             {

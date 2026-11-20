@@ -42,6 +42,9 @@
 - [x] **PLAYER-01**: Refill energy, hunger, happiness, all (game setters, readback)
 - [~] **PLAYER-02**: Invincibility toggle (game command, readback) — ON verified; OFF not yet run
 - [x] **PLAYER-03**: Hold hunger full (experimental, session-only)
+- [ ] **ECON-01**: Difficulty presets Easy/Normal/Hard from game assets (two-press confirm)
+- [ ] **ECON-02**: Nine economy settings cycle through game preset values with readback
+- [ ] **ECON-03**: Unlock courses/contacts/importer products, tutorial switches
 
 Deferred; each needs API verification on build 3233 first.
 
