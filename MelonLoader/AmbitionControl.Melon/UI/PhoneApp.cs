@@ -208,15 +208,6 @@ namespace AmbitionControl.UI
         private void Show()
         {
             Transform container = fullMenu.appsContainer;
-            // Style probe (read-only): log how the game's own app screens are built, once each.
-            StyleProbe.DumpOnce("phone frame (FullMenu)", fullMenu.transform);
-            for (int i = 0; i < container.childCount; i++)
-            {
-                Transform appScreen = container.GetChild(i);
-                if (appScreen.gameObject != panel) StyleProbe.DumpOnce("app screen: " + appScreen.name, appScreen);
-            }
-            StyleProbe.ListUiSprites();
-
             var hidden = new List<string>();
             for (int i = 0; i < container.childCount; i++)
             {
@@ -264,42 +255,109 @@ namespace AmbitionControl.UI
 
         // ---------------------------------------------------------------- panel construction
 
-        private static readonly Color Bg = new Color(0.09f, 0.10f, 0.12f, 0.98f);
-        private static readonly Color BtnNeutral = new Color(0.22f, 0.24f, 0.28f, 1f);
-        private static readonly Color BtnGo = new Color(0.16f, 0.50f, 0.30f, 1f);
-        private static readonly Color BtnStop = new Color(0.55f, 0.20f, 0.20f, 1f);
-        private static readonly Color TextMain = new Color(0.95f, 0.95f, 0.95f, 1f);
-        private static readonly Color TextDim = new Color(0.70f, 0.72f, 0.76f, 1f);
-        private static readonly Color TabActive = new Color(1f, 0.80f, 0.30f, 1f);
-        private static readonly Color StatusNeutral = new Color(0.16f, 0.18f, 0.21f, 1f);
-        private static readonly Color StatusOk = new Color(0.12f, 0.36f, 0.22f, 1f);
-        private static readonly Color StatusWarn = new Color(0.45f, 0.33f, 0.08f, 1f);
-        private static readonly Color StatusBad = new Color(0.45f, 0.14f, 0.14f, 1f);
+        // Palette matched to the game's own phone apps (StyleProbe of build 3233: white cards, #111519 text,
+        // #596975 secondary text, #BDC7CF splitters, white/#ABABAB tab labels).
+        private static readonly Color BtnNeutral = new Color(0.89f, 0.91f, 0.92f, 1f);
+        private static readonly Color BtnGo = new Color(0.25f, 0.68f, 0.35f, 1f);
+        private static readonly Color BtnStop = new Color(0.85f, 0.33f, 0.31f, 1f);
+        private static readonly Color BtnTab = new Color(0f, 0f, 0f, 0f);
+        private static readonly Color TextMain = new Color(0.067f, 0.082f, 0.098f, 1f);   // #111519
+        private static readonly Color TextDim = new Color(0.35f, 0.41f, 0.46f, 1f);      // #596975
+        private static readonly Color OnBg = Color.white;
+        private static readonly Color OnBgDim = new Color(1f, 1f, 1f, 0.72f);
+        private static readonly Color TabInactive = new Color(0.67f, 0.67f, 0.67f, 1f);   // #ABABAB
+        private static readonly Color Splitter = new Color(0.74f, 0.78f, 0.81f, 1f);     // #BDC7CF
+        private const float UiScale = 2f; // game app screens are 3840x1750 canvas units
 
-        /// <summary>Colour for a status message: green verified, amber awaiting confirm/warning, red failed/refused.</summary>
-        private static Color StatusColor(string msg)
+        private readonly Dictionary<string, Sprite> sprites = new Dictionary<string, Sprite>();
+        private TMP_FontAsset boldFont;
+        private Transform root;
+        private RectTransform tabIndicator;
+        private float tabX0, tabStep;
+
+        private static readonly string[] WantedSprites =
         {
-            if (string.IsNullOrEmpty(msg)) return StatusNeutral;
+            "white-round-corner-drop", "button-gray@2x", "button-green@2x", "button-red@2x",
+            "Gradient-Green-Round", "Gradient-Yellow-Round", "Gradient-Red-Round"
+        };
+
+        /// <summary>Find the game's own UI sprites and bold font once (falls back to flat colours if absent).</summary>
+        private void LoadGameStyle()
+        {
+            sprites.Clear();
+            try
+            {
+                foreach (Sprite sp in Resources.FindObjectsOfTypeAll<Sprite>())
+                    if (sp != null && Array.IndexOf(WantedSprites, sp.name) >= 0 && !sprites.ContainsKey(sp.name)) sprites[sp.name] = sp;
+                foreach (TMP_FontAsset f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+                    if (f != null && f.name == "Rubik-Bold SDF") { boldFont = f; break; }
+            }
+            catch (Exception ex)
+            {
+                AmbitionControlMod.Log.Warning("Phone app style lookup failed (using flat colours): " + ex.GetBaseException().Message);
+            }
+            var missing = WantedSprites.Where(n => !sprites.ContainsKey(n)).ToList();
+            AmbitionControlMod.Log.Msg("Phone app style: " + sprites.Count + "/" + WantedSprites.Length + " game sprites" +
+                (missing.Count > 0 ? " (missing: " + string.Join(", ", missing) + ")" : "") + ", bold font " + (boldFont != null ? "found" : "not found") + ".");
+        }
+
+        /// <summary>Apply a game sprite as a 9-slice at the game's on-screen corner size. Returns false if unavailable.</summary>
+        private bool Skin(Image img, string spriteName)
+        {
+            if (!sprites.TryGetValue(spriteName, out Sprite sp)) return false;
+            img.sprite = sp;
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = UiScale;
+            img.color = Color.white;
+            return true;
+        }
+
+        private enum StatusKind { Neutral, Ok, Warn, Bad }
+
+        /// <summary>Status kind: green verified, amber awaiting confirm/warning, red failed/refused.</summary>
+        private static StatusKind Classify(string msg)
+        {
+            if (string.IsNullOrEmpty(msg)) return StatusKind.Neutral;
             string m = msg.ToLowerInvariant();
             if (m.Contains("failed") || m.Contains("did not") || (m.Contains(" not ") && m.Contains(":")) || m.StartsWith("can't") || m.Contains("error"))
-                return StatusBad;
+                return StatusKind.Bad;
             if (m.Contains("confirm") || m.Contains("?") || m.Contains("permanent") || m.Contains("..."))
-                return StatusWarn;
+                return StatusKind.Warn;
             if (m.Contains("verified") || m.Contains("saved") || m.Contains("returned true"))
-                return StatusOk;
-            return StatusNeutral;
+                return StatusKind.Ok;
+            return StatusKind.Neutral;
+        }
+
+        private StatusKind shownKind = (StatusKind)(-1);
+
+        private void ApplyStatusStyle(string msg)
+        {
+            StatusKind k = Classify(msg);
+            if (k == shownKind || statusBg == null) return;
+            shownKind = k;
+            string sp = k == StatusKind.Ok ? "Gradient-Green-Round" : k == StatusKind.Warn ? "Gradient-Yellow-Round" :
+                        k == StatusKind.Bad ? "Gradient-Red-Round" : null;
+            if (sp == null || !Skin(statusBg, sp))
+            {
+                statusBg.sprite = null;
+                statusBg.type = Image.Type.Simple;
+                statusBg.color = k == StatusKind.Ok ? BtnGo : k == StatusKind.Warn ? new Color(0.95f, 0.75f, 0.25f, 1f) :
+                                 k == StatusKind.Bad ? BtnStop : new Color(0f, 0f, 0f, 0.35f);
+            }
+            statusText.color = k == StatusKind.Warn ? TextMain : OnBg;
         }
 
         /// <summary>Small uppercase section label with a thin rule; returns the y below it.</summary>
         private float Header(Transform parent, string label, float x, float y, float w)
         {
-            TextMeshProUGUI t = Text(parent, label.ToUpperInvariant(), x, y, w, 22f, 15f, TabActive, TextAlignmentOptions.BottomLeft);
-            t.characterSpacing = 2f;
+            TextMeshProUGUI t = Text(parent, label.ToUpperInvariant(), x, y, w, 22f, 16f, TextMain, TextAlignmentOptions.BottomLeft);
+            if (boldFont != null) t.font = boldFont; else t.fontStyle = FontStyles.Bold;
+            t.characterSpacing = 1f;
             var rule = new GameObject("Rule");
             rule.transform.SetParent(parent, false);
-            Place(rule.AddComponent<RectTransform>(), x, y + 24f, w, 1f);
+            Place(rule.AddComponent<RectTransform>(), x, y + 25f, w, 2f);
             Image img = rule.AddComponent<Image>();
-            img.color = BtnNeutral;
+            img.color = Splitter;
             img.raycastTarget = false;
             return y + 32f;
         }
@@ -318,16 +376,35 @@ namespace AmbitionControl.UI
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             Image bg = panel.AddComponent<Image>();
-            bg.color = Bg;
-            bg.raycastTarget = true; // swallow clicks on empty panel space
+            bg.color = new Color(0f, 0f, 0f, 0f); // invisible: the phone's own background shows, like the game's apps
+            bg.raycastTarget = true;              // still swallow clicks on empty panel space
 
+            LoadGameStyle();
             const float x0 = 40f;
             const float full = 700f;
-            float y = 24f;
+            float y = 10f;
 
-            Text(panel.transform, Title, x0, y, full - 160f, 44f, 30f, TextMain, TextAlignmentOptions.Left);
-            Text(panel.transform, AmbitionControlMod.VersionLabel, x0 + full - 160f, y + 8f, 160f, 32f, 18f, TextDim, TextAlignmentOptions.Right);
-            y += 54f;
+            // Everything lives in a 2x-scaled, horizontally centred root so sizes match the game's app screens.
+            var rootGo = new GameObject("Content");
+            rootGo.transform.SetParent(panel.transform, false);
+            RectTransform rrt = rootGo.AddComponent<RectTransform>();
+            rrt.anchorMin = new Vector2(0.5f, 1f);
+            rrt.anchorMax = new Vector2(0.5f, 1f);
+            rrt.pivot = new Vector2(0.5f, 1f);
+            rrt.sizeDelta = new Vector2(full + 2 * x0, 720f);
+            rrt.anchoredPosition = new Vector2(0f, -30f);
+            rrt.localScale = new Vector3(UiScale, UiScale, 1f);
+            root = rootGo.transform;
+
+            const float contentTopFixed = 10f + 66f;
+            const float pageHeight = 424f;
+            // White card behind the pages (created first so it renders underneath).
+            var card = new GameObject("Card");
+            card.transform.SetParent(root, false);
+            Place(card.AddComponent<RectTransform>(), x0 - 24f, contentTopFixed - 16f, full + 48f, pageHeight + 30f);
+            Image cardImg = card.AddComponent<Image>();
+            cardImg.raycastTarget = false;
+            if (!Skin(cardImg, "white-round-corner-drop")) cardImg.color = Color.white;
 
             // Tabs. Pages are full-size children so their coordinates match the panel's.
             float hw = (full - 8f) / 2f;
@@ -337,13 +414,28 @@ namespace AmbitionControl.UI
             {
                 int index = i;
                 pages[i] = Page(TabNames[i].Replace(" ", "") + "Page");
-                tabLabels[i] = MakeButton(panel.transform, TabNames[i], x0 + i * (tabW + 8f), y, tabW, 46f, BtnNeutral,
+                tabLabels[i] = MakeButton(root, TabNames[i], x0 + i * (tabW + 8f), y, tabW, 44f, BtnTab,
                     () => ShowTab(index), null);
-                tabLabels[i].fontSize = 15f;
+                tabLabels[i].fontSizeMax = 19f;
             }
-            y += 58f;
+            tabX0 = x0;
+            tabStep = tabW + 8f;
+            var tabLine = new GameObject("TabSplitter");
+            tabLine.transform.SetParent(root, false);
+            Place(tabLine.AddComponent<RectTransform>(), x0, y + 46f, full, 3f);
+            Image tabLineImg = tabLine.AddComponent<Image>();
+            tabLineImg.color = new Color(1f, 1f, 1f, 0.15f);
+            tabLineImg.raycastTarget = false;
+            var ind = new GameObject("TabIndicator");
+            ind.transform.SetParent(root, false);
+            tabIndicator = ind.AddComponent<RectTransform>();
+            Place(tabIndicator, x0, y + 46f, tabW, 3f);
+            Image indImg = ind.AddComponent<Image>();
+            indImg.color = Color.white;
+            indImg.raycastTarget = false;
+            y = contentTopFixed;
             float contentTop = y;
-            const float sharedTop = 566f; // pages end here; status bar, hint and footer follow
+            float sharedTop = contentTop + pageHeight + 30f; // pages end at the card; status bar, hint and footer follow
 
             // Money page.
             Transform page = pages[TabMoney].transform;
@@ -522,23 +614,18 @@ namespace AmbitionControl.UI
             // Shared bottom: colored status bar, one-line hint, compact footer.
             y = sharedTop;
             var barGo = new GameObject("StatusBar");
-            barGo.transform.SetParent(panel.transform, false);
-            Place(barGo.AddComponent<RectTransform>(), x0, y, full, 66f);
+            barGo.transform.SetParent(root, false);
+            Place(barGo.AddComponent<RectTransform>(), x0 - 24f, y, full + 48f, 60f);
             statusBg = barGo.AddComponent<Image>();
-            statusBg.color = StatusNeutral;
             statusBg.raycastTarget = false;
-            statusText = Text(barGo.transform, "", 12f, 6f, full - 24f, 54f, 19f, TextMain, TextAlignmentOptions.MidlineLeft);
-            y += 74f;
-            blockText = Text(panel.transform, "", x0, y, full, 48f, 17f, TextDim, TextAlignmentOptions.TopLeft);
-            y += 52f;
-            var line = new GameObject("FooterLine");
-            line.transform.SetParent(panel.transform, false);
-            Place(line.AddComponent<RectTransform>(), x0, y, full, 2f);
-            Image lineImg = line.AddComponent<Image>();
-            lineImg.color = BtnNeutral;
-            lineImg.raycastTarget = false;
-            y += 8f;
-            infoText = Text(panel.transform, "", x0, y, full, 30f, 18f, TextDim, TextAlignmentOptions.Left);
+            statusText = Text(barGo.transform, "", 18f, 4f, full + 12f, 52f, 19f, OnBg, TextAlignmentOptions.MidlineLeft);
+            shownKind = (StatusKind)(-1);
+            ApplyStatusStyle(null);
+            y += 66f;
+            blockText = Text(root, "", x0 - 24f, y, full + 48f, 46f, 17f, OnBgDim, TextAlignmentOptions.TopLeft);
+            y += 48f;
+            infoText = Text(root, "", x0 - 24f, y, full + 48f - 150f, 28f, 17f, OnBgDim, TextAlignmentOptions.Left);
+            Text(root, AmbitionControlMod.VersionLabel, x0 + full + 24f - 150f, y, 150f, 28f, 15f, OnBgDim, TextAlignmentOptions.Right);
 
             ShowTab(TabMoney);
             panel.SetActive(false);
@@ -547,7 +634,7 @@ namespace AmbitionControl.UI
         private GameObject Page(string name)
         {
             var go = new GameObject(name);
-            go.transform.SetParent(panel.transform, false);
+            go.transform.SetParent(root, false);
             RectTransform rt = go.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
@@ -577,8 +664,9 @@ namespace AmbitionControl.UI
             {
                 pages[i].SetActive(i == currentTab);
                 tabLabels[i].text = TabNames[i];
-                tabLabels[i].color = i == currentTab ? TabActive : TextMain;
+                tabLabels[i].color = i == currentTab ? OnBg : TabInactive;
             }
+            if (tabIndicator != null) tabIndicator.anchoredPosition = new Vector2(tabX0 + currentTab * tabStep, tabIndicator.anchoredPosition.y);
             nextRefresh = 0f;
         }
 
@@ -682,7 +770,9 @@ namespace AmbitionControl.UI
             go.transform.SetParent(parent, false);
             Place(go.AddComponent<RectTransform>(), x, y, w, h);
             Image img = go.AddComponent<Image>();
-            img.color = color;
+            string spriteName = color == BtnGo ? "button-green@2x" : color == BtnStop ? "button-red@2x" :
+                                color == BtnNeutral ? "button-gray@2x" : null;
+            if (spriteName == null || !Skin(img, spriteName)) img.color = color;
             Button b = go.AddComponent<Button>();
             b.targetGraphic = img;
             b.onClick.AddListener((UnityAction)(Action)(() =>
@@ -698,7 +788,11 @@ namespace AmbitionControl.UI
                     Fail("button '" + label + "'", ex);
                 }
             }));
-            TextMeshProUGUI caption = Text(go.transform, label, 0f, 0f, w, h, 20f, TextMain, TextAlignmentOptions.Center);
+            Color captionColor = color == BtnNeutral ? TextMain : OnBg;
+            TextMeshProUGUI caption = Text(go.transform, label, 2f, 0f, w - 4f, h, 19f, captionColor, TextAlignmentOptions.Center);
+            caption.enableAutoSizing = true;
+            caption.fontSizeMin = 12f;
+            caption.fontSizeMax = 19f;
             if (enabledWhen != null) gated.Add(new KeyValuePair<Button, Func<GameSnapshot, bool>>(b, enabledWhen));
             return caption;
         }
@@ -724,7 +818,7 @@ namespace AmbitionControl.UI
 
             MoneyService.Operation op = money.Staged;
             previewText.text = op == null
-                ? (money.StageError != null ? "<color=#ffb04a>Can't stage: " + money.StageError + "</color>" : "")
+                ? (money.StageError != null ? "<color=#C46A00>Can't stage: " + money.StageError + "</color>" : "")
                 :
                 "Preview: " + op.Action + " $" + op.Amount.ToString("N0") + "   $" + op.Before.ToString("N2") +
                 "  ->  $" + op.Expected.ToString("N2");
@@ -738,7 +832,7 @@ namespace AmbitionControl.UI
             if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
             if (QuestTools.Status != lastQuestStatus) { lastQuestStatus = QuestTools.Status; shownStatus = QuestTools.Status; }
             statusText.text = shownStatus ?? "Ready.";
-            if (statusBg != null) statusBg.color = StatusColor(shownStatus);
+            ApplyStatusStyle(shownStatus);
 
             for (int i = 0; i < optionLabels.Length; i++)
                 if (optionLabels[i] != null)

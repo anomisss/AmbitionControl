@@ -1,5 +1,17 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.10] — 2026-11-20 — Game-matched phone app style
+- Restyled from the alpha.9 StyleProbe of the game's own apps (Persona, Rivals, MyEmployees, BizMan, EconoView, MarketInsider):
+  - No dark panel: the phone's own background shows through (clicks on empty space are still blocked).
+  - Content scaled 2x and centred, so text and buttons are the same size as the game's apps (app screens are 3840x1750 canvas units).
+  - Pages sit on the game's white card (`white-round-corner-drop`), dark text `#111519`, bold uppercase section headers (Rubik-Bold) with `#BDC7CF` rules.
+  - Buttons use the game's `button-gray@2x` / `button-green@2x` / `button-red@2x`; captions auto-size.
+  - Tabs are game-style text tabs (white active, `#ABABAB` inactive) with a white underline indicator.
+  - Status bar uses the game's `Gradient-Green/Yellow/Red-Round` bars; hint and footer are white text on the phone background; version moved to the footer. Title removed (the phone's top bar already shows the app name).
+- Every game sprite/font is looked up at runtime with a flat-colour fallback; the log line `Phone app style: N/7 game sprites …` reports what was found.
+- StyleProbe removed. No behaviour changes.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/14-game-style/14-UAT.md`.
+
 ## [0.7.0-alpha.9] — 2026-11-20 — Style probe (diagnostic)
 - Read-only **StyleProbe**: when the Ambition Control app is opened, logs (once per session) the structure of the phone frame and of every game app screen already created — image sprites/9-slice borders/colours, text font/size/colour/style, button colour blocks, layout groups — plus a list of UI-like sprite names. Used to restyle the app to match the game's own phone apps. No visual or behaviour change.
 - **Status:** Build verified (0 warnings); tests 12/12. Not runtime verified.
