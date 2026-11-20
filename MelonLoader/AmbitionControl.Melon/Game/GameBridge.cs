@@ -23,6 +23,7 @@ namespace AmbitionControl.Game
         internal int Hour;
         internal float Minute;
         internal bool Saving;
+        internal bool Invincible;
         internal bool OptionsKnown;
         internal bool[] OptionDisabled = new bool[GameOptions.All.Length];
 
@@ -129,6 +130,7 @@ namespace AmbitionControl.Game
                 snap.Hour = gi.Hour;
                 snap.Minute = gi.Minute;
                 snap.Saving = SaveGameManager.SavingGameInProgress;
+                snap.Invincible = PlayerTools.ReadInvincible();
                 GameVariables gv = gi.gameVariables;
                 if (gv != null)
                 {

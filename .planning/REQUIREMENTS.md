@@ -37,7 +37,11 @@
 - [x] **REL-01**: Release package contains only the built DLL plus install/upgrade/uninstall instructions and checksum
 - [x] **REL-02**: Changelog/version updated; release published only with owner approval
 
-## v2 Requirements
+## v2 Requirements (trainer expansion — see docs/FEATURE_GAP_MATRIX.md)
+
+- [ ] **PLAYER-01**: Refill energy, hunger, happiness, all (game setters, readback)
+- [ ] **PLAYER-02**: Invincibility toggle (game command, readback)
+- [ ] **PLAYER-03**: Hold hunger full (experimental, session-only)
 
 Deferred; each needs API verification on build 3233 first.
 

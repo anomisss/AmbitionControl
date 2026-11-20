@@ -35,10 +35,15 @@ namespace AmbitionControl.UI
         private TMP_FontAsset font;
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
-        private GameObject moneyPage, optionsPage;
-        private TextMeshProUGUI moneyTabLabel, optionsTabLabel;
+        // Tabs (index order = button order). New feature groups add a name + page here.
+        private static readonly string[] TabNames = { "Money", "Player", "Game options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabOptions = 2;
+        private readonly GameObject[] pages = new GameObject[TabNames.Length];
+        private readonly TextMeshProUGUI[] tabLabels = new TextMeshProUGUI[TabNames.Length];
+        private int currentTab;
+        private TextMeshProUGUI invincibleLabel, holdHungerLabel;
+        private string lastPlayerStatus;
         private readonly TextMeshProUGUI[] optionLabels = new TextMeshProUGUI[GameOptions.All.Length];
-        private bool optionsTab;
         private string lastMoneyStatus, lastToggleStatus, shownStatus;
         private readonly List<KeyValuePair<Button, Func<GameSnapshot, bool>>> gated =
             new List<KeyValuePair<Button, Func<GameSnapshot, bool>>>();
@@ -261,16 +266,20 @@ namespace AmbitionControl.UI
             Text(panel.transform, Title + "  " + AmbitionControlMod.VersionLabel, x0, y, full, 44f, 32f, TextMain, TextAlignmentOptions.Left);
             y += 54f;
 
-            // Tabs: Money | Game options. Pages are full-size children so their coordinates match the panel's.
+            // Tabs. Pages are full-size children so their coordinates match the panel's.
             float hw = (full - 8f) / 2f;
-            moneyPage = Page("MoneyPage");
-            optionsPage = Page("OptionsPage");
-            moneyTabLabel = MakeButton(panel.transform, "Money", x0, y, hw, 46f, BtnNeutral, () => ShowTab(false), null);
-            optionsTabLabel = MakeButton(panel.transform, "Game options", x0 + hw + 8f, y, hw, 46f, BtnNeutral, () => ShowTab(true), null);
+            float tabW = (full - (TabNames.Length - 1) * 8f) / TabNames.Length;
+            for (int i = 0; i < TabNames.Length; i++)
+            {
+                int index = i;
+                pages[i] = Page(TabNames[i].Replace(" ", "") + "Page");
+                tabLabels[i] = MakeButton(panel.transform, TabNames[i], x0 + i * (tabW + 8f), y, tabW, 46f, BtnNeutral,
+                    () => ShowTab(index), null);
+            }
             y += 58f;
             float contentTop = y;
 
-            Transform page = moneyPage.transform;
+            Transform page = pages[TabMoney].transform;
             balanceText = Text(page, "", x0, y, full, 36f, 26f, TextMain, TextAlignmentOptions.Left);
             y += 42f;
             amountText = Text(page, "", x0, y, full, 32f, 24f, TextDim, TextAlignmentOptions.Left);
@@ -309,9 +318,33 @@ namespace AmbitionControl.UI
             y += 62f;
             float sharedTop = y;
 
+            // Player page: need refills, invincibility, experimental hunger hold.
+            float py = contentTop;
+            Transform ppage = pages[TabPlayer].transform;
+            Func<GameSnapshot, bool> playerOk = s => settings != null && PlayerTools.BlockReason(s, settings) == null;
+            MakeButton(ppage, "Refill energy", x0, py, hw, 50f, BtnNeutral,
+                () => PlayerTools.Refill(Need.Energy, lastSnap, settings), playerOk);
+            MakeButton(ppage, "Refill hunger", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
+                () => PlayerTools.Refill(Need.Hunger, lastSnap, settings), playerOk);
+            py += 62f;
+            MakeButton(ppage, "Refill happiness", x0, py, hw, 50f, BtnNeutral,
+                () => PlayerTools.Refill(Need.Happiness, lastSnap, settings), playerOk);
+            MakeButton(ppage, "Refill all needs", x0 + hw + 8f, py, hw, 50f, BtnGo,
+                () => PlayerTools.RefillAll(lastSnap, settings), playerOk);
+            py += 62f;
+            invincibleLabel = MakeButton(ppage, "Invincibility", x0, py, hw, 50f, BtnNeutral,
+                () => PlayerTools.ToggleInvincibility(lastSnap, settings), playerOk);
+            holdHungerLabel = MakeButton(ppage, "Hold hunger full", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
+                () => PlayerTools.SetHoldHunger(!PlayerTools.HoldHunger, lastSnap, settings), playerOk);
+            py += 62f + 6f;
+            Text(ppage, "Refills use the game's own need setters and are verified by reading the value back. " +
+                        "Invincibility and Hold hunger last for this session only and are not saved. Hold hunger is " +
+                        "experimental: the game has no hunger option, so it tops hunger up when it drops.",
+                x0, py, full, sharedTop - py - 8f, 20f, TextDim, TextAlignmentOptions.TopLeft);
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
-            Transform opage = optionsPage.transform;
+            Transform opage = pages[TabOptions].transform;
             for (int i = 0; i < GameOptions.All.Length; i++)
             {
                 GameOption option = GameOptions.All[i];
@@ -332,7 +365,7 @@ namespace AmbitionControl.UI
             y += 62f;
             infoText = Text(panel.transform, "", x0, y, full, 130f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
-            ShowTab(false);
+            ShowTab(TabMoney);
             panel.SetActive(false);
         }
 
@@ -348,13 +381,18 @@ namespace AmbitionControl.UI
             return go;
         }
 
-        private void ShowTab(bool options)
+        private bool TabEnabled(int tab) =>
+            settings == null ||
+            (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled : true);
+
+        private void ShowTab(int tab)
         {
-            optionsTab = options && (settings == null || settings.PlayerTogglesEnabled);
-            moneyPage.SetActive(!optionsTab);
-            optionsPage.SetActive(optionsTab);
-            moneyTabLabel.text = optionsTab ? "Money" : "[ Money ]";
-            optionsTabLabel.text = optionsTab ? "[ Game options ]" : "Game options";
+            currentTab = TabEnabled(tab) ? tab : TabMoney;
+            for (int i = 0; i < pages.Length; i++)
+            {
+                pages[i].SetActive(i == currentTab);
+                tabLabels[i].text = i == currentTab ? "[ " + TabNames[i] + " ]" : TabNames[i];
+            }
             nextRefresh = 0f;
         }
 
@@ -436,17 +474,25 @@ namespace AmbitionControl.UI
             // Show whichever message changed most recently (money or needs).
             if (money.Status != lastMoneyStatus) { lastMoneyStatus = money.Status; shownStatus = money.Status; }
             if (GameOptions.Status != lastToggleStatus) { lastToggleStatus = GameOptions.Status; shownStatus = GameOptions.Status; }
+            if (PlayerTools.Status != lastPlayerStatus) { lastPlayerStatus = PlayerTools.Status; shownStatus = PlayerTools.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
                 if (optionLabels[i] != null)
                     optionLabels[i].text = GameOptions.Label(GameOptions.All[i]) + ": " +
                         (s.OptionsKnown ? (s.OptionDisabled[i] ? "OFF" : "ON") : "?");
+            if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
+            if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");
 
-            if (optionsTab)
+            if (currentTab == TabOptions)
             {
                 string optBlock = settings == null ? "Starting..." : GameOptions.BlockReason(s, settings);
                 blockText.text = optBlock == null ? "" : "Switches unavailable: " + optBlock;
+            }
+            else if (currentTab == TabPlayer)
+            {
+                string pBlock = settings == null ? "Starting..." : PlayerTools.BlockReason(s, settings);
+                blockText.text = pBlock == null ? "" : "Player tools unavailable: " + pBlock;
             }
             else
             {

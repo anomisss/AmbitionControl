@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.6.0-alpha.2", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.1", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -16,11 +16,12 @@ namespace AmbitionControl
         internal bool MoneyWritesEnabled = true;
         internal bool AllowOtherBuilds;
         internal bool PlayerTogglesEnabled = true;
+        internal bool PlayerToolsEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.6.0-alpha.2";
+        internal const string VersionLabel = "v0.7.0-alpha.1";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -74,6 +75,8 @@ namespace AmbitionControl
             if (prefPhone.Value) phone = new PhoneApp(money);
             settings.PlayerTogglesEnabled = prefs.CreateEntry("PlayerTogglesEnabled", true,
                 description: "Show the game option switches (energy/happiness drain, aging, vehicle damage/fuel, wholesale limits) in the phone app.").Value;
+            settings.PlayerToolsEnabled = prefs.CreateEntry("PlayerToolsEnabled", true,
+                description: "Show the Player tab (need refills, invincibility, hold hunger).").Value;
 
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
@@ -87,6 +90,7 @@ namespace AmbitionControl
             money.ResetForSessionChange();
             InputBlocker.RestoreActions();
             phone?.Reset();
+            PlayerTools.ResetSession();
             Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };
             nextSnapshot = 0f;
@@ -145,6 +149,7 @@ namespace AmbitionControl
                     GameSnapshot fresh = GameBridge.Capture();
                     if (snapshot.Loaded && !fresh.SameSession(snapshot.Identity()))
                     {
+                        PlayerTools.ResetSession();
                         money.ResetForSessionChange();
                         Log.Msg("Session ended (save closed or switched); staged action and undo cleared.");
                     }
@@ -168,6 +173,7 @@ namespace AmbitionControl
 
                 money.Tick(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);
                 phone?.Update(snapshot, settings);
+                PlayerTools.Tick(snapshot, settings);
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;
                 lastUpdateError = null;
             }

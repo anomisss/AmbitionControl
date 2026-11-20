@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** v0.6.0-alpha.2 released (pre-release); optional next: FEAT-02 time controls, FEAT-04 economy tools
+**Current focus:** Phase 6 — Player Utilities (Milestone B of trainer expansion)
 
 ## Current Position
 
-Phase: 5 of 5 (Release Packaging)
-Plan: 05-01 complete
-Status: Milestone complete; main fast-forwarded to the release state — GitHub pre-release https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2 (asset SHA-256 verified after download)
-Last activity: 2026-11-19 — Published pre-release v0.6.0-alpha.2
+Phase: 6 (Player Utilities)
+Plan: Milestone B implemented
+Status: Checkpoint — v0.7.0-alpha.1 installed (DLL d421c4f1…); awaiting owner UAT (06-UAT.md)
+Last activity: 2026-11-19 — Gap matrix + Milestone B (player utilities)
 
 Progress: [██████████] 100%
 
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: release published
-Resume file: .planning/ROADMAP.md
+Stopped at: Milestone B awaiting in-game test
+Resume file: .planning/phases/06-player-utilities/06-UAT.md

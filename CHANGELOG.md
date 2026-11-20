@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0-alpha.1] — 2026-11-19 — Milestone B: Player utilities (trainer expansion)
+- New **Player** tab in the phone app (tabs are now Money | Player | Game options; tab system generalized for more categories).
+- **Refill energy / hunger / happiness / all** via the game's own setters (`EnergyHelper.SetCurrentEnergy`, `EnergyHelper.SetCurrentHunger`, `HappinessHelper.Happiness`); each refill is read back from `GameInstance` and logged `Refill verified: <need> before -> after`.
+- **Invincibility** toggle via the game's `EnergyHelper.Command_ToggleInvincibility()`, verified by reading `EnergyHelper._invincibility`. Runtime only.
+- **Hold hunger full** (experimental): build 3233 has no hunger option, so this tops hunger up (max once per second) while a save is loaded; session-only, turns itself off when the save changes.
+- Same safety gate as money/options (build 3233, save loaded, not saving). New preference `PlayerToolsEnabled` (default true).
+- New `docs/FEATURE_GAP_MATRIX.md`: full comparison with the reference trainer's advertised features and build-3233 API evidence (e.g. export multiplier does not exist in build 3233).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — see `.planning/phases/06-player-utilities/06-UAT.md`.
+
 > **Latest release:** [v0.6.0-alpha.2 (pre-release)](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2) — ZIP SHA-256 `67bb8831b6d136d54faeaa7d40e0abe872a4efefb688a9c144010642d0a075a3`.
 
 ## [0.6.0-alpha.2] — 2026-11-19 — All game option switches + tabs (GSD Phase 4, plan 04-02)
