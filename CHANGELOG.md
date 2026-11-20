@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0-alpha.1] — 2026-11-19 — In-game phone app (GSD Phase 2, plan 02-02)
+- New **Ambition Control app on the in-game smartphone**: an app button cloned from the phone's own app bar (`FullMenu._appButtons`) with a fresh click event, and a panel built from the game's uGUI (`Image`, `Button`, `TextMeshProUGUI` with the phone's font) inside `FullMenu.appsContainer`.
+- Panel: balance, amount picker, Stage Add/Remove/Set, preview, Confirm/Cancel, Undo, status, limits/blocked reason, day/time and needs readout. Uses the same readback-verified `MoneyService` as the overlay.
+- Opening another phone app hides the panel (it watches the app screens; no extra hooks). Injection retries every 2 s while a save is loaded; disabled after 5 errors (overlay unaffected). New preference `PhoneApp` (default true).
+- The F10 overlay remains as a fallback.
+- **Status:** Build verified; tests 12/12. **Not runtime verified.**
+
 ## [0.4.0-alpha.3] — 2026-11-19 — Click-through: action-level blocking + diagnostics
 - In-game (alpha.2): all 10 `InputActionHelper` patches applied, but clicks over the menu still reached the world. Hypothesis: helper calls inlined by IL2CPP and/or actions read directly.
 - New layer: while the cursor is over the menu, the game's own `InputAction`s for Click/RightClick/Zoom/CursorScroll (from `InputActionHelper.PlayerInputActionMap`) are disabled, and only those the mod disabled are re-enabled on leave, scene change or shutdown.

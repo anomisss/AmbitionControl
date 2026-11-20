@@ -33,10 +33,11 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
   2. Scrolling over the menu does not zoom the camera
   3. With the cursor outside the menu, or the menu closed, clicks/scroll/zoom work normally
   4. Log reports how many input patches applied; mod still works if a patch fails
-**Plans**: 1 plan
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Harmony prefixes on InputActionHelper mouse reads while cursor is over the menu
+- [ ] 02-01: Overlay click-through blocking (helper patches failed in-game; action disabling untested)
+- [ ] 02-02: Ambition Control as an in-game smartphone app (uGUI)
 
 ### Phase 3: Money Feature Verification
 **Goal**: Every money action and its safety rules are proven in-game, including persistence

@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.4.0-alpha.3", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.5.0-alpha.1", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -19,7 +19,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.4.0-alpha.3";
+        internal const string VersionLabel = "v0.5.0-alpha.1";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -34,6 +34,7 @@ namespace AmbitionControl
         private readonly Settings settings = new Settings();
         private readonly MoneyService money = new MoneyService();
         private TrainerMenu menu;
+        private PhoneApp phone;
         private GameSnapshot snapshot = new GameSnapshot { NotLoadedReason = "Starting..." };
         private float nextSnapshot;
         private Key toggleKey = Key.F10;
@@ -67,16 +68,22 @@ namespace AmbitionControl
 
             MelonPreferences_Entry<bool> prefBlock = prefs.CreateEntry("BlockClickThrough", true,
                 description: "Stop mouse clicks/scroll on the menu from also acting on the game world.");
+            MelonPreferences_Entry<bool> prefPhone = prefs.CreateEntry("PhoneApp", true,
+                description: "Add an Ambition Control app to the in-game smartphone.");
+            if (prefPhone.Value) phone = new PhoneApp(money);
+
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
             else Log.Msg("Click-through blocking is off (BlockClickThrough=false).");
-            Log.Msg(VersionLabel + " loaded. Press " + settings.ToggleKey + " in-game to open the menu.");
+            Log.Msg(VersionLabel + " loaded. Open the \"Ambition Control\" app on the in-game phone" +
+                    (phone == null ? " (disabled)" : "") + ", or press " + settings.ToggleKey + " for the overlay.");
         }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             money.ResetForSessionChange();
             InputBlocker.RestoreActions();
+            phone?.Reset();
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };
             nextSnapshot = 0f;
         }
@@ -128,7 +135,7 @@ namespace AmbitionControl
                 InputBlocker.Tick(blockClickThrough);
 
                 // Read game state only while the menu is open or an operation needs it.
-                bool needsState = menu.Visible || money.CurrentPhase != MoneyService.Phase.Idle;
+                bool needsState = menu.Visible || phone != null || money.CurrentPhase != MoneyService.Phase.Idle;
                 if (needsState && Time.unscaledTime >= nextSnapshot)
                 {
                     GameSnapshot fresh = GameBridge.Capture();
@@ -151,6 +158,7 @@ namespace AmbitionControl
                 }
 
                 money.Tick(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);
+                phone?.Update(snapshot, settings);
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;
                 lastUpdateError = null;
             }

@@ -10,8 +10,8 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 ## Current Position
 
 Phase: 2 of 5 (Menu Input Isolation)
-Plan: 1 of 1 in current phase
-Status: alpha.2 failed in-game (clicks still pass through); alpha.3 (action-level blocking + diagnostics, DLL e274007e…) installed, untested. Phone-app UI under consideration.
+Plan: 2 of 2 in current phase
+Status: Checkpoint — 0.5.0-alpha.1 phone app (plan 02-02) installed (DLL c1441af5…), awaiting owner in-game test; alpha.3 overlay blocking also untested
 Last activity: 2026-11-19 — InputBlocker (Harmony prefixes on InputActionHelper) implemented and compiled
 
 Progress: [██░░░░░░░░] 20%
@@ -42,4 +42,4 @@ Progress: [██░░░░░░░░] 20%
 
 Last session: 2026-11-19
 Stopped at: Phase 2 plan 02-01 tasks 1-3 done; task 4 (owner in-game test) pending
-Resume file: .planning/phases/02-menu-input-isolation/02-01-PLAN.md
+Resume file: .planning/phases/02-menu-input-isolation/02-02-PLAN.md
