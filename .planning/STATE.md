@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 10 (Rivals)
 Plan: Phase 10 implemented
-Status: v0.7.0-alpha.5 installed (DLL 106bc9ac…); awaiting owner UAT (10-UAT.md, includes World retest)
+Status: v0.7.0-alpha.5 installed (DLL 106bc9ac…); 10-UAT partial — pause PASS, rivals tab opens without errors, no defeat run yet, speed unverified
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
