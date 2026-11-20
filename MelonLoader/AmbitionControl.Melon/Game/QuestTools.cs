@@ -2,6 +2,7 @@ using System;
 using Il2Cpp;
 using Il2CppHelpers;
 using Il2CppTutorial;
+using Il2CppUI.Smartphone.Apps.Persona;
 using UnityEngine;
 
 namespace AmbitionControl.Game
@@ -23,6 +24,7 @@ namespace AmbitionControl.Game
         internal static string Status { get; private set; }
         internal static bool PendingObjective { get; private set; }
         internal static bool PendingQuest { get; private set; }
+        internal static bool PendingGoals { get; private set; }
 
         private const int TeleportVerifyFrames = 90;
         private const float MinMoveMeters = 2f;
@@ -143,6 +145,7 @@ namespace AmbitionControl.Game
         internal static void CompleteObjectivePressed(GameSnapshot snap, Settings settings)
         {
             PendingQuest = false;
+            PendingGoals = false;
             string block = BlockReason(snap, settings) ?? QuestBlock();
             if (block != null) { PendingObjective = false; Status = "Objective not completed: " + block; return; }
             QuestEntry entry = TutorialHelper.currentQuestEntry;
@@ -177,6 +180,7 @@ namespace AmbitionControl.Game
         internal static void CompleteQuestPressed(GameSnapshot snap, Settings settings)
         {
             PendingObjective = false;
+            PendingGoals = false;
             string block = BlockReason(snap, settings) ?? QuestBlock();
             if (block != null) { PendingQuest = false; Status = "Quest not completed: " + block; return; }
             Quest quest = TutorialHelper.currentQuest;
@@ -207,12 +211,65 @@ namespace AmbitionControl.Game
             }
         }
 
+        /// <summary>Personal goals: GameManager.personalGoals (GenericPersonalGoal.IsCompleted). Returns false if unreadable.</summary>
+        internal static bool GoalCounts(out int done, out int total)
+        {
+            done = 0; total = 0;
+            try
+            {
+                GameManager gm = WorldTools.Manager();
+                if (gm == null || gm.personalGoals == null) return false;
+                foreach (GenericPersonalGoal g in gm.personalGoals)
+                {
+                    if (g == null) continue;
+                    total++;
+                    if (g.IsCompleted) done++;
+                }
+                return total > 0;
+            }
+            catch { return false; }
+        }
+
+        internal static void CompleteGoalsPressed(GameSnapshot snap, Settings settings)
+        {
+            PendingObjective = false;
+            PendingQuest = false;
+            string block = BlockReason(snap, settings);
+            if (block != null) { PendingGoals = false; Status = "Goals not completed: " + block; return; }
+            if (!GoalCounts(out int done, out int total)) { PendingGoals = false; Status = "Goals not completed: personal goals could not be read."; return; }
+            if (done >= total) { PendingGoals = false; Status = "All " + total + " personal goals are already completed."; return; }
+            if (!PendingGoals)
+            {
+                PendingGoals = true;
+                Status = "Complete all " + (total - done) + " remaining personal goals (" + done + "/" + total + " done)? The game grants " +
+                         "their rewards and may unlock matching achievements. Cannot be undone. Press Confirm.";
+                return;
+            }
+            PendingGoals = false;
+            try
+            {
+                PersonalGoals.Command_CompleteAll();
+                GoalCounts(out int after, out int total2);
+                Status = after > done
+                    ? "Personal goals completed (verified): " + done + " -> " + after + " of " + total2 + "."
+                    : "The game did not report any newly completed personal goals (" + after + "/" + total2 + ").";
+                if (after > done) AmbitionControlMod.Log.Msg("Personal goals completed (verified): " + done + " -> " + after + " of " + total2);
+                else AmbitionControlMod.Log.Warning("Personal goals completion not confirmed: " + after + "/" + total2);
+            }
+            catch (Exception ex)
+            {
+                Status = "Completing personal goals failed: " + ex.GetBaseException().Message;
+                AmbitionControlMod.Log.Error(Status);
+            }
+        }
+
         internal static string Label(TeleportTarget t) => t == TeleportTarget.QuestTarget ? "quest target" : "GPS destination";
 
         internal static void ClearPending()
         {
             PendingObjective = false;
             PendingQuest = false;
+            PendingGoals = false;
         }
 
         internal static void ResetSession()

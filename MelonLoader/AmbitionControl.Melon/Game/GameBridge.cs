@@ -29,7 +29,7 @@ namespace AmbitionControl.Game
         internal float[] Econ = new float[GameEconomy.All.Length];
         internal Difficulty CurrentDifficulty;
         internal bool InVehicle, VehicleOwned;
-        internal float VehicleFuel, VehicleMaxFuel, VehicleDamage;
+        internal float VehicleFuel, VehicleMaxFuel, VehicleDamage, VehicleDirt;
         internal bool PauseKnown, Paused, TrafficKnown, Traffic;
         internal float TimeScale = 1f;
 

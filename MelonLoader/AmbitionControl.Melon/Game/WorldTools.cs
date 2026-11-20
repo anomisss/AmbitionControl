@@ -38,7 +38,7 @@ namespace AmbitionControl.Game
             return cachedSpeed;
         }
 
-        private static GameManager Manager()
+        internal static GameManager Manager()
         {
             if (cachedManager == null) cachedManager = Object.FindObjectOfType<GameManager>();
             return cachedManager;
@@ -86,6 +86,7 @@ namespace AmbitionControl.Game
                         snap.VehicleFuel = vi.fuel;
                         snap.VehicleMaxFuel = vi.VehicleType != null ? vi.VehicleType.maxFuel : 0f;
                         snap.VehicleDamage = vi.damage;
+                        snap.VehicleDirt = vi.dirtiness;
                     }
                 }
             }
@@ -191,6 +192,38 @@ namespace AmbitionControl.Game
             catch (Exception ex)
             {
                 Status = "Vehicle refuel failed: " + ex.GetBaseException().Message;
+                AmbitionControlMod.Log.Error(Status);
+            }
+        }
+
+        /// <summary>Clean: VehicleController.SetDirtiness(0) (the game's own setter), readback VehicleInstance.dirtiness.</summary>
+        internal static void CleanVehicle(GameSnapshot snap, Settings settings)
+        {
+            savePending = false;
+            string block = BlockReason(snap, settings);
+            if (block != null) { Status = "Vehicle not cleaned: " + block; return; }
+            try
+            {
+                if (!TryOwnedVehicle(snap, out VehicleInstance vi, out VehicleController vc, out string reason)) { Status = "Vehicle not cleaned: " + reason; return; }
+                if (vi.VehicleType != null && !vi.VehicleType.canGetDirty) { Status = "This vehicle type never gets dirty."; return; }
+                float before = vi.dirtiness;
+                vc.SetDirtiness(0f);
+                float after = vi.dirtiness;
+                snap.VehicleDirt = after;
+                if (after <= 0.001f)
+                {
+                    Status = "Vehicle cleaned (verified): dirtiness " + before.ToString("0.##") + " -> 0. No cost charged.";
+                    AmbitionControlMod.Log.Msg("Vehicle clean verified: dirtiness " + before.ToString("0.###") + " -> " + after.ToString("0.###"));
+                }
+                else
+                {
+                    Status = "Clean did not take effect (dirtiness " + before.ToString("0.##") + " -> " + after.ToString("0.##") + ").";
+                    AmbitionControlMod.Log.Warning(Status);
+                }
+            }
+            catch (Exception ex)
+            {
+                Status = "Vehicle clean failed: " + ex.GetBaseException().Message;
                 AmbitionControlMod.Log.Error(Status);
             }
         }

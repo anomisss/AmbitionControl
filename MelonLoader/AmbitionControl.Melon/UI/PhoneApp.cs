@@ -42,7 +42,7 @@ namespace AmbitionControl.UI
         private readonly TextMeshProUGUI[] rivalRowLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private readonly TextMeshProUGUI[] rivalBtnLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private TextMeshProUGUI rivalAllLabel;
-        private TextMeshProUGUI questText, questObjLabel, questQuestLabel;
+        private TextMeshProUGUI questText, questObjLabel, questQuestLabel, questGoalsLabel;
         private string lastQuestStatus;
         private List<RivalRow> rivalRows = new List<RivalRow>();
         private string rivalError, lastRivalStatus;
@@ -402,7 +402,8 @@ namespace AmbitionControl.UI
                     () => WorldTools.SetSpeed(pct, lastSnap, settings), worldOk);
             }
             wy += 58f;
-            saveLabel = MakeButton(wpage, "Save game", x0, wy, full, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
+            MakeButton(wpage, "Clean vehicle", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.CleanVehicle(lastSnap, settings), vehicleOk);
+            saveLabel = MakeButton(wpage, "Save game", x0 + hw + 8f, wy, hw, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
             wy += 58f;
             vehicleText = Text(wpage, "", x0, wy, full, sharedTop - wy - 4f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
@@ -453,6 +454,9 @@ namespace AmbitionControl.UI
                 () => QuestTools.CompleteObjectivePressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
             questQuestLabel = MakeButton(qpage, "Complete whole quest", x0 + hw + 8f, qy, hw, 50f, BtnStop,
                 () => QuestTools.CompleteQuestPressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
+            qy += 62f;
+            questGoalsLabel = MakeButton(qpage, "Complete all personal goals", x0, qy, full, 50f, BtnStop,
+                () => QuestTools.CompleteGoalsPressed(lastSnap, settings), questOk);
             qy += 62f + 6f;
             Text(qpage, "Teleport works on foot and outdoors, and is checked by confirming you actually moved. " +
                         "Set a GPS destination in the game first for the GPS button. Completing objectives runs the " +
@@ -707,15 +711,17 @@ namespace AmbitionControl.UI
                 questText.text = s.Loaded ? QuestTools.CurrentObjectiveText() : "";
                 questObjLabel.text = QuestTools.PendingObjective ? "Confirm objective" : "Complete objective";
                 questQuestLabel.text = QuestTools.PendingQuest ? "Confirm quest" : "Complete whole quest";
+                questGoalsLabel.text = QuestTools.PendingGoals ? "Confirm: complete all personal goals" :
+                    QuestTools.GoalCounts(out int gd, out int gt) ? "Complete all personal goals (" + gd + "/" + gt + " done)" : "Complete all personal goals";
             }
             if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
             if (vehicleText != null)
-                vehicleText.text = (!s.InVehicle ? "Not in a vehicle. Repair/refuel work in your own vehicle." :
+                vehicleText.text = (!s.InVehicle ? "Not in a vehicle. Repair/refuel/clean work in your own vehicle." :
                     !s.VehicleOwned ? "This vehicle is not one of yours; vehicle tools are disabled." :
                     "Your vehicle: fuel " + s.VehicleFuel.ToString("0.#") + " / " + s.VehicleMaxFuel.ToString("0.#") +
-                    ", damage " + s.VehicleDamage.ToString("0.##") + ".") +
+                    ", damage " + s.VehicleDamage.ToString("0.##") + ", dirt " + s.VehicleDirt.ToString("0.##") + ".") +
                     "\nTime scale " + s.TimeScale.ToString("0.##") + "x. Speeds above the game's own are experimental.";
             if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
             if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");

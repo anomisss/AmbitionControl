@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.0-alpha.7] — 2026-11-20 — Milestone G: Clean vehicle & personal goals
+- **Clean vehicle** (World tab, own vehicle only, shares a row with Save game): the game's own `VehicleController.SetDirtiness(0)`, readback `VehicleInstance.dirtiness`; refused for vehicle types with `canGetDirty = false`. Vehicle line now also shows dirt.
+- **Complete all personal goals** (Quest tab, two-press confirm): the game's `PersonalGoals.Command_CompleteAll()`; button shows done/total from `GameManager.personalGoals` (`GenericPersonalGoal.IsCompleted`), readback = completed count increased. The game grants the goals' rewards and may unlock matching achievements; cannot be undone.
+- Parking tickets stay **Investigate**: `VehicleInstance.parkingTickets` is only a list of timestamps; no evidence that clearing it cancels fines.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/12-clean-goals/12-UAT.md`.
+
 ## [0.7.0-alpha.6] — 2026-11-20 — Milestone F (part 2): Quests & teleport
 - New **Quest** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Quest | Options); tab text 15 pt so eight fit.
 - Shows the current quest and objective ids (`TutorialHelper.currentQuest` / `currentQuestEntry`).

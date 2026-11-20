@@ -53,6 +53,8 @@
 - [ ] **RIVAL-02**: Defeat rival / all active rivals (game method, two-press confirm, readback)
 - [ ] **QUEST-01**: Teleport to quest target / GPS destination (on foot, outdoors; position readback)
 - [ ] **QUEST-02**: Complete current objective / quest (game commands, two-press confirm, readback)
+- [ ] **VEH-03**: Clean own vehicle (game setter, dirtiness readback)
+- [ ] **GOAL-01**: Complete all personal goals (game command, two-press confirm, count readback)
 
 Deferred; each needs API verification on build 3233 first.
 

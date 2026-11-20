@@ -28,11 +28,11 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Player | Invincibility | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | static `EnergyHelper._invincibility`; Cmd `EnergyHelper.Command_ToggleInvincibility()` | L | 1 | Partial-verified | 06-UAT: `Invincibility ON verified.` (log); OFF not run; effect not observed |
 | Player | Movement speed (walk/jog/run/scooter) | — | Yes | No player movement-speed member found (only editor/test scenes, `HandTruck.MoveSpeed`, `VehicleType.maxSpeed`) | — | — | Investigate | — |
 | Player | Set / change age | — | Yes | Cmd `GameManager.Command_ChangeAge(float)`; readback location not yet identified | H | 3 | Investigate | — |
-| Player | Complete personal goals | — | Yes | Cmd `PersonalGoals.Command_CompleteAll()` (+ `Command_Reset`) | H | 3 | Investigate | — |
+| Player | Complete personal goals | Quest tab, two-press confirm | Yes | Cmd `PersonalGoals.Command_CompleteAll()`; readback `GameManager.personalGoals[].IsCompleted` (also `GameInstance.completedPersonalGoals`) | H | 3 | Implemented v0.7.0-alpha.7, awaiting UAT | — |
 | Vehicles | Repair vehicle | World tab (own vehicle only) | Yes | `VehicleHelper.RepairVehicle()`; `VehicleController.Repair()`; `VehicleInstance.damage` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Vehicles | Refuel | World tab (own vehicle only; VehicleController.SetFuel(maxFuel)) | Yes | `VehicleHelper.SetFuel(int)`; `VehicleInstance.fuel` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
-| Vehicles | Clean | — | Yes | `VehicleInstance.dirtiness` (float), `CarFeatures.Dirtiness`; no clean method found | M | 3 | Investigate | — |
-| Vehicles | Clear parking tickets | — | Yes | `VehicleInstance.parkingTickets` (List<Timestamp>) | M | 3 | Investigate | — |
+| Vehicles | Clean | World tab (own vehicle only) | Yes | `VehicleController.SetDirtiness(float)`; readback `VehicleInstance.dirtiness`; `VehicleType.canGetDirty` | M | 3 | Implemented v0.7.0-alpha.7, awaiting UAT | — |
+| Vehicles | Clear parking tickets | — | Yes | `VehicleInstance.parkingTickets` (List<Timestamp>) | M | 3 | Investigate (list of timestamps only; no evidence clearing cancels fines) | — |
 | Vehicles | Tow vehicle | — | Yes | Cmd `VehicleHelper.Command_TowVehicle(TowDestination)` | M | 3 | Missing | — |
 | Vehicles | No damage / no fuel use | GameOptions switches | Yes | GV `disableVehicleDamage`, `disableVehicleFuel` | M | — | Partial-verified | 04-02: write/readback only |
 | Vehicles | Spawn vehicle | — | No | Cmd `VehicleHelper.Command_GetCar(VehicleTypeName[, color])` | M | 4 | Investigate | — |
