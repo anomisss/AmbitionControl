@@ -17,10 +17,10 @@ Run on a COPY of a save — **defeating a rival is permanent in that save.** Evi
 | 6 | Defeat all (optional) | Defeat all → Confirm | Status counts; log line per rival | NOT RUN |
 | W1 | World: refuel | In your own car, part-empty tank: Refuel vehicle | Log `Vehicle refuel verified` (from 08-UAT #3) | NOT RUN |
 | W2 | World: pause | Pause game, Resume game | Log `Pause False -> True`, `True -> False` (08-UAT #5) | PASS — log 02:58:59 `Pause True -> False`, 02:59:02 `Pause False -> True`, 02:59:07 `Pause True -> False`. |
-| W3 | World: speed | 2x, then 1x | Log `Speed 200% requested; Time.timeScale …` (08-UAT #6) | PARTIAL — 10x pressed 4×; `Time.timeScale 1 -> 1` each time (0 -> 0 while paused). No readback evidence the speed changed; owner observation needed. 2x/1x not pressed. |
+| W3 | World: speed | 2x, then 1x | Log `Speed 200% requested; Time.timeScale …` (08-UAT #6) | PASS (owner-observed) — 10x pressed 4×; owner confirmed the in-game clock sped up. Log readback `Time.timeScale 1 -> 1` is not usable (tweened). 2x/1x not pressed. |
 | W4 | World: save | Save game → Confirm save | Log `SaveGame("<name>") returned True` (08-UAT #8) | NOT RUN |
 
 ## Summary
-total: 10 · pass: 1 · partial: 3 · fail: 0 · not run: 6
+total: 10 · pass: 2 · partial: 2 · fail: 0 · not run: 6
 
 Evidence: Latest.log session 2026-11-20 02:57–02:59 (save day 10). Speed: `Time.timeScale` is not a usable readback (GameSpeedController tweens it via `timeScaleTween`); next build should read `GameSpeedController.currentGameSpeed` instead.

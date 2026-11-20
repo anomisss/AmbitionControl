@@ -44,7 +44,7 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Business | Revenue / income multiplier | — | Yes | No revenue multiplier in GameVariables; `baseCustomerPromotionMultiplier` exists (effect unknown) | — | — | Investigate | — |
 | Business | Urgent delivery fee multipliers | Economy tab cycle (preset values) | No | GV `wholesaleUrgentFeeMultiplier`, `importerUrgentFeeMultiplier` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Business | Market events / demand | — | No | Cmd `ProductMarketHelper.Command_CreateMarketEvent`, `Command_UpdateMarketDemand` | M | 4 | Investigate | — |
-| Gameplay | Game speed 0×–10× | World tab 1x–10x (experimental) | Yes | Cmd `TimeHelper.Command_SetTimeSpeed(int percentage)` | L | 2 | Implemented v0.7.0-alpha.3 (experimental); PARTIAL — no readback evidence (10-UAT W3) | — |
+| Gameplay | Game speed 0×–10× | World tab 1x–10x (experimental) | Yes | Cmd `TimeHelper.Command_SetTimeSpeed(int percentage)` | L | 2 | Implemented v0.7.0-alpha.3 (experimental); PASS owner-observed at 10x (10-UAT W3; log readback via timeScale not usable) | — |
 | Gameplay | Pause / resume | World tab | Yes | `GameSpeedController.SetPause(bool, bool)`, `.Paused`; `TimeSpeed` = Pause, Normal, FastForward | L | 2 | Implemented v0.7.0-alpha.3; PASS (10-UAT W2, toggled both ways) | — |
 | Gameplay | Skip hours | — | Yes | `Timemachine.TimeMachine.SkipTime(string)` — must confirm it runs hourly simulation | H | 2 | Investigate | — |
 | Gameplay | Set custom time | — | Yes | `TimeHelper.SetCurrentTime(Timestamp)` — direct jump may skip scheduled events | H | 4 | Investigate | — |
