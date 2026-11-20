@@ -41,8 +41,19 @@ namespace AmbitionControl.UI
             GUI.Box(new Rect(X, Y, W, 26f), "AMBITION CONTROL  " + AmbitionControlMod.VersionLabel + "   [" + settings.ToggleKey + "]");
             if (GUI.Button(new Rect(X + W - 28f, Y + 2f, 24f, 22f), "X")) Visible = false;
 
-            int newTab = GUI.Toolbar(new Rect(X + Pad, Y + 32f, W - 2 * Pad, Row), tab, Tabs);
-            if (newTab != tab) { tab = newTab; if (money.CurrentPhase == MoneyService.Phase.Staged) money.Cancel(); }
+            // GUI.Toolbar is unusable on this build: it needs GUIContent.Temp(string[]), which is
+            // stripped and MelonLoader 0.7.3 fails to unstrip it (runtime NotSupportedException).
+            // Plain GUI.Button(Rect, string) is confirmed working in-game.
+            float tabW = (W - 2 * Pad - (Tabs.Length - 1) * 4f) / Tabs.Length;
+            for (int i = 0; i < Tabs.Length; i++)
+            {
+                string label = i == tab ? "[ " + Tabs[i] + " ]" : Tabs[i];
+                if (GUI.Button(new Rect(X + Pad + i * (tabW + 4f), Y + 32f, tabW, Row), label) && i != tab)
+                {
+                    tab = i;
+                    if (money.CurrentPhase == MoneyService.Phase.Staged) money.Cancel();
+                }
+            }
 
             y = Y + 32f + Row + 8f;
             switch (tab)
