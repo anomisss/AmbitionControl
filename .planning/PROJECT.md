@@ -20,9 +20,9 @@ Money changes made from the menu apply through the game's own transaction path, 
 ### Active
 
 - ✓ Phone app: menu inside the in-game smartphone, clicks stay in the UI, Add verified ($1.11M) — v0.5.0-alpha.1
-- [ ] Remove, Set and Undo verified in-game
-- [ ] Money changes persist across save → quit → reload
-- [ ] State resets correctly when switching saves / returning to main menu
+- ✓ Remove, Undo, persistence, state reset verified in-game; Set and over-removal refusal owner-reported — v0.5.0-alpha.2/3
+
+
 - [ ] Expanded features (candidates: player stats, time controls) — each only after its API is verified on build 3233
 - [ ] Packaged release (DLL + install/uninstall instructions) once the money feature set is runtime-verified
 

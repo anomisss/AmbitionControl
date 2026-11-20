@@ -1,5 +1,5 @@
 ---
-status: partial
+status: complete
 phase: 03-money-feature-verification
 source: [02-02-SUMMARY.md]
 started: 2026-11-19
@@ -11,7 +11,7 @@ build: v0.5.0-alpha.2 (adds Session/Scene/app-hidden log lines for evidence)
 
 number: 1-8 (one play session)
 name: Money feature UAT on a COPY of a save
-awaiting: re-run of skipped tests 2, 3, 5
+awaiting: none
 
 ## Tests
 
@@ -24,14 +24,16 @@ evidence: "Remove verified: 15145598.00 -> 15144598.00"
 ### 2. Over-removal refused
 expected: Clear, then pick an amount larger than the current balance (e.g. +10M when the balance is under $10M), Stage Remove. Staging is refused with "Result would be negative or exceed $100M."; nothing applied.
 requirement: MONEY-02
-result: skipped
-reason: not attempted (balance $15.1M exceeds the $10M max single change; a $10M remove was valid and verified). Rule covered by unit test Rejects_invalid.
+result: pass (owner-reported)
+reported: "Tested, all worked"
+note: no log evidence — Latest.log and MelonLoader/Logs show no game session after 20:57 (v0.5.0-alpha.2); alpha.3 ("Can't stage" message) never logged as run.
 
 ### 3. Set
 expected: Clear, +1M, Stage Set, Confirm. Balance becomes exactly $1,000,000. Log "Set verified: ... -> 1000000".
 requirement: MONEY-03
-result: skipped
-reason: Stage Set not used in this run
+result: pass (owner-reported)
+reported: "Tested, all worked"
+note: no log evidence (see test 2).
 
 ### 4. Undo
 expected: Immediately after test 3, Undo. Balance returns to the value before Set. Log "Undo verified".
@@ -42,8 +44,9 @@ evidence: "Undo verified: 5144598.00 -> 15144598.00" and "Undo verified: 6144598
 ### 5. Undo expires
 expected: Make a change, then let the in-game balance change on its own (spend money or wait for a transaction). Undo button becomes disabled.
 requirement: MONEY-04
-result: skipped
-reason: not evidenced in this run
+result: pass (owner-reported)
+reported: "Tested, all worked"
+note: no log evidence (see test 2).
 
 ### 6. Status readout
 expected: Day/time, money, net worth, energy, hunger, happiness in the app match the game HUD.
@@ -67,6 +70,6 @@ evidence: last verified balance $15,144,598.00; after save -> main menu -> reloa
 ## Summary
 
 total: 8
-passed: 5
+passed: 8 (5 log-verified, 3 owner-reported: tests 2, 3, 5)
 issues: 0
-skipped: 3 (tests 2, 3, 5)
+skipped: 0

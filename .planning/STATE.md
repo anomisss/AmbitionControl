@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 3 — Money Feature Verification
+**Current focus:** Phase 4 — Expanded Features (scope to be chosen with owner)
 
 ## Current Position
 
-Phase: 3 of 5 (Money Feature Verification)
-Plan: UAT (03-UAT.md) — 8 owner tests
-Status: UAT partial — 5/8 pass (03-UAT.md); round 2 needs tests 2 (over-removal refused), 3 (Set), 5 (Undo expiry). v0.5.0-alpha.3 installed (DLL 1719645d…)
-Last activity: 2026-11-19 — UAT round 1 recorded; staging-refusal message added to phone app
+Phase: 4 of 5 (Expanded Features)
+Plan: not yet planned
+Status: Ready to plan — Phase 3 complete (UAT 8/8; tests 2, 3, 5 owner-reported without log evidence)
+Last activity: 2026-11-19 — Phase 3 UAT complete
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Accumulated Context
 
@@ -41,5 +41,5 @@ Progress: [█████░░░░░] 50%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 2 complete; next is Phase 3 (Remove, Set, Undo, persistence, save switching)
-Resume file: .planning/phases/03-money-feature-verification/03-UAT.md
+Stopped at: Phase 3 complete; next choose Phase 4 features
+Resume file: .planning/ROADMAP.md (Phase 4)

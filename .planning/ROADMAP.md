@@ -8,7 +8,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 
 - [x] **Phase 1: MelonLoader Foundation** - Buildable mod, F10 menu, build guard, verified money Add
 - [x] **Phase 2: Menu Input Isolation** - Menu clicks/scroll no longer reach the game world
-- [ ] **Phase 3: Money Feature Verification** - Remove, Set, Undo, persistence and save switching verified in-game
+- [x] **Phase 3: Money Feature Verification** - Remove, Set, Undo, persistence and save switching verified in-game
 - [ ] **Phase 4: Expanded Features** - Player needs and time controls, each behind verified APIs
 - [ ] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
 
@@ -49,7 +49,7 @@ Plans:
   3. Balance persists after save → quit → reload
   4. Switching saves clears staged/undo state
   5. Status tab matches the HUD
-**Plans**: TBD (mostly owner-run UAT plus fixes)
+**Plans**: UAT (03-UAT.md) — 8/8 pass (5 log-verified, 3 owner-reported)
 
 ### Phase 4: Expanded Features
 **Goal**: Add owner-chosen features without weakening save safety
@@ -75,6 +75,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. MelonLoader Foundation | done | Complete | 2026-11-19 |
 | 2. Menu Input Isolation | 1/1 (02-01 superseded) | Complete | 2026-11-19 |
-| 3. Money Feature Verification | 0/TBD | Not started | - |
+| 3. Money Feature Verification | UAT 8/8 | Complete | 2026-11-19 |
 | 4. Expanded Features | 0/TBD | Not started | - |
 | 5. Release Packaging | 0/TBD | Not started | - |
