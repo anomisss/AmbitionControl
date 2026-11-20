@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 9 (Employees, part 1)
 Plan: Phase 9 implemented
-Status: v0.7.0-alpha.4 installed (DLL 5d53d475…); awaiting owner UAT (09-UAT.md). Phase 8 UAT partial (traffic OFF verified); owner chose to continue
+Status: Phase 9 verified in-game (09-UAT: list + max satisfaction 5/5). Phase 8 UAT partial (traffic OFF verified); owner chose to continue
 Last activity: 2026-11-19 — Staff tab: employee list, temporary max satisfaction
 
 Progress: [██████████] 100%
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 9 awaiting in-game test
+Stopped at: Phase 9 complete
 Resume file: .planning/phases/09-employees/09-UAT.md

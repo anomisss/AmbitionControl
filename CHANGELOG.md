@@ -6,7 +6,7 @@
 - **Max satisfaction (temporary)**: first press shows how many of N employees would change, second press ("Confirm") sets `EmployeeInstance.satisfaction` to 100 and reads each back. Only runs when the 0–100 scale is confirmed (game `EmployeeHelper.LowSatisfactionThreshold` between 1 and 100 and no observed value above 100). The game recalculates satisfaction itself (`EmployeeInstance.UpdateSatisfaction()`), so the effect is temporary — stated in the UI.
 - Not yet: wage edits (change payroll and feed back into satisfaction) and candidate generation — remain "Investigate" in the gap matrix. The salary **multiplier** is already on the Economy tab.
 - New preference `EmployeeToolsEnabled` (default true).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/09-employees/09-UAT.md`.
+- **Status:** **Runtime verified (2026-11-19, build 3233):** list read 5 hired employees (satisfaction 44–100, game threshold 20 → 0–100 scale confirmed); Max satisfaction previewed then applied, 5/5 verified. Not observed: how quickly the game recalculates satisfaction.
 
 ## [0.7.0-alpha.3] — 2026-11-19 — Milestone C: Vehicles & world
 - New **World** tab (tabs: Money | Player | Economy | World | Options).
