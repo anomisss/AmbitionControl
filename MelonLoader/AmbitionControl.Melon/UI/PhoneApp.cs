@@ -208,6 +208,15 @@ namespace AmbitionControl.UI
         private void Show()
         {
             Transform container = fullMenu.appsContainer;
+            // Style probe (read-only): log how the game's own app screens are built, once each.
+            StyleProbe.DumpOnce("phone frame (FullMenu)", fullMenu.transform);
+            for (int i = 0; i < container.childCount; i++)
+            {
+                Transform appScreen = container.GetChild(i);
+                if (appScreen.gameObject != panel) StyleProbe.DumpOnce("app screen: " + appScreen.name, appScreen);
+            }
+            StyleProbe.ListUiSprites();
+
             var hidden = new List<string>();
             for (int i = 0; i < container.childCount; i++)
             {

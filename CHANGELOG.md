@@ -1,62 +1,65 @@
-# Changelog
+﻿# Changelog
 
-## [0.7.0-alpha.8] — 2026-11-20 — UI cleanup
-- **Section headers** (small gold caps with a thin rule) on every page: e.g. Money → Amount / Change; World → Your vehicle / Time / Game; Quest → Current quest / Teleport / Complete.
+## [0.7.0-alpha.9] — 2026-11-20 — Style probe (diagnostic)
+- Read-only **StyleProbe**: when the Ambition Control app is opened, logs (once per session) the structure of the phone frame and of every game app screen already created — image sprites/9-slice borders/colours, text font/size/colour/style, button colour blocks, layout groups — plus a list of UI-like sprite names. Used to restyle the app to match the game's own phone apps. No visual or behaviour change.
+- **Status:** Build verified (0 warnings); tests 12/12. Not runtime verified.
+## [0.7.0-alpha.8] â€” 2026-11-20 â€” UI cleanup
+- **Section headers** (small gold caps with a thin rule) on every page: e.g. Money â†’ Amount / Change; World â†’ Your vehicle / Time / Game; Quest â†’ Current quest / Teleport / Complete.
 - **Coloured status bar**: green = verified, amber = waiting for Confirm / in progress, red = failed or refused, grey = info.
 - **One short hint line** per tab replaces the long help paragraphs; when a tab's tools are unavailable the reason shows there in amber.
 - **One-line footer**: balance, day/time, energy, hunger, happiness.
 - World: Repair / Refuel / Clean on one row with a one-line vehicle readout; Save game on its own row. Money: Confirm / Cancel / Undo on one row. Title and version split.
-- No behaviour changes. **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/13-ui-cleanup/13-UAT.md`.
+- No behaviour changes. **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/13-ui-cleanup/13-UAT.md`.
 
-## [0.7.0-alpha.7] — 2026-11-20 — Milestone G: Clean vehicle & personal goals
+## [0.7.0-alpha.7] â€” 2026-11-20 â€” Milestone G: Clean vehicle & personal goals
 - **Clean vehicle** (World tab, own vehicle only, shares a row with Save game): the game's own `VehicleController.SetDirtiness(0)`, readback `VehicleInstance.dirtiness`; refused for vehicle types with `canGetDirty = false`. Vehicle line now also shows dirt.
 - **Complete all personal goals** (Quest tab, two-press confirm): the game's `PersonalGoals.Command_CompleteAll()`; button shows done/total from `GameManager.personalGoals` (`GenericPersonalGoal.IsCompleted`), readback = completed count increased. The game grants the goals' rewards and may unlock matching achievements; cannot be undone.
 - Parking tickets stay **Investigate**: `VehicleInstance.parkingTickets` is only a list of timestamps; no evidence that clearing it cancels fines.
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/12-clean-goals/12-UAT.md`.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/12-clean-goals/12-UAT.md`.
 
-## [0.7.0-alpha.6] — 2026-11-20 — Milestone F (part 2): Quests & teleport
+## [0.7.0-alpha.6] â€” 2026-11-20 â€” Milestone F (part 2): Quests & teleport
 - New **Quest** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Quest | Options); tab text 15 pt so eight fit.
 - Shows the current quest and objective ids (`TutorialHelper.currentQuest` / `currentQuestEntry`).
 - **Teleport to quest target** (`GameManager.Command_TeleportPlayerToQuestTarget`) and **Teleport to GPS destination** (`Command_TeleportPlayerToDestination`). Only on foot and outdoors (`PlayerHelper.IsUsingVehicle`, `BuildingManager.IsInsideBuilding`). Verified by checking the player moved at least 2 m (`PlayerHelper.GetPosition`) within 90 frames.
 - **Complete objective** (`TutorialHelper.Command_CompleteObjective`, readback `QuestEntry.IsAlreadyCompleted` / next objective) and **Complete whole quest** (`Command_CompleteQuest`, readback current quest changed). Both need a second press ("Confirm"); cannot be undone. Unavailable when the tutorial is off or finished.
 - New preference `QuestToolsEnabled` (default true).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/11-quests-teleport/11-UAT.md`.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/11-quests-teleport/11-UAT.md`.
 
-## [0.7.0-alpha.5] — 2026-11-20 — Milestone F (part 1): Rivals
+## [0.7.0-alpha.5] â€” 2026-11-20 â€” Milestone F (part 1): Rivals
 - New **Rivals** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Options). Selected tab is now highlighted in gold instead of bracketed, so seven tabs fit.
 - **Rival list**: one row per neighbourhood rival (`RivalsHelper.GetSpecialRivalByNeighborhood`), with name, area, state from the save's `specialRivalStates` (active / not active / defeated) and weekly income.
-- **Defeat rival** via the game's own `RivalTimeline.DefeatRival(Neighbourhood, showMessage)`, verified with `RivalsHelper.IsRivalDefeated`. **Permanent** — the game closes the rival's businesses and sells their buildings — so it needs a second press ("Confirm") after a warning, and only rivals the game marks **active** in this save can be defeated. **Defeat all active rivals** works the same way and lists who is affected first.
+- **Defeat rival** via the game's own `RivalTimeline.DefeatRival(Neighbourhood, showMessage)`, verified with `RivalsHelper.IsRivalDefeated`. **Permanent** â€” the game closes the rival's businesses and sells their buildings â€” so it needs a second press ("Confirm") after a warning, and only rivals the game marks **active** in this save can be defeated. **Defeat all active rivals** works the same way and lists who is affected first.
 - New preference `RivalToolsEnabled` (default true).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/10-rivals/10-UAT.md` (also retests untested World items).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/10-rivals/10-UAT.md` (also retests untested World items).
 
-## [0.7.0-alpha.4] — 2026-11-19 — Milestone E (part 1): Employees
+## [0.7.0-alpha.4] â€” 2026-11-19 â€” Milestone E (part 1): Employees
 - New **Staff** tab (tabs: Money | Player | Economy | World | Staff | Options).
 - **Read-only employee list** from `GameInstance.EmployeeInstances` (hired staff only; candidates excluded): name via the game's `GetEmployeeNameWithInfo()`, hourly wage, satisfaction, absent/unassigned flags; summary with count, average satisfaction and total wages per hour; 7 per page.
-- **Max satisfaction (temporary)**: first press shows how many of N employees would change, second press ("Confirm") sets `EmployeeInstance.satisfaction` to 100 and reads each back. Only runs when the 0–100 scale is confirmed (game `EmployeeHelper.LowSatisfactionThreshold` between 1 and 100 and no observed value above 100). The game recalculates satisfaction itself (`EmployeeInstance.UpdateSatisfaction()`), so the effect is temporary — stated in the UI.
-- Not yet: wage edits (change payroll and feed back into satisfaction) and candidate generation — remain "Investigate" in the gap matrix. The salary **multiplier** is already on the Economy tab.
+- **Max satisfaction (temporary)**: first press shows how many of N employees would change, second press ("Confirm") sets `EmployeeInstance.satisfaction` to 100 and reads each back. Only runs when the 0â€“100 scale is confirmed (game `EmployeeHelper.LowSatisfactionThreshold` between 1 and 100 and no observed value above 100). The game recalculates satisfaction itself (`EmployeeInstance.UpdateSatisfaction()`), so the effect is temporary â€” stated in the UI.
+- Not yet: wage edits (change payroll and feed back into satisfaction) and candidate generation â€” remain "Investigate" in the gap matrix. The salary **multiplier** is already on the Economy tab.
 - New preference `EmployeeToolsEnabled` (default true).
-- **Status:** **Runtime verified (2026-11-19, build 3233):** list read 5 hired employees (satisfaction 44–100, game threshold 20 → 0–100 scale confirmed); Max satisfaction previewed then applied, 5/5 verified. Not observed: how quickly the game recalculates satisfaction.
+- **Status:** **Runtime verified (2026-11-19, build 3233):** list read 5 hired employees (satisfaction 44â€“100, game threshold 20 â†’ 0â€“100 scale confirmed); Max satisfaction previewed then applied, 5/5 verified. Not observed: how quickly the game recalculates satisfaction.
 
-## [0.7.0-alpha.3] — 2026-11-19 — Milestone C: Vehicles & world
+## [0.7.0-alpha.3] â€” 2026-11-19 â€” Milestone C: Vehicles & world
 - New **World** tab (tabs: Money | Player | Economy | World | Options).
-- **Repair vehicle** (`VehicleHelper.RepairVehicle()`, readback `VehicleInstance.damage`) and **Refuel vehicle** (`VehicleController.SetFuel(VehicleType.maxFuel)`, readback `VehicleInstance.fuel`). Only work while you are inside a motor vehicle **that is in your own `GameInstance.VehicleInstances`** — taxis/NPC/other vehicles are refused. No cost charged.
+- **Repair vehicle** (`VehicleHelper.RepairVehicle()`, readback `VehicleInstance.damage`) and **Refuel vehicle** (`VehicleController.SetFuel(VehicleType.maxFuel)`, readback `VehicleInstance.fuel`). Only work while you are inside a motor vehicle **that is in your own `GameInstance.VehicleInstances`** â€” taxis/NPC/other vehicles are refused. No cost charged.
 - **Pause / Resume** via the game's own `GameSpeedController.SetPause` with `Paused` readback.
-- **Game speed 1x / 2x / 3x / 5x / 10x** via the game's debug command `TimeHelper.Command_SetTimeSpeed(percent)` — **experimental** (the game's normal speeds are only Normal and FastForward); logs `Time.timeScale` before/after.
+- **Game speed 1x / 2x / 3x / 5x / 10x** via the game's debug command `TimeHelper.Command_SetTimeSpeed(percent)` â€” **experimental** (the game's normal speeds are only Normal and FastForward); logs `Time.timeScale` before/after.
 - **Traffic ON/OFF** via `GameManager.Command_ToggleTraffic()` with `spawnTraffic` readback (runtime only).
 - **Save game** (two-press confirm) runs the game's normal `GameManager.SaveGame` for the loaded save, only when `SaveGameManager.CanSave()`.
 - Cached scene lookups (no per-snapshot scene scans); new preference `WorldToolsEnabled` (default true).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/08-vehicles-world/08-UAT.md`.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/08-vehicles-world/08-UAT.md`.
 
-## [0.7.0-alpha.2] — 2026-11-19 — Milestone C/D: Economy & difficulty controls
+## [0.7.0-alpha.2] â€” 2026-11-19 â€” Milestone C/D: Economy & difficulty controls
 - New **Economy** tab (tabs: Money | Player | Economy | Options).
-- **Difficulty presets Easy / Normal / Hard**: values are read at runtime from the game's own `DifficultySetting.GetDifficultySettings(...)` assets and logged; first press shows how many of 9 settings would change, second press ("Confirm …") applies them and sets `gameVariables.difficulty`. Build 3233 has no "Brutal" preset (enum: Custom, Easy, Normal, Hard).
-- **Nine settings** — tax %, market prices, staff salaries, rival difficulty, bank interest, bank negative rate, customer promotion, wholesale urgent fee, importer urgent fee — each cycles **only through values the game's presets use** (no invented ranges); label shows which preset a value matches or "(custom)". Each write is read back.
+- **Difficulty presets Easy / Normal / Hard**: values are read at runtime from the game's own `DifficultySetting.GetDifficultySettings(...)` assets and logged; first press shows how many of 9 settings would change, second press ("Confirm â€¦") applies them and sets `gameVariables.difficulty`. Build 3233 has no "Brutal" preset (enum: Custom, Easy, Normal, Hard).
+- **Nine settings** â€” tax %, market prices, staff salaries, rival difficulty, bank interest, bank negative rate, customer promotion, wholesale urgent fee, importer urgent fee â€” each cycles **only through values the game's presets use** (no invented ranges); label shows which preset a value matches or "(custom)". Each write is read back.
 - **Options** tab gains **All courses unlocked, All contacts unlocked, All importer products, Tutorial** (game's own custom-game options; positive flags display ON = enabled).
 - Not changed mid-game on purpose: starting age, starting money, days per year.
 - New preference `EconomyControlsEnabled` (default true).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/07-economy-controls/07-UAT.md`.
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** â€” `.planning/phases/07-economy-controls/07-UAT.md`.
 
-## [0.7.0-alpha.1] — 2026-11-19 — Milestone B: Player utilities (trainer expansion)
+## [0.7.0-alpha.1] â€” 2026-11-19 â€” Milestone B: Player utilities (trainer expansion)
 - New **Player** tab in the phone app (tabs are now Money | Player | Game options; tab system generalized for more categories).
 - **Refill energy / hunger / happiness / all** via the game's own setters (`EnergyHelper.SetCurrentEnergy`, `EnergyHelper.SetCurrentHunger`, `HappinessHelper.Happiness`); each refill is read back from `GameInstance` and logged `Refill verified: <need> before -> after`.
 - **Invincibility** toggle via the game's `EnergyHelper.Command_ToggleInvincibility()`, verified by reading `EnergyHelper._invincibility`. Runtime only.
@@ -65,62 +68,62 @@
 - New `docs/FEATURE_GAP_MATRIX.md`: full comparison with the reference trainer's advertised features and build-3233 API evidence (e.g. export multiplier does not exist in build 3233).
 - **Status:** **Runtime verified (2026-11-19, build 3233):** refills logged `Energy 73.1 -> 100`, `Hunger 59.6 -> 100`, `Happiness 35 -> 100` and the HUD showed full (owner); Invincibility ON verified; Hold hunger kept hunger full (owner); tab switching works. Not run: Invincibility OFF, Hold-hunger reset on save change. Details: `.planning/phases/06-player-utilities/06-UAT.md`.
 
-> **Latest release:** [v0.6.0-alpha.2 (pre-release)](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2) — ZIP SHA-256 `67bb8831b6d136d54faeaa7d40e0abe872a4efefb688a9c144010642d0a075a3`.
+> **Latest release:** [v0.6.0-alpha.2 (pre-release)](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2) â€” ZIP SHA-256 `67bb8831b6d136d54faeaa7d40e0abe872a4efefb688a9c144010642d0a075a3`.
 
-## [0.6.0-alpha.2] — 2026-11-19 — All game option switches + tabs (GSD Phase 4, plan 04-02)
+## [0.6.0-alpha.2] â€” 2026-11-19 â€” All game option switches + tabs (GSD Phase 4, plan 04-02)
 - Phone app now has **Money** and **Game options** tabs.
-- Game options tab: six switches for the game's own custom-game options — **Energy drain, Happiness drain, Aging, Vehicle damage, Vehicle fuel use, Wholesale/import limits** (`GameVariables.disableEnergy/disableHappiness/disableAging/disableVehicleDamage/disableVehicleFuel/disableWholesaleAndImportLimits`, all verified in build-3233 interop and offered by the game's custom-game screen). Each change is read back; stored in the save when the game saves.
+- Game options tab: six switches for the game's own custom-game options â€” **Energy drain, Happiness drain, Aging, Vehicle damage, Vehicle fuel use, Wholesale/import limits** (`GameVariables.disableEnergy/disableHappiness/disableAging/disableVehicleDamage/disableVehicleFuel/disableWholesaleAndImportLimits`, all verified in build-3233 interop and offered by the game's custom-game screen). Each change is read back; stored in the save when the game saves.
 - `NeedToggles` generalized to `GameOptions` (one code path for all six).
 - **Status:** **Runtime verified (2026-11-19, build 3233):** Game options tab works; Aging, Vehicle damage, Vehicle fuel use and Wholesale/import limits each set OFF and read back ("verified" in log); owner confirms both tabs display correctly. Not exercised: switching back ON, and the in-game effect of the four new options.
 
-## [0.6.0-alpha.1] — 2026-11-19 — Energy/happiness drain switches (GSD Phase 4, plan 04-01)
+## [0.6.0-alpha.1] â€” 2026-11-19 â€” Energy/happiness drain switches (GSD Phase 4, plan 04-01)
 - Phone app: **Energy drain ON/OFF** and **Happiness drain ON/OFF** buttons. They set the game's own custom-game options `GameInstance.gameVariables.disableEnergy` / `disableHappiness` (verified in build-3233 interop; the game exposes them in `CustomGameOptionsHandler`), read the value back, and report "(verified)".
 - These options are part of the save: once the game saves, the setting stays with that save. Turn a switch back ON to restore normal drain.
 - Blocked on non-3233 builds (unless `AllowOtherBuilds`), with no save loaded, or while saving. New preference `PlayerTogglesEnabled` (default true).
 - Hunger has no game option in build 3233, so it is not included.
 - **Status:** **Runtime verified (2026-11-19, build 3233):** both switches set OFF and read back ("verified" in log); owner confirms energy and happiness stop dropping immediately (no reload) and the panel layout fits. Switching back ON not yet exercised.
 
-## [0.5.0-alpha.3] — 2026-11-19 — Phase 3 UAT round 1 + staging feedback
-- UAT round 1 on build 3233 (log evidence in `.planning/phases/03-money-feature-verification/03-UAT.md`): **Remove** verified (15,145,598 → 15,144,598), **Undo** verified twice, **save → quit → reload** kept the mod's changes (reload $15,144,279 after $319 normal spending), state cleared and app re-injected after reload, Status matched the HUD, switching phone apps hides ours. Not yet run: over-removal refusal, Set, Undo expiry.
+## [0.5.0-alpha.3] â€” 2026-11-19 â€” Phase 3 UAT round 1 + staging feedback
+- UAT round 1 on build 3233 (log evidence in `.planning/phases/03-money-feature-verification/03-UAT.md`): **Remove** verified (15,145,598 â†’ 15,144,598), **Undo** verified twice, **save â†’ quit â†’ reload** kept the mod's changes (reload $15,144,279 after $319 normal spending), state cleared and app re-injected after reload, Status matched the HUD, switching phone apps hides ours. Not yet run: over-removal refusal, Set, Undo expiry.
 - Fix (UX): when staging is refused (e.g. amount above the $10M-per-change limit) the phone app now shows "Can't stage: <reason>" on the preview line; previously only the status line changed and repeated Stage clicks looked dead. The message clears when the amount changes.
 - **Status:** Build verified; tests 12/12. Owner reports Set, over-removal refusal (with the new message) and Undo expiry work; **no log evidence** of an alpha.3 game session (last log 20:57, alpha.2).
 
-## [0.5.0-alpha.2] — 2026-11-19 — Phase 3 test evidence logging
+## [0.5.0-alpha.2] â€” 2026-11-19 â€” Phase 3 test evidence logging
 - Log lines for UAT evidence: `Session: save loaded, balance $X, day N`, `Session ended ... cleared`, `Scene loaded: <scene> (staged action and undo cleared)`, `Phone app hidden: another phone app was opened.`
 - Added Phase 3 UAT checklist (`.planning/phases/03-money-feature-verification/03-UAT.md`).
 - **Status:** Build verified; tests 12/12. Logging only; behaviour unchanged from 0.5.0-alpha.1.
 
-## [0.5.0-alpha.1] — 2026-11-19 — In-game phone app (GSD Phase 2, plan 02-02)
+## [0.5.0-alpha.1] â€” 2026-11-19 â€” In-game phone app (GSD Phase 2, plan 02-02)
 - New **Ambition Control app on the in-game smartphone**: an app button cloned from the phone's own app bar (`FullMenu._appButtons`) with a fresh click event, and a panel built from the game's uGUI (`Image`, `Button`, `TextMeshProUGUI` with the phone's font) inside `FullMenu.appsContainer`.
 - Panel: balance, amount picker, Stage Add/Remove/Set, preview, Confirm/Cancel, Undo, status, limits/blocked reason, day/time and needs readout. Uses the same readback-verified `MoneyService` as the overlay.
 - Opening another phone app hides the panel (it watches the app screens; no extra hooks). Injection retries every 2 s while a save is loaded; disabled after 5 errors (overlay unaffected). New preference `PhoneApp` (default true).
 - The F10 overlay remains as a fallback.
 - **Status:** **Runtime verified (2026-11-19, build 3233):** app injected into the phone, opened, buttons respond, Add $1,110,000 verified by readback (1,595,598.38 -> 2,705,598.50); owner reports no click-through. Undo/Remove/Set and app switching not yet exercised.
 
-## [0.4.0-alpha.3] — 2026-11-19 — Click-through: action-level blocking + diagnostics
+## [0.4.0-alpha.3] â€” 2026-11-19 â€” Click-through: action-level blocking + diagnostics
 - In-game (alpha.2): all 10 `InputActionHelper` patches applied, but clicks over the menu still reached the world. Hypothesis: helper calls inlined by IL2CPP and/or actions read directly.
 - New layer: while the cursor is over the menu, the game's own `InputAction`s for Click/RightClick/Zoom/CursorScroll (from `InputActionHelper.PlayerInputActionMap`) are disabled, and only those the mod disabled are re-enabled on leave, scene change or shutdown.
 - `Input diag:` log line (every 3 s while the menu is open) reports helper calls/blocked, actions held disabled and re-enables by the game, to show which path the game uses.
 - Reference: the Alunas trainer (owner-supplied, not redistributed) builds a uGUI panel inside the in-game smartphone (`Il2CppUI.Smartphone.FullMenu`); candidate architecture for the menu.
 - **Status:** Build verified; tests 12/12. **Not runtime verified.**
 
-## [0.4.0-alpha.2] — 2026-11-19 — Menu input isolation (GSD Phase 2)
+## [0.4.0-alpha.2] â€” 2026-11-19 â€” Menu input isolation (GSD Phase 2)
 - Click-through blocking: Harmony prefixes on the game's `Il2CppBigAmbitions.InputSystem.InputActionHelper` mouse reads (left/right click helpers, scroll, and `Pressed/Pressing/Released/Value` for `Click`, `RightClick`, `Zoom`, `CursorScroll`) report no input while the cursor is over the open menu or a title drag is active. Keyboard actions untouched.
 - Each patch applied independently; the log reports `Click-through blocking: N patches applied`. New preference `BlockClickThrough` (default true).
 - Added GSD planning docs under `.planning/` (project, requirements, roadmap, state, Phase 2 plan).
 - **Status:** Build verified; unit tests 12/12. **Not runtime verified.**
 
-## [0.4.0-alpha.1] — 2026-11-19 — First MelonLoader build (compat/ea-0.9.3233-melonloader)
+## [0.4.0-alpha.1] â€” 2026-11-19 â€” First MelonLoader build (compat/ea-0.9.3233-melonloader)
 - Confirmed target from the user's install: Big Ambitions build 3233, Unity 2022.3.62f2 **IL2CPP**, **MelonLoader v0.7.3** (net6).
 - New standalone project `MelonLoader/AmbitionControl.Melon` (`MelonMod` entry, net6.0); SDK sources under `Assets/` untouched and not compiled into it.
 - Replaced the reflection prototype `GameBridge` with typed calls to the generated interop. Corrected the money API to the real 3233 signature: `GameManager.ChangeMoneySafe(float, TransactionType, DataHolder, Nullable<int>, Address, bool, bool)` using the game's built-in `TransactionType.Cheat`.
-- Money: stage → preview → confirm → balance readback verification; guarded one-step undo; writes latched off on any mismatch/exception; blocked while saving, with no save, or on builds ≠ 3233.
+- Money: stage â†’ preview â†’ confirm â†’ balance readback verification; guarded one-step undo; writes latched off on any mismatch/exception; blocked while saving, with no save, or on builds â‰  3233.
 - F10 menu (rebindable via MelonPreferences) with Money / Status / Diagnostics tabs, fixed-rect IMGUI only (avoids stripped GUILayout/GUIStyle members); amount entry by buttons so no keystrokes reach game hotkeys.
 - Added xUnit tests for the pure money logic.
 - **Status:** Build verified; unit tests 12/12 passed. **Partly runtime verified (2026-11-19, build 3233, ML 0.7.3):** mod loads, build guard passes, F10 menu opens, drags and accepts clicks, Add $1,000,000 applied through `ChangeMoneySafe` and verified by readback (1,595,598.38 -> 2,595,598.50). Not yet exercised: Remove, Set, Undo, save/reload persistence, save switching.
 - In-game fixes during testing: `GUI.Toolbar` fails at runtime ("Method unstripping failed") -> plain buttons; IMGUI `GUI.Button` click detection did not fire over the game world -> clicks resolved from `Mouse.current` (Input System); title-bar dragging added; state and click logging added.
 
-## [0.3.0] — 2026-11-16 — Native money controls (source-only)
+## [0.3.0] â€” 2026-11-16 â€” Native money controls (source-only)
 - Implemented real game-API money integration via `SaveGameManager.Current.Money` and `GameManager.ChangeMoneySafe`.
 - Added Add, Remove and Set workflows with input bounds, preview and explicit confirmation.
 - Added single-step, save-identity-and-balance-guarded undo, with limitations described in docs.
@@ -128,7 +131,7 @@
 - Player and World Time tabs now display live, read-only game values.
 - **Status:** source committed, signatures cross-checked against public mod source; compilation and actual in-game behavior unverified.
 
-## [0.2.0] — 2026-11-16 — SDK integration source
+## [0.2.0] â€” 2026-11-16 â€” SDK integration source
 - Added actual `IModBigAmbitions` entry class, `[ModEntryOnInitializationLoad]`, and `[assembly: RegisterModClass]` based on official Example-Options.
 - Added SDK-style manifest and assembly definition with canonical references.
 - Added F10 IMGUI trainer, Money/Player/Time/Diagnostics/Settings panels, basic money validation, and preferences.
@@ -136,7 +139,7 @@
 - Gameplay cheats disabled; adapter integration and runtime testing remained outstanding.
 - **Status:** source generated and SDK structure compared with official examples; not compiled/in-game tested.
 
-## [0.1.0] — 2026-11-16 — Historical starter
+## [0.1.0] â€” 2026-11-16 â€” Historical starter
 - Original local source ZIP prepared in ChatGPT.
 - Draggable F10 IMGUI UI prototype, money command validation/staging, placeholder game bridge, settings and metadata diagnostics.
 - **Status:** source-only; no SDK manifest or verified runtime entry point; not compiled or tested.
