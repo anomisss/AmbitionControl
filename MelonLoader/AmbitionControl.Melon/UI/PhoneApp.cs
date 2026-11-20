@@ -36,6 +36,7 @@ namespace AmbitionControl.UI
         private TMP_FontAsset font;
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
+        private Image statusBg;
         // Tabs (index order = button order). New feature groups add a name + page here.
         private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Rivals", "Quest", "Options" };
         private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabRivals = 5, TabQuest = 6, TabOptions = 7;
@@ -261,6 +262,38 @@ namespace AmbitionControl.UI
         private static readonly Color TextMain = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TextDim = new Color(0.70f, 0.72f, 0.76f, 1f);
         private static readonly Color TabActive = new Color(1f, 0.80f, 0.30f, 1f);
+        private static readonly Color StatusNeutral = new Color(0.16f, 0.18f, 0.21f, 1f);
+        private static readonly Color StatusOk = new Color(0.12f, 0.36f, 0.22f, 1f);
+        private static readonly Color StatusWarn = new Color(0.45f, 0.33f, 0.08f, 1f);
+        private static readonly Color StatusBad = new Color(0.45f, 0.14f, 0.14f, 1f);
+
+        /// <summary>Colour for a status message: green verified, amber awaiting confirm/warning, red failed/refused.</summary>
+        private static Color StatusColor(string msg)
+        {
+            if (string.IsNullOrEmpty(msg)) return StatusNeutral;
+            string m = msg.ToLowerInvariant();
+            if (m.Contains("failed") || m.Contains("did not") || (m.Contains(" not ") && m.Contains(":")) || m.StartsWith("can't") || m.Contains("error"))
+                return StatusBad;
+            if (m.Contains("confirm") || m.Contains("?") || m.Contains("permanent") || m.Contains("..."))
+                return StatusWarn;
+            if (m.Contains("verified") || m.Contains("saved") || m.Contains("returned true"))
+                return StatusOk;
+            return StatusNeutral;
+        }
+
+        /// <summary>Small uppercase section label with a thin rule; returns the y below it.</summary>
+        private float Header(Transform parent, string label, float x, float y, float w)
+        {
+            TextMeshProUGUI t = Text(parent, label.ToUpperInvariant(), x, y, w, 22f, 15f, TabActive, TextAlignmentOptions.BottomLeft);
+            t.characterSpacing = 2f;
+            var rule = new GameObject("Rule");
+            rule.transform.SetParent(parent, false);
+            Place(rule.AddComponent<RectTransform>(), x, y + 24f, w, 1f);
+            Image img = rule.AddComponent<Image>();
+            img.color = BtnNeutral;
+            img.raycastTarget = false;
+            return y + 32f;
+        }
 
         private void BuildPanel(Transform container)
         {
@@ -283,11 +316,13 @@ namespace AmbitionControl.UI
             const float full = 700f;
             float y = 24f;
 
-            Text(panel.transform, Title + "  " + AmbitionControlMod.VersionLabel, x0, y, full, 44f, 32f, TextMain, TextAlignmentOptions.Left);
+            Text(panel.transform, Title, x0, y, full - 160f, 44f, 30f, TextMain, TextAlignmentOptions.Left);
+            Text(panel.transform, AmbitionControlMod.VersionLabel, x0 + full - 160f, y + 8f, 160f, 32f, 18f, TextDim, TextAlignmentOptions.Right);
             y += 54f;
 
             // Tabs. Pages are full-size children so their coordinates match the panel's.
             float hw = (full - 8f) / 2f;
+            float tw = (full - 2 * 8f) / 3f;
             float tabW = (full - (TabNames.Length - 1) * 8f) / TabNames.Length;
             for (int i = 0; i < TabNames.Length; i++)
             {
@@ -299,13 +334,15 @@ namespace AmbitionControl.UI
             }
             y += 58f;
             float contentTop = y;
+            const float sharedTop = 566f; // pages end here; status bar, hint and footer follow
 
+            // Money page.
             Transform page = pages[TabMoney].transform;
             balanceText = Text(page, "", x0, y, full, 36f, 26f, TextMain, TextAlignmentOptions.Left);
             y += 42f;
-            amountText = Text(page, "", x0, y, full, 32f, 24f, TextDim, TextAlignmentOptions.Left);
-            y += 40f;
-
+            y = Header(page, "Amount", x0, y, full);
+            amountText = Text(page, "", x0, y, full, 30f, 22f, TextDim, TextAlignmentOptions.Left);
+            y += 34f;
             long[] steps = { 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L };
             string[] labels = { "+1K", "+10K", "+100K", "+1M", "+10M" };
             float bw = (full - 5 * 8f) / 6f;
@@ -316,79 +353,78 @@ namespace AmbitionControl.UI
                     () => { amount = MoneyCommand.ClampAmount(amount + step); money.ClearStageError(); }, null);
             }
             MakeButton(page, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
-            y += 58f;
-
-            float tw = (full - 2 * 8f) / 3f;
+            y += 56f;
+            y = Header(page, "Change", x0, y, full);
             MakeButton(page, "Stage Add", x0, y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Add, amount, lastSnap), s => CanStage(s) && amount > 0);
             MakeButton(page, "Stage Remove", x0 + tw + 8f, y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Remove, amount, lastSnap), s => CanStage(s) && amount > 0);
             MakeButton(page, "Stage Set", x0 + 2 * (tw + 8f), y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Set, amount, lastSnap), CanStage);
-            y += 62f;
-
-            previewText = Text(page, "", x0, y, full, 36f, 22f, TextMain, TextAlignmentOptions.Left);
-            y += 42f;
-            MakeButton(page, "Confirm change", x0, y, hw, 54f, BtnGo,
+            y += 58f;
+            previewText = Text(page, "", x0, y, full, 32f, 20f, TextMain, TextAlignmentOptions.Left);
+            y += 36f;
+            MakeButton(page, "Confirm change", x0, y, tw, 50f, BtnGo,
                 () => money.RequestConfirm(), s => money.Staged != null && Block(s) == null);
-            MakeButton(page, "Cancel", x0 + hw + 8f, y, hw, 54f, BtnStop,
+            MakeButton(page, "Cancel", x0 + tw + 8f, y, tw, 50f, BtnStop,
                 () => money.Cancel(), s => money.Staged != null);
-            y += 66f;
-            MakeButton(page, "Undo last Ambition Control change", x0, y, full, 50f, BtnNeutral,
+            MakeButton(page, "Undo last change", x0 + 2 * (tw + 8f), y, tw, 50f, BtnNeutral,
                 () => money.RequestUndo(), s => Block(s) == null && money.CanUndo(s));
-            y += 62f;
-            float sharedTop = y;
 
-            // Player page: need refills, invincibility, experimental hunger hold.
+            // Player page.
             float py = contentTop;
             Transform ppage = pages[TabPlayer].transform;
             Func<GameSnapshot, bool> playerOk = s => settings != null && PlayerTools.BlockReason(s, settings) == null;
+            py = Header(ppage, "Needs", x0, py, full);
             MakeButton(ppage, "Refill energy", x0, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.Refill(Need.Energy, lastSnap, settings), playerOk);
             MakeButton(ppage, "Refill hunger", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.Refill(Need.Hunger, lastSnap, settings), playerOk);
-            py += 62f;
+            py += 58f;
             MakeButton(ppage, "Refill happiness", x0, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.Refill(Need.Happiness, lastSnap, settings), playerOk);
             MakeButton(ppage, "Refill all needs", x0 + hw + 8f, py, hw, 50f, BtnGo,
                 () => PlayerTools.RefillAll(lastSnap, settings), playerOk);
             py += 62f;
+            py = Header(ppage, "This session only", x0, py, full);
             invincibleLabel = MakeButton(ppage, "Invincibility", x0, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.ToggleInvincibility(lastSnap, settings), playerOk);
             holdHungerLabel = MakeButton(ppage, "Hold hunger full", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.SetHoldHunger(!PlayerTools.HoldHunger, lastSnap, settings), playerOk);
-            py += 62f + 6f;
-            Text(ppage, "Refills use the game's own need setters and are verified by reading the value back. " +
-                        "Invincibility and Hold hunger last for this session only and are not saved. Hold hunger is " +
-                        "experimental: the game has no hunger option, so it tops hunger up when it drops.",
-                x0, py, full, sharedTop - py - 8f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
-            // Economy page: the game's own difficulty presets, then one cycle button per setting (2 columns).
+            // Economy page.
             float ey = contentTop;
             Transform epage = pages[TabEconomy].transform;
             Func<GameSnapshot, bool> econOk = s => settings != null && GameEconomy.BlockReason(s, settings) == null;
+            ey = Header(epage, "Difficulty presets", x0, ey, full);
             for (int i = 0; i < GameEconomy.Presets.Length; i++)
             {
                 Difficulty preset = GameEconomy.Presets[i];
                 presetLabels[i] = MakeButton(epage, preset + " preset", x0 + i * (tw + 8f), ey, tw, 50f, BtnNeutral,
                     () => GameEconomy.PresetPressed(preset, lastSnap, settings), econOk);
             }
-            ey += 58f;
+            ey += 62f;
+            ey = Header(epage, "Settings (tap to cycle)", x0, ey, full);
             for (int i = 0; i < GameEconomy.All.Length; i++)
             {
                 EconSetting setting = GameEconomy.All[i];
-                econLabels[i] = MakeButton(epage, GameEconomy.Label(setting), x0 + (i % 2) * (hw + 8f), ey + (i / 2) * 58f, hw, 50f,
+                econLabels[i] = MakeButton(epage, GameEconomy.Label(setting), x0 + (i % 2) * (hw + 8f), ey + (i / 2) * 56f, hw, 48f,
                     BtnNeutral, () => GameEconomy.Cycle(setting, lastSnap, settings), econOk);
             }
 
-            // World page: vehicle repair/refuel (own vehicle only), pause, speed, traffic, save.
+            // World page.
             float wy = contentTop;
             Transform wpage = pages[TabWorld].transform;
             Func<GameSnapshot, bool> worldOk = s => settings != null && WorldTools.BlockReason(s, settings) == null;
             Func<GameSnapshot, bool> vehicleOk = s => worldOk(s) && s.InVehicle && s.VehicleOwned;
-            MakeButton(wpage, "Repair vehicle", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.RepairVehicle(lastSnap, settings), vehicleOk);
-            MakeButton(wpage, "Refuel vehicle", x0 + hw + 8f, wy, hw, 50f, BtnNeutral, () => WorldTools.RefuelVehicle(lastSnap, settings), vehicleOk);
-            wy += 58f;
+            wy = Header(wpage, "Your vehicle", x0, wy, full);
+            MakeButton(wpage, "Repair", x0, wy, tw, 50f, BtnNeutral, () => WorldTools.RepairVehicle(lastSnap, settings), vehicleOk);
+            MakeButton(wpage, "Refuel", x0 + tw + 8f, wy, tw, 50f, BtnNeutral, () => WorldTools.RefuelVehicle(lastSnap, settings), vehicleOk);
+            MakeButton(wpage, "Clean", x0 + 2 * (tw + 8f), wy, tw, 50f, BtnNeutral, () => WorldTools.CleanVehicle(lastSnap, settings), vehicleOk);
+            wy += 54f;
+            vehicleText = Text(wpage, "", x0, wy, full, 26f, 18f, TextDim, TextAlignmentOptions.Left);
+            wy += 32f;
+            wy = Header(wpage, "Time", x0, wy, full);
             pauseLabel = MakeButton(wpage, "Pause", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.TogglePause(lastSnap, settings),
                 s => worldOk(s) && s.PauseKnown);
             trafficLabel = MakeButton(wpage, "Traffic", x0 + hw + 8f, wy, hw, 50f, BtnNeutral, () => WorldTools.ToggleTraffic(lastSnap, settings),
@@ -401,15 +437,14 @@ namespace AmbitionControl.UI
                 MakeButton(wpage, (pct / 100f).ToString("0.#") + "x", x0 + i * (sw + 8f), wy, sw, 50f, BtnNeutral,
                     () => WorldTools.SetSpeed(pct, lastSnap, settings), worldOk);
             }
-            wy += 58f;
-            MakeButton(wpage, "Clean vehicle", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.CleanVehicle(lastSnap, settings), vehicleOk);
-            saveLabel = MakeButton(wpage, "Save game", x0 + hw + 8f, wy, hw, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
-            wy += 58f;
-            vehicleText = Text(wpage, "", x0, wy, full, sharedTop - wy - 4f, 20f, TextDim, TextAlignmentOptions.TopLeft);
+            wy += 62f;
+            wy = Header(wpage, "Game", x0, wy, full);
+            saveLabel = MakeButton(wpage, "Save game", x0, wy, full, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
 
-            // Staff page: read-only employee list (paged) + temporary max satisfaction with preview/confirm.
+            // Staff page.
             float sy = contentTop;
             Transform spage = pages[TabStaff].transform;
+            sy = Header(spage, "Employees", x0, sy, full);
             staffSummary = Text(spage, "", x0, sy, full, 30f, 20f, TextMain, TextAlignmentOptions.Left);
             sy += 34f;
             staffList = Text(spage, "", x0, sy, full, EmployeeTools.PageSize * 30f, 18f, TextDim, TextAlignmentOptions.TopLeft);
@@ -420,10 +455,11 @@ namespace AmbitionControl.UI
             staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnNeutral,
                 () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
 
-            // Rivals page: one row per neighbourhood rival with a guarded Defeat button, then Defeat all.
+            // Rivals page.
             float ry = contentTop;
             Transform rpage = pages[TabRivals].transform;
             Func<GameSnapshot, bool> rivalsOk = s => settings != null && RivalTools.BlockReason(s, settings) == null;
+            ry = Header(rpage, "Rivals by neighbourhood", x0, ry, full);
             for (int i = 0; i < RivalTools.Areas.Length; i++)
             {
                 int index = i;
@@ -437,54 +473,63 @@ namespace AmbitionControl.UI
                 () => { RivalTools.DefeatAllPressed(lastSnap, settings); nextRivalRead = 0f; },
                 s => rivalsOk(s) && rivalRows.Any(r => r.Met && r.Active && !r.Defeated));
 
-            // Quest page: current objective, teleport (quest target / GPS destination), complete objective / quest.
+            // Quest page.
             float qy = contentTop;
             Transform qpage = pages[TabQuest].transform;
             Func<GameSnapshot, bool> questOk = s => settings != null && QuestTools.BlockReason(s, settings) == null;
-            questText = Text(qpage, "", x0, qy, full, 64f, 20f, TextMain, TextAlignmentOptions.TopLeft);
-            qy += 72f;
-            MakeButton(qpage, "Teleport to quest target", x0, qy, hw, 50f, BtnNeutral,
+            qy = Header(qpage, "Current quest", x0, qy, full);
+            questText = Text(qpage, "", x0, qy, full, 52f, 19f, TextMain, TextAlignmentOptions.TopLeft);
+            qy += 58f;
+            qy = Header(qpage, "Teleport (on foot, outdoors)", x0, qy, full);
+            MakeButton(qpage, "To quest target", x0, qy, hw, 50f, BtnNeutral,
                 () => QuestTools.Teleport(TeleportTarget.QuestTarget, lastSnap, settings),
                 s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.QuestTarget) == null);
-            MakeButton(qpage, "Teleport to GPS destination", x0 + hw + 8f, qy, hw, 50f, BtnNeutral,
+            MakeButton(qpage, "To GPS destination", x0 + hw + 8f, qy, hw, 50f, BtnNeutral,
                 () => QuestTools.Teleport(TeleportTarget.GpsDestination, lastSnap, settings),
                 s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.GpsDestination) == null);
             qy += 62f;
+            qy = Header(qpage, "Complete (cannot be undone)", x0, qy, full);
             questObjLabel = MakeButton(qpage, "Complete objective", x0, qy, hw, 50f, BtnStop,
                 () => QuestTools.CompleteObjectivePressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
             questQuestLabel = MakeButton(qpage, "Complete whole quest", x0 + hw + 8f, qy, hw, 50f, BtnStop,
                 () => QuestTools.CompleteQuestPressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
-            qy += 62f;
+            qy += 58f;
             questGoalsLabel = MakeButton(qpage, "Complete all personal goals", x0, qy, full, 50f, BtnStop,
                 () => QuestTools.CompleteGoalsPressed(lastSnap, settings), questOk);
-            qy += 62f + 6f;
-            Text(qpage, "Teleport works on foot and outdoors, and is checked by confirming you actually moved. " +
-                        "Set a GPS destination in the game first for the GPS button. Completing objectives runs the " +
-                        "game's own completion actions and cannot be undone.",
-                x0, qy, full, sharedTop - qy - 4f, 18f, TextDim, TextAlignmentOptions.TopLeft);
 
-            // Game options page: 2 columns x 3 rows of switches, then a note.
+            // Game options page.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
+            oy = Header(opage, "Game options (saved with your save)", x0, oy, full);
             for (int i = 0; i < GameOptions.All.Length; i++)
             {
                 GameOption option = GameOptions.All[i];
                 float ox = x0 + (i % 2) * (hw + 8f);
-                optionLabels[i] = MakeButton(opage, GameOptions.Label(option), ox, oy + (i / 2) * 62f, hw, 50f, BtnNeutral,
+                optionLabels[i] = MakeButton(opage, GameOptions.Label(option), ox, oy + (i / 2) * 58f, hw, 50f, BtnNeutral,
                     () => GameOptions.Toggle(option, lastSnap, settings),
                     s => GameOptions.BlockReason(s, settings) == null);
             }
-            oy += ((GameOptions.All.Length + 1) / 2) * 62f + 4f;
-            Text(opage, "The game's own custom-game options, stored in your save when it saves. Unlocks and tutorial may " +
-                        "need a save reload to take effect.",
-                x0, oy, full, sharedTop - oy - 4f, 18f, TextDim, TextAlignmentOptions.TopLeft);
 
+            // Shared bottom: colored status bar, one-line hint, compact footer.
             y = sharedTop;
-            statusText = Text(panel.transform, "", x0, y, full, 70f, 22f, TextMain, TextAlignmentOptions.TopLeft);
-            y += 76f;
-            blockText = Text(panel.transform, "", x0, y, full, 56f, 20f, TextDim, TextAlignmentOptions.TopLeft);
-            y += 62f;
-            infoText = Text(panel.transform, "", x0, y, full, 130f, 20f, TextDim, TextAlignmentOptions.TopLeft);
+            var barGo = new GameObject("StatusBar");
+            barGo.transform.SetParent(panel.transform, false);
+            Place(barGo.AddComponent<RectTransform>(), x0, y, full, 66f);
+            statusBg = barGo.AddComponent<Image>();
+            statusBg.color = StatusNeutral;
+            statusBg.raycastTarget = false;
+            statusText = Text(barGo.transform, "", 12f, 6f, full - 24f, 54f, 19f, TextMain, TextAlignmentOptions.MidlineLeft);
+            y += 74f;
+            blockText = Text(panel.transform, "", x0, y, full, 48f, 17f, TextDim, TextAlignmentOptions.TopLeft);
+            y += 52f;
+            var line = new GameObject("FooterLine");
+            line.transform.SetParent(panel.transform, false);
+            Place(line.AddComponent<RectTransform>(), x0, y, full, 2f);
+            Image lineImg = line.AddComponent<Image>();
+            lineImg.color = BtnNeutral;
+            lineImg.raycastTarget = false;
+            y += 8f;
+            infoText = Text(panel.transform, "", x0, y, full, 30f, 18f, TextDim, TextAlignmentOptions.Left);
 
             ShowTab(TabMoney);
             panel.SetActive(false);
@@ -683,7 +728,8 @@ namespace AmbitionControl.UI
             if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
             if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
             if (QuestTools.Status != lastQuestStatus) { lastQuestStatus = QuestTools.Status; shownStatus = QuestTools.Status; }
-            statusText.text = shownStatus ?? "";
+            statusText.text = shownStatus ?? "Ready.";
+            if (statusBg != null) statusBg.color = StatusColor(shownStatus);
 
             for (int i = 0; i < optionLabels.Length; i++)
                 if (optionLabels[i] != null)
@@ -718,65 +764,34 @@ namespace AmbitionControl.UI
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
             if (vehicleText != null)
-                vehicleText.text = (!s.InVehicle ? "Not in a vehicle. Repair/refuel/clean work in your own vehicle." :
-                    !s.VehicleOwned ? "This vehicle is not one of yours; vehicle tools are disabled." :
-                    "Your vehicle: fuel " + s.VehicleFuel.ToString("0.#") + " / " + s.VehicleMaxFuel.ToString("0.#") +
-                    ", damage " + s.VehicleDamage.ToString("0.##") + ", dirt " + s.VehicleDirt.ToString("0.##") + ".") +
-                    "\nTime scale " + s.TimeScale.ToString("0.##") + "x. Speeds above the game's own are experimental.";
+                vehicleText.text = !s.InVehicle ? "Not in a vehicle." :
+                    !s.VehicleOwned ? "Not your vehicle; vehicle tools disabled." :
+                    "Fuel " + s.VehicleFuel.ToString("0") + "/" + s.VehicleMaxFuel.ToString("0") +
+                    "   Damage " + s.VehicleDamage.ToString("0.##") + "   Dirt " + s.VehicleDirt.ToString("0.##");
             if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
             if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");
 
-            if (currentTab == TabOptions)
-            {
-                string optBlock = settings == null ? "Starting..." : GameOptions.BlockReason(s, settings);
-                blockText.text = optBlock == null ? "" : "Switches unavailable: " + optBlock;
-            }
-            else if (currentTab == TabEconomy)
-            {
-                string eBlock = settings == null ? "Starting..." : GameEconomy.BlockReason(s, settings);
-                blockText.text = eBlock == null
-                    ? "Values cycle through the game's own Easy/Normal/Hard preset values. Stored in your save when the game saves."
-                    : "Economy controls unavailable: " + eBlock;
-            }
-            else if (currentTab == TabRivals)
-            {
-                string rBlock = settings == null ? "Starting..." : RivalTools.BlockReason(s, settings);
-                blockText.text = rBlock == null ? (rivalError ?? "Defeating a rival is permanent (the game closes their businesses). Each needs Confirm.") : "Rival tools unavailable: " + rBlock;
-            }
+            // One short hint per tab; when the tab's tools are unavailable, the reason replaces the hint.
+            string tabBlock = null, hint = "";
+            if (settings == null) tabBlock = "Starting...";
+            else if (currentTab == TabOptions) { tabBlock = GameOptions.BlockReason(s, settings); hint = "Unlocks and tutorial may need a save reload."; }
+            else if (currentTab == TabEconomy) { tabBlock = GameEconomy.BlockReason(s, settings); hint = "Values cycle through the game's Easy / Normal / Hard values."; }
+            else if (currentTab == TabRivals) { tabBlock = RivalTools.BlockReason(s, settings); hint = rivalError ?? "Defeat is permanent: the game closes their businesses."; }
+            else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = "Max satisfaction is temporary; the game recalculates it."; }
+            else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools work only in your own vehicle. Speeds above 2x are experimental."; }
+            else if (currentTab == TabPlayer) { tabBlock = PlayerTools.BlockReason(s, settings); hint = "Refills are checked by reading the value back."; }
             else if (currentTab == TabQuest)
             {
-                string qBlock = settings == null ? "Starting..." : QuestTools.BlockReason(s, settings);
-                string why = qBlock ?? QuestTools.TeleportBlock(TeleportTarget.QuestTarget) ?? QuestTools.QuestBlock();
-                blockText.text = qBlock != null ? "Quest tools unavailable: " + qBlock : why ?? "";
+                tabBlock = QuestTools.BlockReason(s, settings);
+                hint = QuestTools.TeleportBlock(TeleportTarget.QuestTarget) ?? QuestTools.QuestBlock() ?? "Set a GPS destination in the game before using the GPS teleport.";
             }
-            else if (currentTab == TabStaff)
-            {
-                string stBlock = settings == null ? "Starting..." : EmployeeTools.BlockReason(s, settings);
-                blockText.text = stBlock == null ? "Read-only list. Max satisfaction is temporary (the game recalculates it)." : "Staff tools unavailable: " + stBlock;
-            }
-            else if (currentTab == TabWorld)
-            {
-                string wBlock = settings == null ? "Starting..." : WorldTools.BlockReason(s, settings);
-                blockText.text = wBlock == null ? "" : "World tools unavailable: " + wBlock;
-            }
-            else if (currentTab == TabPlayer)
-            {
-                string pBlock = settings == null ? "Starting..." : PlayerTools.BlockReason(s, settings);
-                blockText.text = pBlock == null ? "" : "Player tools unavailable: " + pBlock;
-            }
-            else
-            {
-                string block = Block(s);
-                blockText.text = block == null
-                    ? "Limits: $10M per change, balance $0-$100M. Logged by the game as 'Cheat' transactions."
-                    : "Changes unavailable: " + block;
-            }
+            else { tabBlock = Block(s); hint = "Limits: $10M per change, balance $0-$100M."; }
+            blockText.text = tabBlock != null ? "<color=#ffb04a>Unavailable: " + tabBlock + "</color>" : hint;
 
             infoText.text = s.Loaded
-                ? "Day " + s.Day + "  " + s.Hour.ToString("00") + ":" + ((int)s.Minute).ToString("00") +
-                  "    Net worth $" + s.NetWorth.ToString("N0") + "\nEnergy " + s.Energy.ToString("0.#") +
-                  "    Hunger " + s.Hunger.ToString("0.#") + "    Happiness " + s.Happiness.ToString("0.#")
-                : "";
+                ? "$" + s.Money.ToString("N0") + "   |   Day " + s.Day + "  " + s.Hour.ToString("00") + ":" + ((int)s.Minute).ToString("00") +
+                  "   |   Energy " + s.Energy.ToString("0") + "  Hunger " + s.Hunger.ToString("0") + "  Happy " + s.Happiness.ToString("0")
+                : s.NotLoadedReason;
 
             foreach (var kv in gated)
                 if (kv.Key != null) kv.Key.interactable = kv.Value(s);

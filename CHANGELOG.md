@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0-alpha.8] — 2026-11-20 — UI cleanup
+- **Section headers** (small gold caps with a thin rule) on every page: e.g. Money → Amount / Change; World → Your vehicle / Time / Game; Quest → Current quest / Teleport / Complete.
+- **Coloured status bar**: green = verified, amber = waiting for Confirm / in progress, red = failed or refused, grey = info.
+- **One short hint line** per tab replaces the long help paragraphs; when a tab's tools are unavailable the reason shows there in amber.
+- **One-line footer**: balance, day/time, energy, hunger, happiness.
+- World: Repair / Refuel / Clean on one row with a one-line vehicle readout; Save game on its own row. Money: Confirm / Cancel / Undo on one row. Title and version split.
+- No behaviour changes. **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/13-ui-cleanup/13-UAT.md`.
+
 ## [0.7.0-alpha.7] — 2026-11-20 — Milestone G: Clean vehicle & personal goals
 - **Clean vehicle** (World tab, own vehicle only, shares a row with Save game): the game's own `VehicleController.SetDirtiness(0)`, readback `VehicleInstance.dirtiness`; refused for vehicle types with `canGetDirty = false`. Vehicle line now also shows dirt.
 - **Complete all personal goals** (Quest tab, two-press confirm): the game's `PersonalGoals.Command_CompleteAll()`; button shows done/total from `GameManager.personalGoals` (`GenericPersonalGoal.IsCompleted`), readback = completed count increased. The game grants the goals' rewards and may unlock matching achievements; cannot be undone.

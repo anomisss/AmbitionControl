@@ -18,6 +18,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [ ] **Phase 10: Rivals** - Rival list, guarded defeat / defeat all
 - [ ] **Phase 11: Quests & teleport** - Teleport to quest target / GPS, guarded complete objective / quest
 - [ ] **Phase 12: Clean vehicle & personal goals** - Clean own vehicle, guarded complete all personal goals
+- [ ] **Phase 13: UI cleanup** - Section headers, coloured status bar, short hints, compact footer
 - [ ] **Phase 7+: Trainer expansion** - Game-variable controls, vehicles/time, business, employees, rivals (see docs/FEATURE_GAP_MATRIX.md)
 
 ## Phase Details
