@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 2 — Menu Input Isolation
+**Current focus:** Phase 3 — Money Feature Verification
 
 ## Current Position
 
-Phase: 2 of 5 (Menu Input Isolation)
-Plan: 2 of 2 in current phase
-Status: Checkpoint — 0.5.0-alpha.1 phone app (plan 02-02) installed (DLL c1441af5…), awaiting owner in-game test; alpha.3 overlay blocking also untested
-Last activity: 2026-11-19 — InputBlocker (Harmony prefixes on InputActionHelper) implemented and compiled
+Phase: 3 of 5 (Money Feature Verification)
+Plan: 0 of TBD in current phase
+Status: Ready to plan — Phase 2 complete (phone app runtime verified: Add $1.11M verified)
+Last activity: 2026-11-19 — Phone app verified in-game (02-02-SUMMARY.md)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Accumulated Context
 
@@ -41,5 +41,5 @@ Progress: [██░░░░░░░░] 20%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 2 plan 02-01 tasks 1-3 done; task 4 (owner in-game test) pending
-Resume file: .planning/phases/02-menu-input-isolation/02-02-PLAN.md
+Stopped at: Phase 2 complete; next is Phase 3 (Remove, Set, Undo, persistence, save switching)
+Resume file: .planning/ROADMAP.md (Phase 3)

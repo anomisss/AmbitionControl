@@ -16,8 +16,8 @@
 - [x] **MENU-01**: F10 (rebindable) toggles the menu at main menu and in a loaded save
 - [x] **MENU-02**: Menu can be dragged by its title bar; position persists
 - [x] **MENU-03**: Menu buttons respond to clicks in-game
-- [ ] **MENU-04**: Clicks and scroll over the open menu do not act on the game world (no walking, camera zoom, world selection)
-- [ ] **MENU-05**: Game controls behave normally when the cursor is outside the menu or the menu is closed
+- [x] **MENU-04**: Clicks and scroll over the open menu do not act on the game world (no walking, camera zoom, world selection)
+- [x] **MENU-05**: Game controls behave normally when the cursor is outside the menu or the menu is closed
 
 ### Money (MONEY)
 
@@ -60,7 +60,7 @@ Deferred; each needs API verification on build 3233 first.
 | LOAD-01..03 | Phase 1 | Complete |
 | MENU-01..03 | Phase 1 | Complete |
 | MONEY-01 | Phase 1 | Complete |
-| MENU-04, MENU-05 | Phase 2 | In progress |
+| MENU-04, MENU-05 | Phase 2 | Complete (phone app) |
 | MONEY-02..06, STAT-01 | Phase 3 | Pending |
 | FEAT-01..03 | Phase 4 | Pending |
 | REL-01, REL-02 | Phase 5 | Pending |

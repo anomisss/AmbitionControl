@@ -19,7 +19,7 @@ Money changes made from the menu apply through the game's own transaction path, 
 
 ### Active
 
-- [ ] Clicks/scroll on the menu do not act on the game world behind it
+- ✓ Phone app: menu inside the in-game smartphone, clicks stay in the UI, Add verified ($1.11M) — v0.5.0-alpha.1
 - [ ] Remove, Set and Undo verified in-game
 - [ ] Money changes persist across save → quit → reload
 - [ ] State resets correctly when switching saves / returning to main menu
@@ -60,7 +60,8 @@ Money changes made from the menu apply through the game's own transaction path, 
 | Amount entry by buttons, no text field | IMGUI can't stop keystrokes reaching game hotkeys | ✓ Good |
 | Fixed-rect `GUI.*` only, no GUILayout/Toolbar/Window | IL2CPP stripping | ✓ Good |
 | Menu clicks from Input System, IMGUI only draws | IMGUI clicks failed over game world in-game | ✓ Good |
-| Click-through blocking via Harmony prefixes on `InputActionHelper` | Game centralizes mouse reads there | — Pending (built, untested) |
+| Click-through blocking via Harmony prefixes on `InputActionHelper` | Game centralizes mouse reads there | ⚠️ Failed in-game (likely inlining) |
+| Menu as an in-game smartphone app built from game uGUI | Game UI owns clicks; matches game look | ✓ Good (verified 2026-11-19) |
 
 ---
 *Last updated: 2026-11-19 after GSD initialization (brownfield, inline)*

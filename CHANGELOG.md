@@ -5,7 +5,7 @@
 - Panel: balance, amount picker, Stage Add/Remove/Set, preview, Confirm/Cancel, Undo, status, limits/blocked reason, day/time and needs readout. Uses the same readback-verified `MoneyService` as the overlay.
 - Opening another phone app hides the panel (it watches the app screens; no extra hooks). Injection retries every 2 s while a save is loaded; disabled after 5 errors (overlay unaffected). New preference `PhoneApp` (default true).
 - The F10 overlay remains as a fallback.
-- **Status:** Build verified; tests 12/12. **Not runtime verified.**
+- **Status:** **Runtime verified (2026-11-19, build 3233):** app injected into the phone, opened, buttons respond, Add $1,110,000 verified by readback (1,595,598.38 -> 2,705,598.50); owner reports no click-through. Undo/Remove/Set and app switching not yet exercised.
 
 ## [0.4.0-alpha.3] — 2026-11-19 — Click-through: action-level blocking + diagnostics
 - In-game (alpha.2): all 10 `InputActionHelper` patches applied, but clicks over the menu still reached the world. Hypothesis: helper calls inlined by IL2CPP and/or actions read directly.

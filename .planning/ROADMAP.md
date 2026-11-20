@@ -7,7 +7,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 ## Phases
 
 - [x] **Phase 1: MelonLoader Foundation** - Buildable mod, F10 menu, build guard, verified money Add
-- [ ] **Phase 2: Menu Input Isolation** - Menu clicks/scroll no longer reach the game world
+- [x] **Phase 2: Menu Input Isolation** - Menu clicks/scroll no longer reach the game world
 - [ ] **Phase 3: Money Feature Verification** - Remove, Set, Undo, persistence and save switching verified in-game
 - [ ] **Phase 4: Expanded Features** - Player needs and time controls, each behind verified APIs
 - [ ] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
@@ -36,8 +36,8 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Overlay click-through blocking (helper patches failed in-game; action disabling untested)
-- [ ] 02-02: Ambition Control as an in-game smartphone app (uGUI)
+- [~] 02-01: Overlay click-through blocking — superseded by 02-02 (helper patches failed in-game)
+- [x] 02-02: Ambition Control as an in-game smartphone app (uGUI) — runtime verified
 
 ### Phase 3: Money Feature Verification
 **Goal**: Every money action and its safety rules are proven in-game, including persistence
@@ -74,7 +74,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. MelonLoader Foundation | done | Complete | 2026-11-19 |
-| 2. Menu Input Isolation | 0/1 | In progress | - |
+| 2. Menu Input Isolation | 1/1 (02-01 superseded) | Complete | 2026-11-19 |
 | 3. Money Feature Verification | 0/TBD | Not started | - |
 | 4. Expanded Features | 0/TBD | Not started | - |
 | 5. Release Packaging | 0/TBD | Not started | - |
