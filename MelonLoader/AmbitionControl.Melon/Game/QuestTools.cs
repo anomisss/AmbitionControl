@@ -113,6 +113,40 @@ namespace AmbitionControl.Game
                 () => GameManager.Command_TeleportPlayerToAddress(address.streetNumber, address.streetName));
         }
 
+        internal const string WaypointName = "AmbitionControl";
+
+        /// <summary>Remember the current spot as the game's own debug waypoint (GameManager.Command_AddWaypoint, stored in PlayerPrefs).</summary>
+        internal static void MarkSpot(GameSnapshot snap, Settings settings)
+        {
+            ClearPending();
+            string block = BlockReason(snap, settings) ?? TeleportBlock(TeleportTarget.Address);
+            if (block != null) { Status = "Spot not marked: " + block; return; }
+            try
+            {
+                try { GameManager.Command_RemoveWaypoint(WaypointName); } catch { /* none yet */ }
+                GameManager.Command_AddWaypoint(WaypointName);
+                spotMarked = true;
+                Status = "Spot marked at " + PlayerHelper.GetPosition() + ". Use Return to spot to come back.";
+                AmbitionControlMod.Log.Msg("Waypoint '" + WaypointName + "' set at " + PlayerHelper.GetPosition());
+            }
+            catch (Exception ex)
+            {
+                Status = "Marking the spot failed: " + ex.GetBaseException().Message;
+                AmbitionControlMod.Log.Error(Status);
+            }
+        }
+
+        private static bool spotMarked;
+        internal static bool SpotMarked => spotMarked;
+
+        internal static void ReturnToSpot(GameSnapshot snap, Settings settings)
+        {
+            ClearPending();
+            string block = BlockReason(snap, settings) ?? TeleportBlock(TeleportTarget.Address);
+            if (block != null) { Status = "Not teleported: " + block; return; }
+            StartTeleport(TeleportTarget.Address, "marked spot", () => GameManager.Command_TeleportPlayerToWaypoint(WaypointName));
+        }
+
         private static void StartTeleport(TeleportTarget kind, string label, Action call)
         {
             try

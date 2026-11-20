@@ -57,6 +57,8 @@ namespace AmbitionControl.UI
         private readonly TextMeshProUGUI[] skipLabels = new TextMeshProUGUI[TimeSkip.Hours.Length];
         private TextMeshProUGUI wageLabel, skillLabel, levelLabel;
         private TextMeshProUGUI bizSummary;
+        private TextMeshProUGUI ageText, ageDownLabel, ageUpLabel;
+        private string lastAgeStatus;
         private readonly TextMeshProUGUI[] bizRowLabels = new TextMeshProUGUI[BusinessTools.PageSize];
         private List<BizRow> bizRows = new List<BizRow>();
         private string bizError;
@@ -501,6 +503,14 @@ namespace AmbitionControl.UI
                 () => PlayerTools.ToggleInvincibility(lastSnap, settings), playerOk);
             holdHungerLabel = MakeButton(ppage, "Hold hunger full", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
                 () => PlayerTools.SetHoldHunger(!PlayerTools.HoldHunger, lastSnap, settings), playerOk);
+            py += 62f;
+            py = Header(ppage, "Age", x0, py, full);
+            ageText = Text(ppage, "", x0, py, full, 26f, 18f, TextDim, TextAlignmentOptions.Left);
+            py += 30f;
+            ageDownLabel = MakeButton(ppage, "Younger 1 year", x0, py, hw, 50f, BtnNeutral,
+                () => AgeTools.ChangePressed(-1, lastSnap, settings), playerOk);
+            ageUpLabel = MakeButton(ppage, "Older 1 year", x0 + hw + 8f, py, hw, 50f, BtnNeutral,
+                () => AgeTools.ChangePressed(1, lastSnap, settings), playerOk);
 
             // Economy page.
             float ey = contentTop;
@@ -634,6 +644,12 @@ namespace AmbitionControl.UI
             MakeButton(qpage, "To GPS destination", x0 + hw + 8f, qy, hw, 50f, BtnNeutral,
                 () => QuestTools.Teleport(TeleportTarget.GpsDestination, lastSnap, settings),
                 s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.GpsDestination) == null);
+            qy += 58f;
+            MakeButton(qpage, "Mark this spot", x0, qy, hw, 50f, BtnNeutral,
+                () => QuestTools.MarkSpot(lastSnap, settings), s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.Address) == null);
+            MakeButton(qpage, "Return to spot", x0 + hw + 8f, qy, hw, 50f, BtnNeutral,
+                () => QuestTools.ReturnToSpot(lastSnap, settings),
+                s => questOk(s) && QuestTools.SpotMarked && QuestTools.TeleportBlock(TeleportTarget.Address) == null);
             qy += 62f;
             qy = Header(qpage, "Complete (cannot be undone)", x0, qy, full);
             questObjLabel = MakeButton(qpage, "Complete objective", x0, qy, hw, 50f, BtnStop,
@@ -706,6 +722,7 @@ namespace AmbitionControl.UI
             RivalTools.ClearPending();
             QuestTools.ClearPending();
             TimeSkip.ClearPending();
+            AgeTools.ClearPending();
             HiringTools.ClearPending();
             nextRivalRead = 0f;
             nextStaffRead = 0f;
@@ -920,6 +937,7 @@ namespace AmbitionControl.UI
             if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
             if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
             if (QuestTools.Status != lastQuestStatus) { lastQuestStatus = QuestTools.Status; shownStatus = QuestTools.Status; }
+            if (AgeTools.Status != lastAgeStatus) { lastAgeStatus = AgeTools.Status; shownStatus = AgeTools.Status; }
             if (TimeSkip.Status != lastSkipStatus) { lastSkipStatus = TimeSkip.Status; shownStatus = TimeSkip.Status; }
             if (HiringTools.Status != lastHireStatus) { lastHireStatus = HiringTools.Status; shownStatus = HiringTools.Status; }
             statusText.text = shownStatus ?? "Ready.";
@@ -969,6 +987,12 @@ namespace AmbitionControl.UI
                     !s.VehicleOwned ? "Not your vehicle; vehicle tools disabled." :
                     "Fuel " + s.VehicleFuel.ToString("0") + "/" + s.VehicleMaxFuel.ToString("0") +
                     "   Damage " + s.VehicleDamage.ToString("0.##") + "   Dirt " + s.VehicleDirt.ToString("0.##");
+            if (currentTab == TabPlayer && ageText != null)
+            {
+                ageText.text = s.Loaded ? AgeTools.AgeText() : "";
+                ageDownLabel.text = AgeTools.PendingDelta == -1 ? "Confirm younger" : "Younger 1 year";
+                ageUpLabel.text = AgeTools.PendingDelta == 1 ? "Confirm older" : "Older 1 year";
+            }
             if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
             if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");
 

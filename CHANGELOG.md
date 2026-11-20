@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.14] — 2026-11-20 — Milestone J: age and marked spot
+- **Age** (Player tab): shows age in years (`CharacterData.ageInDays` ÷ `gameVariables.daysPerYear`); **Younger 1 year / Older 1 year** with two-press confirm via the game's `GameManager.Command_ChangeAge`. The command's unit is undocumented, so the mod applies 1, measures `ageInDays`, tops up to a full year only if it moved exactly 1 day, and stops if it moved anything unexpected. Bounded: never below `AppearanceAgeHelper.MinAge`, never within a year of `PlayerHelper.PermanentZombieWalkingAge` / `DeathAge`. Readback in days.
+- **Mark this spot / Return to spot** (Quest tab → Teleport): the game's own debug waypoint (`Command_AddWaypoint` / `Command_TeleportPlayerToWaypoint`, name `AmbitionControl`, stored by the game in PlayerPrefs). Return is verified by movement; enabled after marking a spot this session.
+- Investigated, not added: tow vehicle and forcing the IRS tax payment — no build-3233 method found (gap matrix: Unsupported).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/17-age-spot/17-UAT.md`.
+
 ## [0.7.0-alpha.13] — 2026-11-20 — Readable addresses and times
 - Fix: addresses and times showed as `Il2Cpp.Address` / `Il2CppBigAmbitions.DayNightCycle.Timestamp` in some status and log lines (Il2Cpp objects concatenated into strings print their type name). New `GameText` helper: "45 Third Street", "Day 11 01:12"; used by the Business list, teleport-to-business and time skip.
 - alpha.12 runtime results (16-UAT): business list PASS, Go teleport PASS (2/2), Skip 1h PASS.

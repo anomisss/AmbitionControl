@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.13", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.14", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -27,7 +27,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.13";
+        internal const string VersionLabel = "v0.7.0-alpha.14";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -112,6 +112,7 @@ namespace AmbitionControl
             EmployeeTools.ResetSession();
             RivalTools.ClearPending();
             TimeSkip.ResetScene();
+            AgeTools.ClearPending();
             BusinessTools.ResetSession();
             HiringTools.ClearPending();
             QuestTools.ResetSession();

@@ -55,11 +55,13 @@
 - [ ] **QUEST-02**: Complete current objective / quest (game commands, two-press confirm, readback)
 - [ ] **VEH-03**: Clean own vehicle (game setter, dirtiness readback)
 - [ ] **GOAL-01**: Complete all personal goals (game command, two-press confirm, count readback)
-- [ ] **TIME-01**: Skip hours via the game time machine (two-press, end-time readback)
+- [x] **TIME-01**: Skip hours via the game time machine (two-press, end-time readback)
 - [ ] **EMP-03**: Bulk wages to market rate (payroll preview, two-press, readback)
 - [x] **EMP-04**: Generate candidate by skill and level (count readback)
-- [ ] **BIZ-01**: List rented/owned buildings with customer satisfaction
-- [ ] **BIZ-02**: Teleport to a business (address command, movement readback)
+- [x] **BIZ-01**: List rented/owned buildings with customer satisfaction
+- [x] **BIZ-02**: Teleport to a business (address command, movement readback)
+- [ ] **AGE-01**: Change age ±1 year (game command, bounded, two-press, days readback)
+- [ ] **TP-02**: Mark a spot and return to it (game waypoint, movement readback)
 
 Deferred; each needs API verification on build 3233 first.
 
