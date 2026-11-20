@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0-alpha.5] — 2026-11-20 — Milestone F (part 1): Rivals
+- New **Rivals** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Options). Selected tab is now highlighted in gold instead of bracketed, so seven tabs fit.
+- **Rival list**: one row per neighbourhood rival (`RivalsHelper.GetSpecialRivalByNeighborhood`), with name, area, state from the save's `specialRivalStates` (active / not active / defeated) and weekly income.
+- **Defeat rival** via the game's own `RivalTimeline.DefeatRival(Neighbourhood, showMessage)`, verified with `RivalsHelper.IsRivalDefeated`. **Permanent** — the game closes the rival's businesses and sells their buildings — so it needs a second press ("Confirm") after a warning, and only rivals the game marks **active** in this save can be defeated. **Defeat all active rivals** works the same way and lists who is affected first.
+- New preference `RivalToolsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/10-rivals/10-UAT.md` (also retests untested World items).
+
 ## [0.7.0-alpha.4] — 2026-11-19 — Milestone E (part 1): Employees
 - New **Staff** tab (tabs: Money | Player | Economy | World | Staff | Options).
 - **Read-only employee list** from `GameInstance.EmployeeInstances` (hired staff only; candidates excluded): name via the game's `GetEmployeeNameWithInfo()`, hourly wage, satisfaction, absent/unassigned flags; summary with count, average satisfaction and total wages per hour; 7 per page.

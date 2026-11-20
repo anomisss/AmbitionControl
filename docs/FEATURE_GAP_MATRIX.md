@@ -59,8 +59,8 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Employees | Salary multiplier | Economy tab cycle (preset values) | Yes | GV `employeeHourlySalaryMultiplier` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Employees | Set wages (bulk / individual) | — | Yes | `EmployeeInstance.hourlyWage` (float, direct) | M | 3 | Investigate | — |
 | Employees | Generate candidates by skill | — | Yes | Cmd `RecruitmentHelper.Command_GenerateCandidate(SkillName, int, …)` | M | 3 | Investigate | — |
-| Rivals | View rivals | — | Yes | `UI.Smartphone.Apps.Rivals.RivalLeaderboardData.isDefeated`; `GameInstance` rival ids | L | 3 | Investigate | — |
-| Rivals | Defeat rival (per neighbourhood) / all | — | Yes | `BigAmbitions.Rivals.RivalTimeline.DefeatRival(Neighbourhood, bool)` | H | 3 | Investigate | — |
+| Rivals | View rivals | Rivals tab (per neighbourhood) | Yes | `RivalsHelper.GetSpecialRivalByNeighborhood(Neighbourhood)` → `SpecialRival.rivalData {id, rivalName, WeeklyIncome}`; `GameInstance.specialRivalStates {rivalId, isActive, isDefeated}` | L | 3 | Implemented v0.7.0-alpha.5, awaiting UAT | — |
+| Rivals | Defeat rival (per neighbourhood) / all | Rivals tab, two-press confirm, active rivals only | Yes | `RivalTimeline.DefeatRival(Neighbourhood, bool)`; readback `RivalsHelper.IsRivalDefeated(string)`; permanent (`OnRivalDefeat` closes businesses, sells real estate) | H | 3 | Implemented v0.7.0-alpha.5, awaiting UAT | — |
 | Rivals | Rival difficulty | Economy tab cycle (preset values) | Yes | GV `rivalsDifficultyMultiplier` (float) | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Rivals | Difficulty presets | Economy tab Easy/Normal/Hard (game DifficultySetting assets, two-press confirm) | Yes (Easy/Normal/Hard/Brutal) | `DifficultySetting.GetDifficultySettings(Difficulty)`; enum `Difficulty` = Custom, Easy, Normal, Hard — **no Brutal in build 3233** | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT (Brutal: Unsupported) | — |
 

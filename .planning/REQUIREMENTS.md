@@ -49,6 +49,8 @@
 - [ ] **WORLD-02**: Pause/resume, game speed (experimental), traffic, save game
 - [x] **STAFF-01**: Read-only employee list (paged, summary)
 - [x] **STAFF-02**: Temporary max satisfaction with affected-count preview and readback
+- [ ] **RIVAL-01**: Rival list per neighbourhood (name, state, weekly income)
+- [ ] **RIVAL-02**: Defeat rival / all active rivals (game method, two-press confirm, readback)
 
 Deferred; each needs API verification on build 3233 first.
 

@@ -37,8 +37,14 @@ namespace AmbitionControl.UI
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabOptions = 5;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Rivals", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabRivals = 5, TabOptions = 6;
+        private readonly TextMeshProUGUI[] rivalRowLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
+        private readonly TextMeshProUGUI[] rivalBtnLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
+        private TextMeshProUGUI rivalAllLabel;
+        private List<RivalRow> rivalRows = new List<RivalRow>();
+        private string rivalError, lastRivalStatus;
+        private float nextRivalRead;
         private TextMeshProUGUI staffSummary, staffList, staffMaxLabel;
         private int staffPage;
         private float nextStaffRead;
@@ -252,6 +258,7 @@ namespace AmbitionControl.UI
         private static readonly Color BtnStop = new Color(0.55f, 0.20f, 0.20f, 1f);
         private static readonly Color TextMain = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TextDim = new Color(0.70f, 0.72f, 0.76f, 1f);
+        private static readonly Color TabActive = new Color(1f, 0.80f, 0.30f, 1f);
 
         private void BuildPanel(Transform container)
         {
@@ -286,6 +293,7 @@ namespace AmbitionControl.UI
                 pages[i] = Page(TabNames[i].Replace(" ", "") + "Page");
                 tabLabels[i] = MakeButton(panel.transform, TabNames[i], x0 + i * (tabW + 8f), y, tabW, 46f, BtnNeutral,
                     () => ShowTab(index), null);
+                tabLabels[i].fontSize = 17f;
             }
             y += 58f;
             float contentTop = y;
@@ -409,6 +417,23 @@ namespace AmbitionControl.UI
             staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnNeutral,
                 () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
 
+            // Rivals page: one row per neighbourhood rival with a guarded Defeat button, then Defeat all.
+            float ry = contentTop;
+            Transform rpage = pages[TabRivals].transform;
+            Func<GameSnapshot, bool> rivalsOk = s => settings != null && RivalTools.BlockReason(s, settings) == null;
+            for (int i = 0; i < RivalTools.Areas.Length; i++)
+            {
+                int index = i;
+                rivalRowLabels[i] = Text(rpage, RivalTools.AreaName(RivalTools.Areas[i]), x0, ry, full - 168f, 44f, 18f, TextMain, TextAlignmentOptions.Left);
+                rivalBtnLabels[i] = MakeButton(rpage, "Defeat", x0 + full - 160f, ry, 160f, 44f, BtnStop,
+                    () => { RivalTools.DefeatPressed(RivalTools.Areas[index], lastSnap, settings); nextRivalRead = 0f; },
+                    s => rivalsOk(s) && RivalEligible(index));
+                ry += 50f;
+            }
+            rivalAllLabel = MakeButton(rpage, "Defeat all active rivals", x0, ry + 4f, full, 46f, BtnStop,
+                () => { RivalTools.DefeatAllPressed(lastSnap, settings); nextRivalRead = 0f; },
+                s => rivalsOk(s) && rivalRows.Any(r => r.Met && r.Active && !r.Defeated));
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
@@ -452,7 +477,7 @@ namespace AmbitionControl.UI
             settings == null ||
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
              tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled :
-             tab == TabStaff ? settings.EmployeeToolsEnabled : true);
+             tab == TabStaff ? settings.EmployeeToolsEnabled : tab == TabRivals ? settings.RivalToolsEnabled : true);
 
         private void ShowTab(int tab)
         {
@@ -460,11 +485,14 @@ namespace AmbitionControl.UI
             GameEconomy.ClearPending();
             WorldTools.ClearPending();
             EmployeeTools.ClearPending();
+            RivalTools.ClearPending();
+            nextRivalRead = 0f;
             nextStaffRead = 0f;
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].SetActive(i == currentTab);
-                tabLabels[i].text = i == currentTab ? "[ " + TabNames[i] + " ]" : TabNames[i];
+                tabLabels[i].text = TabNames[i];
+                tabLabels[i].color = i == currentTab ? TabActive : TextMain;
             }
             nextRefresh = 0f;
         }
@@ -509,6 +537,35 @@ namespace AmbitionControl.UI
                 staffList.text = sb.ToString();
             }
             if (staffMaxLabel != null) staffMaxLabel.text = EmployeeTools.ConfirmPending ? "Confirm" : "Max satisfaction";
+        }
+
+        private bool RivalEligible(int index)
+        {
+            RivalRow r = rivalRows.FirstOrDefault(x => x.Neighbourhood == RivalTools.Areas[index]);
+            return r != null && r.Met && r.Active && !r.Defeated;
+        }
+
+        /// <summary>Re-read rivals at most once per second while the Rivals tab is open.</summary>
+        private void RefreshRivals(GameSnapshot s)
+        {
+            if (Time.unscaledTime >= nextRivalRead)
+            {
+                nextRivalRead = Time.unscaledTime + 1f;
+                rivalRows = s.Loaded ? RivalTools.ReadRows(s, out rivalError) : new List<RivalRow>();
+            }
+            for (int i = 0; i < RivalTools.Areas.Length; i++)
+            {
+                Il2CppBigAmbitions.Neighborhoods.Neighbourhood area = RivalTools.Areas[i];
+                RivalRow r = rivalRows.FirstOrDefault(x => x.Neighbourhood == area);
+                string state = r == null ? "no rival" : r.Defeated ? "defeated" : !r.Met || !r.Active ? "not active" : "active";
+                rivalRowLabels[i].text = r == null
+                    ? RivalTools.AreaName(area) + ": no rival"
+                    : r.Name + "  (" + RivalTools.AreaName(area) + ")  " + state +
+                      (r.Met && !r.Defeated ? "  $" + r.WeeklyIncome.ToString("N0") + "/wk" : "");
+                rivalBtnLabels[i].text = r != null && r.Defeated ? "Defeated" :
+                    RivalTools.PendingArea == area ? "Confirm" : "Defeat";
+            }
+            rivalAllLabel.text = RivalTools.PendingAll ? "Confirm: defeat ALL active rivals" : "Defeat all active rivals";
         }
 
         private string Block(GameSnapshot s) =>
@@ -593,6 +650,7 @@ namespace AmbitionControl.UI
             if (GameEconomy.Status != lastEconStatus) { lastEconStatus = GameEconomy.Status; shownStatus = GameEconomy.Status; }
             if (WorldTools.Status != lastWorldStatus) { lastWorldStatus = WorldTools.Status; shownStatus = WorldTools.Status; }
             if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
+            if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
@@ -615,6 +673,7 @@ namespace AmbitionControl.UI
                         d + (s.OptionsKnown && s.CurrentDifficulty == d ? " (current)" : " preset");
                 }
             if (currentTab == TabStaff && staffList != null) RefreshStaff(s);
+            if (currentTab == TabRivals && rivalAllLabel != null) RefreshRivals(s);
             if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
@@ -638,6 +697,11 @@ namespace AmbitionControl.UI
                 blockText.text = eBlock == null
                     ? "Values cycle through the game's own Easy/Normal/Hard preset values. Stored in your save when the game saves."
                     : "Economy controls unavailable: " + eBlock;
+            }
+            else if (currentTab == TabRivals)
+            {
+                string rBlock = settings == null ? "Starting..." : RivalTools.BlockReason(s, settings);
+                blockText.text = rBlock == null ? (rivalError ?? "Defeating a rival is permanent (the game closes their businesses). Each needs Confirm.") : "Rival tools unavailable: " + rBlock;
             }
             else if (currentTab == TabStaff)
             {

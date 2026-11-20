@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 9 — Employees (part 1)
+**Current focus:** Phase 10 — Rivals (+ World retest)
 
 ## Current Position
 
-Phase: 9 (Employees, part 1)
-Plan: Phase 9 implemented
-Status: Phase 9 verified in-game (09-UAT: list + max satisfaction 5/5). Phase 8 UAT partial (traffic OFF verified); owner chose to continue
-Last activity: 2026-11-19 — Staff tab: employee list, temporary max satisfaction
+Phase: 10 (Rivals)
+Plan: Phase 10 implemented
+Status: v0.7.0-alpha.5 installed (DLL 106bc9ac…); awaiting owner UAT (10-UAT.md, includes World retest)
+Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
 
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 9 complete
-Resume file: .planning/phases/09-employees/09-UAT.md
+Stopped at: Phase 10 awaiting in-game test
+Resume file: .planning/phases/10-rivals/10-UAT.md
