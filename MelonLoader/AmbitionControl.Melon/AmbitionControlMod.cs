@@ -39,6 +39,7 @@ namespace AmbitionControl
         private Key toggleKey = Key.F10;
         private bool loggedBuild;
         private bool dragBroken;
+        private string lastStateSummary;
         private string lastUpdateError;
 
         public override void OnInitializeMelon()
@@ -119,6 +120,18 @@ namespace AmbitionControl
                         money.ResetForSessionChange();
                     snapshot = fresh;
                     nextSnapshot = Time.unscaledTime + SnapshotInterval;
+                }
+
+                // Log state transitions (not every frame) so in-game reports can be diagnosed from the log.
+                string state = snapshot.Loaded
+                    ? "save loaded, balance " + snapshot.Money.ToString("N2")
+                    : "not loaded: " + snapshot.NotLoadedReason;
+                string block = money.WriteBlockReason(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);
+                string summary = (snapshot.Loaded ? "save loaded" : state) + " | writes " + (block == null ? "allowed" : "blocked: " + block);
+                if (menu.Visible && summary != lastStateSummary)
+                {
+                    lastStateSummary = summary;
+                    Log.Msg("State: " + summary);
                 }
 
                 money.Tick(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);

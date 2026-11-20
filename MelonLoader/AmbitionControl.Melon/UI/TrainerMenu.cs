@@ -97,6 +97,10 @@ namespace AmbitionControl.UI
             float gy = Screen.height - p.y; // Input System is bottom-left origin; IMGUI is top-left
             bool inTitle = gx >= X && gx <= X + W - 32f && gy >= Y && gy <= Y + 26f;
 
+            if (mouse.leftButton.wasPressedThisFrame && gx >= X && gx <= X + W && gy >= Y && gy <= Y + H)
+                AmbitionControlMod.Log.Msg("Mouse down inside menu at (" + (int)(gx - X) + "," + (int)(gy - Y) +
+                                           ") tab=" + Tabs[tab]);
+
             if (mouse.leftButton.wasPressedThisFrame && inTitle)
             {
                 dragging = true;
