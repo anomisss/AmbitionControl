@@ -39,9 +39,9 @@
 
 ## v2 Requirements (trainer expansion — see docs/FEATURE_GAP_MATRIX.md)
 
-- [ ] **PLAYER-01**: Refill energy, hunger, happiness, all (game setters, readback)
-- [ ] **PLAYER-02**: Invincibility toggle (game command, readback)
-- [ ] **PLAYER-03**: Hold hunger full (experimental, session-only)
+- [x] **PLAYER-01**: Refill energy, hunger, happiness, all (game setters, readback)
+- [~] **PLAYER-02**: Invincibility toggle (game command, readback) — ON verified; OFF not yet run
+- [x] **PLAYER-03**: Hold hunger full (experimental, session-only)
 
 Deferred; each needs API verification on build 3233 first.
 

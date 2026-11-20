@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 6 (Player Utilities)
 Plan: Milestone B implemented
-Status: Checkpoint — v0.7.0-alpha.1 installed (DLL d421c4f1…); awaiting owner UAT (06-UAT.md)
-Last activity: 2026-11-19 — Gap matrix + Milestone B (player utilities)
+Status: Milestone B verified in-game (06-UAT: 7 pass, 1 partial, 1 not run). Next: game-variable controls (Phase 7)
+Last activity: 2026-11-19 — Milestone B UAT recorded
 
 Progress: [██████████] 100%
 
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Milestone B awaiting in-game test
-Resume file: .planning/phases/06-player-utilities/06-UAT.md
+Stopped at: Milestone B complete
+Resume file: docs/FEATURE_GAP_MATRIX.md

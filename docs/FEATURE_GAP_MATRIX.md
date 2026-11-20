@@ -18,14 +18,14 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Money | Export value multiplier | — | Yes | **No `exportMultiplier` in build 3233** (reference trainer itself throws `MissingMethodException: GameVariables.get_exportMultiplier` on this build) | — | — | Unsupported | owner's MelonLoader log 2026-11-16 |
 | Money | Bank interest multiplier / rate | — | No | GV `bankInterestMultiplier`, `bankInterestRate` | M | 3 | Missing | — |
 | Money | Force IRS tax payment | — | No | Cmd `TaxHelper.Command_IRSForcePayment(float)` | M | 4 | Investigate | — |
-| Player | Refill energy | — | Yes | `EnergyHelper.SetCurrentEnergy(float)`; Cmd `GameManager.Command_SetEnergy(float)` | L | 1 | Implemented (v0.7.0-alpha.1), awaiting UAT | — |
-| Player | Refill hunger | — | Yes | `EnergyHelper.SetCurrentHunger(float)`; Cmd `GameManager.Command_ChangeHunger(int)` | L | 1 | Implemented (v0.7.0-alpha.1), awaiting UAT | — |
-| Player | Refill happiness | — | Yes | static `HappinessHelper.Happiness` (get/set); Cmd `GameManager.Command_ChangeHappiness(int)` | L | 1 | Implemented (v0.7.0-alpha.1), awaiting UAT | — |
-| Player | Refill all needs | — | Yes | combination of the above | L | 1 | Implemented (v0.7.0-alpha.1), awaiting UAT | — |
+| Player | Refill energy | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | `EnergyHelper.SetCurrentEnergy(float)`; Cmd `GameManager.Command_SetEnergy(float)` | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
+| Player | Refill hunger | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | `EnergyHelper.SetCurrentHunger(float)`; Cmd `GameManager.Command_ChangeHunger(int)` | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
+| Player | Refill happiness | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | static `HappinessHelper.Happiness` (get/set); Cmd `GameManager.Command_ChangeHappiness(int)` | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
+| Player | Refill all needs | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | combination of the above | L | 1 | Verified | 06-UAT: refill log + HUD (owner) |
 | Player | Disable energy / happiness drain | GameOptions switches | Yes | GV `disableEnergy`, `disableHappiness` | M | — | Verified (OFF) | 04-01: log + owner saw drain stop |
 | Player | Disable aging | GameOptions switch | — | GV `disableAging` | M | — | Partial-verified | 04-02: write/readback only |
-| Player | Disable / freeze hunger | — | Yes | **No game option.** Only mechanism: periodic `SetCurrentHunger(100)` (session-only hold) | L | 1 | Implemented (experimental, v0.7.0-alpha.1), awaiting UAT | — |
-| Player | Invincibility | — | Yes | static `EnergyHelper._invincibility`; Cmd `EnergyHelper.Command_ToggleInvincibility()` | L | 1 | Implemented (v0.7.0-alpha.1), awaiting UAT | — |
+| Player | Disable / freeze hunger | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | **No game option.** Only mechanism: periodic `SetCurrentHunger(100)` (session-only hold) | L | 1 | Verified (experimental) | 06-UAT: owner saw hunger stay full |
+| Player | Invincibility | PlayerTools + Player tab (v0.7.0-alpha.1) | Yes | static `EnergyHelper._invincibility`; Cmd `EnergyHelper.Command_ToggleInvincibility()` | L | 1 | Partial-verified | 06-UAT: `Invincibility ON verified.` (log); OFF not run; effect not observed |
 | Player | Movement speed (walk/jog/run/scooter) | — | Yes | No player movement-speed member found (only editor/test scenes, `HandTruck.MoveSpeed`, `VehicleType.maxSpeed`) | — | — | Investigate | — |
 | Player | Set / change age | — | Yes | Cmd `GameManager.Command_ChangeAge(float)`; readback location not yet identified | H | 3 | Investigate | — |
 | Player | Complete personal goals | — | Yes | Cmd `PersonalGoals.Command_CompleteAll()` (+ `Command_Reset`) | H | 3 | Investigate | — |

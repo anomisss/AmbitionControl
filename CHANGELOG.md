@@ -7,7 +7,7 @@
 - **Hold hunger full** (experimental): build 3233 has no hunger option, so this tops hunger up (max once per second) while a save is loaded; session-only, turns itself off when the save changes.
 - Same safety gate as money/options (build 3233, save loaded, not saving). New preference `PlayerToolsEnabled` (default true).
 - New `docs/FEATURE_GAP_MATRIX.md`: full comparison with the reference trainer's advertised features and build-3233 API evidence (e.g. export multiplier does not exist in build 3233).
-- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — see `.planning/phases/06-player-utilities/06-UAT.md`.
+- **Status:** **Runtime verified (2026-11-19, build 3233):** refills logged `Energy 73.1 -> 100`, `Hunger 59.6 -> 100`, `Happiness 35 -> 100` and the HUD showed full (owner); Invincibility ON verified; Hold hunger kept hunger full (owner); tab switching works. Not run: Invincibility OFF, Hold-hunger reset on save change. Details: `.planning/phases/06-player-utilities/06-UAT.md`.
 
 > **Latest release:** [v0.6.0-alpha.2 (pre-release)](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2) — ZIP SHA-256 `67bb8831b6d136d54faeaa7d40e0abe872a4efefb688a9c144010642d0a075a3`.
 

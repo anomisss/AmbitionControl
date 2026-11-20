@@ -11,7 +11,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [x] **Phase 3: Money Feature Verification** - Remove, Set, Undo, persistence and save switching verified in-game
 - [ ] **Phase 4: Expanded Features** - Player needs and time controls, each behind verified APIs
 - [x] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
-- [ ] **Phase 6: Player Utilities (Milestone B)** - Need refills, invincibility, hunger hold; Player tab
+- [x] **Phase 6: Player Utilities (Milestone B)** - Need refills, invincibility, hunger hold; Player tab
 - [ ] **Phase 7+: Trainer expansion** - Game-variable controls, vehicles/time, business, employees, rivals (see docs/FEATURE_GAP_MATRIX.md)
 
 ## Phase Details
