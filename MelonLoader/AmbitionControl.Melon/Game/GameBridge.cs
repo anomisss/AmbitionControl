@@ -23,9 +23,8 @@ namespace AmbitionControl.Game
         internal int Hour;
         internal float Minute;
         internal bool Saving;
-        internal bool TogglesKnown;
-        internal bool EnergyDrainOff;
-        internal bool HappinessDrainOff;
+        internal bool OptionsKnown;
+        internal bool[] OptionDisabled = new bool[GameOptions.All.Length];
 
         internal bool SameSession(SaveIdentity id) =>
             Loaded && id != null && id.InstancePtr == InstancePtr &&
@@ -133,9 +132,9 @@ namespace AmbitionControl.Game
                 GameVariables gv = gi.gameVariables;
                 if (gv != null)
                 {
-                    snap.TogglesKnown = true;
-                    snap.EnergyDrainOff = gv.disableEnergy;
-                    snap.HappinessDrainOff = gv.disableHappiness;
+                    snap.OptionsKnown = true;
+                    foreach (GameOption o in GameOptions.All)
+                        snap.OptionDisabled[(int)o] = GameOptions.ReadDisabled(gv, o);
                 }
                 snap.Loaded = true;
             }

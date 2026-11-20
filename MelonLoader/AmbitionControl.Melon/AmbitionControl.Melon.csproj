@@ -15,7 +15,7 @@
     <AssemblyName>AmbitionControl</AssemblyName>
     <RootNamespace>AmbitionControl</RootNamespace>
     <Version>0.6.0</Version>
-    <InformationalVersion>0.6.0-alpha.1</InformationalVersion>
+    <InformationalVersion>0.6.0-alpha.2</InformationalVersion>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>

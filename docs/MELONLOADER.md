@@ -27,13 +27,13 @@
 
 - **Phone app (v0.5+):** open the in-game smartphone and tap the **Ambition Control** app. It has the same money controls and status readout as the overlay, built from the game's own UI so clicks stay in the phone. Turn off with `PhoneApp = false`.
 - **Money tab (F10 overlay):** build an amount with the +1K…+10M buttons (no typing, so game hotkeys are not triggered), then *Stage Add / Remove / Set* → check the preview → *Confirm change*. The mod reads the balance back and reports **Verified** only if it actually changed by the expected amount. *Undo* reverses the last change only while the same save is loaded and the balance has not changed since.
-- **Energy / Happiness drain (phone app, v0.6+):** switches the game's own custom-game options. The choice is stored in your save when the game saves; switch back ON to restore normal drain.
+- **Game options tab (phone app, v0.6+):** switches for energy drain, happiness drain, aging, vehicle damage, vehicle fuel use and wholesale/import limits — the game's own custom-game options. The choice is stored in your save when the game saves; switch back ON to restore normal behaviour.
 - **Status tab:** read-only day/time, money, net worth, energy, hunger, happiness.
 - **Diagnostics tab:** detected build, loader state, preference values, session latch reason.
 
 Safety rules built in: writes blocked if the build ≠ 3233 (unless `AllowOtherBuilds = true`), while the game is saving, with no save loaded, or after any failed readback/exception (latched off until restart). Limits: $10M per change, balance 0–$100M.
 
-Preferences (`UserData\MelonPreferences.cfg`, section `[AmbitionControl]`): `ToggleKey` (Input System key name, default `F10`), `MoneyWritesEnabled`, `AllowOtherBuilds`, `BlockClickThrough` (default `true`; overlay only), `PhoneApp` (default `true`; adds the phone app), `PlayerTogglesEnabled` (default `true`; energy/happiness drain switches).
+Preferences (`UserData\MelonPreferences.cfg`, section `[AmbitionControl]`): `ToggleKey` (Input System key name, default `F10`), `MoneyWritesEnabled`, `AllowOtherBuilds`, `BlockClickThrough` (default `true`; overlay only), `PhoneApp` (default `true`; adds the phone app), `PlayerTogglesEnabled` (default `true`; game option switches).
 
 ### Known limitations
 - Click-through blocking (v0.4.0-alpha.2, not yet tested in-game) filters the game's mouse reads through `InputActionHelper` while the cursor is over the menu. Game code that reads the mouse some other way, or where IL2CPP inlined the helper, can still react. Turn it off with `BlockClickThrough = false` if game controls misbehave.

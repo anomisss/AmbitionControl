@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 ## Current Position
 
 Phase: 4 of 5 (Expanded Features)
-Plan: 04-01 complete; next plan TBD with owner
-Status: 04-01 done — drain switches verified in-game (OFF; game reads flags live). Owner kept both OFF in the test save.
-Last activity: 2026-11-19 — 04-01 verified (04-01-SUMMARY.md)
+Plan: 04-02 (all six game option switches + tabs)
+Status: Checkpoint — 0.6.0-alpha.2 installed (DLL f2ef9036…); awaiting owner in-game test of the Game options tab
+Last activity: 2026-11-19 — 04-02: six game option switches, Money/Game options tabs
 
 Progress: [███████░░░] 70%
 
@@ -42,4 +42,4 @@ Progress: [███████░░░] 70%
 
 Last session: 2026-11-19
 Stopped at: Phase 3 complete; next choose Phase 4 features
-Resume file: .planning/phases/04-expanded-features/04-01-PLAN.md
+Resume file: .planning/phases/04-expanded-features/04-02-PLAN.md

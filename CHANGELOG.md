@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0-alpha.2] — 2026-11-19 — All game option switches + tabs (GSD Phase 4, plan 04-02)
+- Phone app now has **Money** and **Game options** tabs.
+- Game options tab: six switches for the game's own custom-game options — **Energy drain, Happiness drain, Aging, Vehicle damage, Vehicle fuel use, Wholesale/import limits** (`GameVariables.disableEnergy/disableHappiness/disableAging/disableVehicleDamage/disableVehicleFuel/disableWholesaleAndImportLimits`, all verified in build-3233 interop and offered by the game's custom-game screen). Each change is read back; stored in the save when the game saves.
+- `NeedToggles` generalized to `GameOptions` (one code path for all six).
+- **Status:** Build verified; tests 12/12. Not runtime verified (energy/happiness mechanism proven in 0.6.0-alpha.1; the four new options untested).
+
 ## [0.6.0-alpha.1] — 2026-11-19 — Energy/happiness drain switches (GSD Phase 4, plan 04-01)
 - Phone app: **Energy drain ON/OFF** and **Happiness drain ON/OFF** buttons. They set the game's own custom-game options `GameInstance.gameVariables.disableEnergy` / `disableHappiness` (verified in build-3233 interop; the game exposes them in `CustomGameOptionsHandler`), read the value back, and report "(verified)".
 - These options are part of the save: once the game saves, the setting stays with that save. Turn a switch back ON to restore normal drain.

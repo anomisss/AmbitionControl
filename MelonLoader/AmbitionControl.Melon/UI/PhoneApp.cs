@@ -35,7 +35,10 @@ namespace AmbitionControl.UI
         private TMP_FontAsset font;
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
-        private TextMeshProUGUI energyLabel, happinessLabel;
+        private GameObject moneyPage, optionsPage;
+        private TextMeshProUGUI moneyTabLabel, optionsTabLabel;
+        private readonly TextMeshProUGUI[] optionLabels = new TextMeshProUGUI[GameOptions.All.Length];
+        private bool optionsTab;
         private string lastMoneyStatus, lastToggleStatus, shownStatus;
         private readonly List<KeyValuePair<Button, Func<GameSnapshot, bool>>> gated =
             new List<KeyValuePair<Button, Func<GameSnapshot, bool>>>();
@@ -257,9 +260,20 @@ namespace AmbitionControl.UI
 
             Text(panel.transform, Title + "  " + AmbitionControlMod.VersionLabel, x0, y, full, 44f, 32f, TextMain, TextAlignmentOptions.Left);
             y += 54f;
-            balanceText = Text(panel.transform, "", x0, y, full, 36f, 26f, TextMain, TextAlignmentOptions.Left);
+
+            // Tabs: Money | Game options. Pages are full-size children so their coordinates match the panel's.
+            float hw = (full - 8f) / 2f;
+            moneyPage = Page("MoneyPage");
+            optionsPage = Page("OptionsPage");
+            moneyTabLabel = MakeButton(panel.transform, "Money", x0, y, hw, 46f, BtnNeutral, () => ShowTab(false), null);
+            optionsTabLabel = MakeButton(panel.transform, "Game options", x0 + hw + 8f, y, hw, 46f, BtnNeutral, () => ShowTab(true), null);
+            y += 58f;
+            float contentTop = y;
+
+            Transform page = moneyPage.transform;
+            balanceText = Text(page, "", x0, y, full, 36f, 26f, TextMain, TextAlignmentOptions.Left);
             y += 42f;
-            amountText = Text(panel.transform, "", x0, y, full, 32f, 24f, TextDim, TextAlignmentOptions.Left);
+            amountText = Text(page, "", x0, y, full, 32f, 24f, TextDim, TextAlignmentOptions.Left);
             y += 40f;
 
             long[] steps = { 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L };
@@ -268,51 +282,80 @@ namespace AmbitionControl.UI
             for (int i = 0; i < steps.Length; i++)
             {
                 long step = steps[i];
-                MakeButton(panel.transform, labels[i], x0 + i * (bw + 8f), y, bw, 46f, BtnNeutral,
+                MakeButton(page, labels[i], x0 + i * (bw + 8f), y, bw, 46f, BtnNeutral,
                     () => { amount = MoneyCommand.ClampAmount(amount + step); money.ClearStageError(); }, null);
             }
-            MakeButton(panel.transform, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
+            MakeButton(page, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
             y += 58f;
 
             float tw = (full - 2 * 8f) / 3f;
-            MakeButton(panel.transform, "Stage Add", x0, y, tw, 50f, BtnNeutral,
+            MakeButton(page, "Stage Add", x0, y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Add, amount, lastSnap), s => CanStage(s) && amount > 0);
-            MakeButton(panel.transform, "Stage Remove", x0 + tw + 8f, y, tw, 50f, BtnNeutral,
+            MakeButton(page, "Stage Remove", x0 + tw + 8f, y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Remove, amount, lastSnap), s => CanStage(s) && amount > 0);
-            MakeButton(panel.transform, "Stage Set", x0 + 2 * (tw + 8f), y, tw, 50f, BtnNeutral,
+            MakeButton(page, "Stage Set", x0 + 2 * (tw + 8f), y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Set, amount, lastSnap), CanStage);
             y += 62f;
 
-            previewText = Text(panel.transform, "", x0, y, full, 36f, 22f, TextMain, TextAlignmentOptions.Left);
+            previewText = Text(page, "", x0, y, full, 36f, 22f, TextMain, TextAlignmentOptions.Left);
             y += 42f;
-            float hw = (full - 8f) / 2f;
-            MakeButton(panel.transform, "Confirm change", x0, y, hw, 54f, BtnGo,
+            MakeButton(page, "Confirm change", x0, y, hw, 54f, BtnGo,
                 () => money.RequestConfirm(), s => money.Staged != null && Block(s) == null);
-            MakeButton(panel.transform, "Cancel", x0 + hw + 8f, y, hw, 54f, BtnStop,
+            MakeButton(page, "Cancel", x0 + hw + 8f, y, hw, 54f, BtnStop,
                 () => money.Cancel(), s => money.Staged != null);
             y += 66f;
-            MakeButton(panel.transform, "Undo last Ambition Control change", x0, y, full, 50f, BtnNeutral,
+            MakeButton(page, "Undo last Ambition Control change", x0, y, full, 50f, BtnNeutral,
                 () => money.RequestUndo(), s => Block(s) == null && money.CanUndo(s));
             y += 62f;
+            float sharedTop = y;
 
-            if (settings == null || settings.PlayerTogglesEnabled)
+            // Game options page: 2 columns x 3 rows of switches, then a note.
+            float oy = contentTop;
+            Transform opage = optionsPage.transform;
+            for (int i = 0; i < GameOptions.All.Length; i++)
             {
-                energyLabel = MakeButton(panel.transform, "Energy drain", x0, y, hw, 50f, BtnNeutral,
-                    () => NeedToggles.Set(NeedKind.Energy, !lastSnap.EnergyDrainOff, lastSnap, settings),
-                    s => NeedToggles.BlockReason(s, settings) == null);
-                happinessLabel = MakeButton(panel.transform, "Happiness drain", x0 + hw + 8f, y, hw, 50f, BtnNeutral,
-                    () => NeedToggles.Set(NeedKind.Happiness, !lastSnap.HappinessDrainOff, lastSnap, settings),
-                    s => NeedToggles.BlockReason(s, settings) == null);
-                y += 62f;
+                GameOption option = GameOptions.All[i];
+                float ox = x0 + (i % 2) * (hw + 8f);
+                optionLabels[i] = MakeButton(opage, GameOptions.Label(option), ox, oy + (i / 2) * 62f, hw, 50f, BtnNeutral,
+                    () => GameOptions.Toggle(option, lastSnap, settings),
+                    s => GameOptions.BlockReason(s, settings) == null);
             }
+            oy += ((GameOptions.All.Length + 1) / 2) * 62f + 6f;
+            Text(opage, "These are the game's own custom-game options. ON = normal game behaviour. A change is stored in " +
+                        "your save when the game saves; switch back ON to restore normal behaviour.",
+                x0, oy, full, sharedTop - oy - 8f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
+            y = sharedTop;
             statusText = Text(panel.transform, "", x0, y, full, 70f, 22f, TextMain, TextAlignmentOptions.TopLeft);
             y += 76f;
             blockText = Text(panel.transform, "", x0, y, full, 56f, 20f, TextDim, TextAlignmentOptions.TopLeft);
             y += 62f;
             infoText = Text(panel.transform, "", x0, y, full, 130f, 20f, TextDim, TextAlignmentOptions.TopLeft);
 
+            ShowTab(false);
             panel.SetActive(false);
+        }
+
+        private GameObject Page(string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(panel.transform, false);
+            RectTransform rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            return go;
+        }
+
+        private void ShowTab(bool options)
+        {
+            optionsTab = options && (settings == null || settings.PlayerTogglesEnabled);
+            moneyPage.SetActive(!optionsTab);
+            optionsPage.SetActive(optionsTab);
+            moneyTabLabel.text = optionsTab ? "Money" : "[ Money ]";
+            optionsTabLabel.text = optionsTab ? "[ Game options ]" : "Game options";
+            nextRefresh = 0f;
         }
 
         private string Block(GameSnapshot s) =>
@@ -392,18 +435,26 @@ namespace AmbitionControl.UI
                 "  ->  $" + op.Expected.ToString("N2");
             // Show whichever message changed most recently (money or needs).
             if (money.Status != lastMoneyStatus) { lastMoneyStatus = money.Status; shownStatus = money.Status; }
-            if (NeedToggles.Status != lastToggleStatus) { lastToggleStatus = NeedToggles.Status; shownStatus = NeedToggles.Status; }
+            if (GameOptions.Status != lastToggleStatus) { lastToggleStatus = GameOptions.Status; shownStatus = GameOptions.Status; }
             statusText.text = shownStatus ?? "";
 
-            if (energyLabel != null)
-                energyLabel.text = s.TogglesKnown ? "Energy drain: " + (s.EnergyDrainOff ? "OFF" : "ON") : "Energy drain: ?";
-            if (happinessLabel != null)
-                happinessLabel.text = s.TogglesKnown ? "Happiness drain: " + (s.HappinessDrainOff ? "OFF" : "ON") : "Happiness drain: ?";
+            for (int i = 0; i < optionLabels.Length; i++)
+                if (optionLabels[i] != null)
+                    optionLabels[i].text = GameOptions.Label(GameOptions.All[i]) + ": " +
+                        (s.OptionsKnown ? (s.OptionDisabled[i] ? "OFF" : "ON") : "?");
 
-            string block = Block(s);
-            blockText.text = block == null
-                ? "Limits: $10M per change, balance $0-$100M. Logged by the game as 'Cheat' transactions."
-                : "Changes unavailable: " + block;
+            if (optionsTab)
+            {
+                string optBlock = settings == null ? "Starting..." : GameOptions.BlockReason(s, settings);
+                blockText.text = optBlock == null ? "" : "Switches unavailable: " + optBlock;
+            }
+            else
+            {
+                string block = Block(s);
+                blockText.text = block == null
+                    ? "Limits: $10M per change, balance $0-$100M. Logged by the game as 'Cheat' transactions."
+                    : "Changes unavailable: " + block;
+            }
 
             infoText.text = s.Loaded
                 ? "Day " + s.Day + "  " + s.Hour.ToString("00") + ":" + ((int)s.Minute).ToString("00") +

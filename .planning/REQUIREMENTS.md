@@ -43,7 +43,8 @@ Deferred; each needs API verification on build 3233 first.
 
 - [x] **FEAT-01**: Energy and happiness drain switches (game options; hunger has no game option in build 3233)
 - **FEAT-02**: Time controls (skip hours / set time)
-- **FEAT-03**: Additional economy tools (e.g. pay off loans/taxes) — scope TBD with owner
+- [ ] **FEAT-03**: Remaining game option switches (aging, vehicle damage, vehicle fuel, wholesale/import limits)
+- **FEAT-04**: Additional economy tools (e.g. pay off loans/taxes) — scope TBD with owner
 
 ## Out of Scope
 
