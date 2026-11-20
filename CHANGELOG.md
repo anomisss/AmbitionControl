@@ -7,7 +7,8 @@
 - Money: stage → preview → confirm → balance readback verification; guarded one-step undo; writes latched off on any mismatch/exception; blocked while saving, with no save, or on builds ≠ 3233.
 - F10 menu (rebindable via MelonPreferences) with Money / Status / Diagnostics tabs, fixed-rect IMGUI only (avoids stripped GUILayout/GUIStyle members); amount entry by buttons so no keystrokes reach game hotkeys.
 - Added xUnit tests for the pure money logic.
-- **Status:** Build verified (compiled against the user's generated Il2Cpp assemblies + MelonLoader 0.7.3); unit tests 12/12 passed. **Not runtime verified** — no in-game test yet. See `docs/MELONLOADER.md`.
+- **Status:** Build verified; unit tests 12/12 passed. **Partly runtime verified (2026-11-19, build 3233, ML 0.7.3):** mod loads, build guard passes, F10 menu opens, drags and accepts clicks, Add $1,000,000 applied through `ChangeMoneySafe` and verified by readback (1,595,598.38 -> 2,595,598.50). Not yet exercised: Remove, Set, Undo, save/reload persistence, save switching.
+- In-game fixes during testing: `GUI.Toolbar` fails at runtime ("Method unstripping failed") -> plain buttons; IMGUI `GUI.Button` click detection did not fire over the game world -> clicks resolved from `Mouse.current` (Input System); title-bar dragging added; state and click logging added.
 
 ## [0.3.0] — 2026-11-16 — Native money controls (source-only)
 - Implemented real game-API money integration via `SaveGameManager.Current.Money` and `GameManager.ChangeMoneySafe`.

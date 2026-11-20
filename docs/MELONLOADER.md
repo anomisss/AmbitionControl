@@ -1,6 +1,6 @@
 # Ambition Control — MelonLoader build (v0.4.0-alpha.1)
 
-**Status: candidate build.** Compiles against the real generated interop for Big Ambitions build 3233; **not yet exercised in-game**. Back up your save before using money features.
+**Status: partly runtime verified** on build 3233 / MelonLoader 0.7.3: loading, F10 menu, dragging, clicks and a verified $1M Add work in-game. Remove, Set, Undo and save/reload persistence not yet tested. Back up your save before using money features.
 
 ## Verified target
 
@@ -34,7 +34,7 @@ Safety rules built in: writes blocked if the build ≠ 3233 (unless `AllowOtherB
 Preferences (`UserData\MelonPreferences.cfg`, section `[AmbitionControl]`): `ToggleKey` (Input System key name, default `F10`), `MoneyWritesEnabled`, `AllowOtherBuilds`.
 
 ### Known limitations
-- IMGUI cannot block the game's Input System: clicks on the menu may also reach the game world behind it.
+- Clicks on the menu also reach the game world behind it (the menu draws with IMGUI and reads the mouse from the Input System; it does not yet block game input).
 - Player stats and time are read-only.
 
 ## In-game test checklist (record Passed / Failed / Not run)
