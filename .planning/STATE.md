@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 8 (Vehicles & world)
 Plan: Phase 8 implemented
-Status: v0.7.0-alpha.3 built; install pending (game was running); then owner UAT (08-UAT.md). Phase 7 UAT: presets + cycle verified; preset confirm/unlocks skipped by owner
+Status: v0.7.0-alpha.3 installed (DLL 551eb361…); awaiting owner UAT (08-UAT.md). Phase 7 UAT: presets + cycle verified; preset confirm/unlocks skipped by owner
 Last activity: 2026-11-19 — World tab: vehicle repair/refuel, pause, speed, traffic, save
 
 Progress: [██████████] 100%

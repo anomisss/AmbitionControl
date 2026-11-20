@@ -1,7 +1,7 @@
 ---
 status: testing
 phase: 08-vehicles-world (Milestone C)
-build: v0.7.0-alpha.3 (DLL hash recorded at install)
+build: v0.7.0-alpha.3 (DLL SHA-256 551eb36161a3f378a16eee3591fcffef3f0066a4c844ad50cb5e0728b9210862)
 started: 2026-11-19
 ---
 
