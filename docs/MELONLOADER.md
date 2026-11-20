@@ -31,10 +31,10 @@
 
 Safety rules built in: writes blocked if the build ≠ 3233 (unless `AllowOtherBuilds = true`), while the game is saving, with no save loaded, or after any failed readback/exception (latched off until restart). Limits: $10M per change, balance 0–$100M.
 
-Preferences (`UserData\MelonPreferences.cfg`, section `[AmbitionControl]`): `ToggleKey` (Input System key name, default `F10`), `MoneyWritesEnabled`, `AllowOtherBuilds`.
+Preferences (`UserData\MelonPreferences.cfg`, section `[AmbitionControl]`): `ToggleKey` (Input System key name, default `F10`), `MoneyWritesEnabled`, `AllowOtherBuilds`, `BlockClickThrough` (default `true`; stops menu clicks/scroll reaching the game).
 
 ### Known limitations
-- Clicks on the menu also reach the game world behind it (the menu draws with IMGUI and reads the mouse from the Input System; it does not yet block game input).
+- Click-through blocking (v0.4.0-alpha.2, not yet tested in-game) filters the game's mouse reads through `InputActionHelper` while the cursor is over the menu. Game code that reads the mouse some other way, or where IL2CPP inlined the helper, can still react. Turn it off with `BlockClickThrough = false` if game controls misbehave.
 - Player stats and time are read-only.
 
 ## In-game test checklist (record Passed / Failed / Not run)

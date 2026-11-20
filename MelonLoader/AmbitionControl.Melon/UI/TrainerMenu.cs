@@ -13,8 +13,8 @@ namespace AmbitionControl.UI
     internal sealed class TrainerMenu
     {
         private static readonly string[] Tabs = { "Money", "Status", "Diagnostics" };
-        private const float W = 460f;
-        private const float H = 430f;
+        internal const float W = 460f;
+        internal const float H = 430f;
         private const float Pad = 10f;
         private const float Row = 24f;
 
@@ -30,6 +30,7 @@ namespace AmbitionControl.UI
         private float clickY;
 
         internal bool Visible;
+        internal bool IsDragging => dragging;
         internal float X = 20f;
         internal float Y = 80f;
 

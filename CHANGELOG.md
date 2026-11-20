@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0-alpha.2] — 2026-11-19 — Menu input isolation (GSD Phase 2)
+- Click-through blocking: Harmony prefixes on the game's `Il2CppBigAmbitions.InputSystem.InputActionHelper` mouse reads (left/right click helpers, scroll, and `Pressed/Pressing/Released/Value` for `Click`, `RightClick`, `Zoom`, `CursorScroll`) report no input while the cursor is over the open menu or a title drag is active. Keyboard actions untouched.
+- Each patch applied independently; the log reports `Click-through blocking: N patches applied`. New preference `BlockClickThrough` (default true).
+- Added GSD planning docs under `.planning/` (project, requirements, roadmap, state, Phase 2 plan).
+- **Status:** Build verified; unit tests 12/12. **Not runtime verified.**
+
 ## [0.4.0-alpha.1] — 2026-11-19 — First MelonLoader build (compat/ea-0.9.3233-melonloader)
 - Confirmed target from the user's install: Big Ambitions build 3233, Unity 2022.3.62f2 **IL2CPP**, **MelonLoader v0.7.3** (net6).
 - New standalone project `MelonLoader/AmbitionControl.Melon` (`MelonMod` entry, net6.0); SDK sources under `Assets/` untouched and not compiled into it.

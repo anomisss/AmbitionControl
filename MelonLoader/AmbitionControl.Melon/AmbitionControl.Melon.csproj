@@ -15,7 +15,7 @@
     <AssemblyName>AmbitionControl</AssemblyName>
     <RootNamespace>AmbitionControl</RootNamespace>
     <Version>0.4.0</Version>
-    <InformationalVersion>0.4.0-alpha.1</InformationalVersion>
+    <InformationalVersion>0.4.0-alpha.2</InformationalVersion>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="MelonLoader"><HintPath>$(MelonDir)\net6\MelonLoader.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Il2CppInterop.Runtime"><HintPath>$(MelonDir)\net6\Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(MelonDir)\net6\0Harmony.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Il2CppInterop.Common"><HintPath>$(MelonDir)\net6\Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="$(MelonDir)\Il2CppAssemblies\*.dll" Private="false" />
   </ItemGroup>

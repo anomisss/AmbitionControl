@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.4.0-alpha.1", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.4.0-alpha.2", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -19,7 +19,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.4.0-alpha.1";
+        internal const string VersionLabel = "v0.4.0-alpha.2";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -63,6 +63,11 @@ namespace AmbitionControl
             }
 
             menu = new TrainerMenu(money) { X = prefX.Value, Y = prefY.Value };
+
+            MelonPreferences_Entry<bool> prefBlock = prefs.CreateEntry("BlockClickThrough", true,
+                description: "Stop mouse clicks/scroll on the menu from also acting on the game world.");
+            if (prefBlock.Value) InputBlocker.Apply(HarmonyInstance);
+            else Log.Msg("Click-through blocking is off (BlockClickThrough=false).");
             Log.Msg(VersionLabel + " loaded. Press " + settings.ToggleKey + " in-game to open the menu.");
         }
 
@@ -110,6 +115,13 @@ namespace AmbitionControl
                         Log.Warning("Menu mouse input disabled (clicks and dragging): " + ex.GetBaseException().Message);
                     }
                 }
+
+                InputBlocker.MenuVisible = menu.Visible;
+                InputBlocker.MenuX = menu.X;
+                InputBlocker.MenuY = menu.Y;
+                InputBlocker.MenuW = TrainerMenu.W;
+                InputBlocker.MenuH = TrainerMenu.H;
+                InputBlocker.Dragging = menu.IsDragging;
 
                 // Read game state only while the menu is open or an operation needs it.
                 bool needsState = menu.Visible || money.CurrentPhase != MoneyService.Phase.Idle;
