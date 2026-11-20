@@ -21,6 +21,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [ ] **Phase 13: UI cleanup** - Section headers, coloured status bar, short hints, compact footer
 - [x] **Phase 14: Game-matched style** - Game sprites, white cards, game-style tabs, 2x scale (owner: looks good)
 - [ ] **Phase 15: Staff part 2 & skip time** - Skip hours, market wages, generate candidates
+- [ ] **Phase 16: Business tab** - Your businesses, customer satisfaction, teleport to business
 - [ ] **Phase 7+: Trainer expansion** - Game-variable controls, vehicles/time, business, employees, rivals (see docs/FEATURE_GAP_MATRIX.md)
 
 ## Phase Details

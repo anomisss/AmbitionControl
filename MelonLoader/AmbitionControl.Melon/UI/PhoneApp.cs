@@ -38,8 +38,8 @@ namespace AmbitionControl.UI
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         private Image statusBg;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Rivals", "Quest", "Options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabRivals = 5, TabQuest = 6, TabOptions = 7;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Business", "Rivals", "Quest", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabBusiness = 5, TabRivals = 6, TabQuest = 7, TabOptions = 8;
         private readonly TextMeshProUGUI[] rivalRowLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private readonly TextMeshProUGUI[] rivalBtnLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private TextMeshProUGUI rivalAllLabel;
@@ -56,6 +56,12 @@ namespace AmbitionControl.UI
         private TextMeshProUGUI pauseLabel, trafficLabel, saveLabel, vehicleText;
         private readonly TextMeshProUGUI[] skipLabels = new TextMeshProUGUI[TimeSkip.Hours.Length];
         private TextMeshProUGUI wageLabel, skillLabel, levelLabel;
+        private TextMeshProUGUI bizSummary;
+        private readonly TextMeshProUGUI[] bizRowLabels = new TextMeshProUGUI[BusinessTools.PageSize];
+        private List<BizRow> bizRows = new List<BizRow>();
+        private string bizError;
+        private int bizPage;
+        private float nextBizRead;
         private string lastSkipStatus, lastHireStatus;
         private string lastWorldStatus;
         private readonly TextMeshProUGUI[] econLabels = new TextMeshProUGUI[GameEconomy.All.Length];
@@ -575,6 +581,27 @@ namespace AmbitionControl.UI
             MakeButton(spage, "Generate", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnGo,
                 () => HiringTools.GenerateCandidate(lastSnap, settings), staffOk);
 
+            // Business page: your rented/owned buildings with customer satisfaction, and Go (teleport) per row.
+            float by = contentTop;
+            Transform bpage = pages[TabBusiness].transform;
+            Func<GameSnapshot, bool> bizOk = s => settings != null && BusinessTools.BlockReason(s, settings) == null;
+            by = Header(bpage, "Your businesses", x0, by, full);
+            bizSummary = Text(bpage, "", x0, by, full, 28f, 18f, TextDim, TextAlignmentOptions.Left);
+            by += 32f;
+            for (int i = 0; i < BusinessTools.PageSize; i++)
+            {
+                int slot = i;
+                bizRowLabels[i] = Text(bpage, "", x0, by, full - 128f, 48f, 16f, TextMain, TextAlignmentOptions.Left);
+                MakeButton(bpage, "Go", x0 + full - 120f, by + 2f, 120f, 44f, BtnNeutral,
+                    () => BusinessTools.GoTo(BizAt(slot), lastSnap, settings),
+                    s => bizOk(s) && BizAt(slot) != null && BizAt(slot).Address != null &&
+                         QuestTools.TeleportBlock(TeleportTarget.Address) == null);
+                by += 52f;
+            }
+            by += 6f;
+            MakeButton(bpage, "< Prev", x0, by, hw, 50f, BtnNeutral, () => { bizPage = Math.Max(0, bizPage - 1); nextBizRead = 0f; }, null);
+            MakeButton(bpage, "Next >", x0 + hw + 8f, by, hw, 50f, BtnNeutral, () => { bizPage++; nextBizRead = 0f; }, null);
+
             // Rivals page.
             float ry = contentTop;
             Transform rpage = pages[TabRivals].transform;
@@ -667,7 +694,8 @@ namespace AmbitionControl.UI
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
              tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled :
              tab == TabStaff ? settings.EmployeeToolsEnabled : tab == TabRivals ? settings.RivalToolsEnabled :
-             tab == TabQuest ? settings.QuestToolsEnabled : true);
+             tab == TabQuest ? settings.QuestToolsEnabled :
+             tab == TabBusiness ? settings.BusinessToolsEnabled : true);
 
         private void ShowTab(int tab)
         {
@@ -681,6 +709,7 @@ namespace AmbitionControl.UI
             HiringTools.ClearPending();
             nextRivalRead = 0f;
             nextStaffRead = 0f;
+            nextBizRead = 0f;
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].SetActive(i == currentTab);
@@ -731,6 +760,45 @@ namespace AmbitionControl.UI
                 staffList.text = sb.ToString();
             }
             if (staffMaxLabel != null) staffMaxLabel.text = EmployeeTools.ConfirmPending ? "Confirm" : "Max satisfaction";
+        }
+
+        private BizRow BizAt(int slot)
+        {
+            int i = bizPage * BusinessTools.PageSize + slot;
+            return i >= 0 && i < bizRows.Count ? bizRows[i] : null;
+        }
+
+        /// <summary>Re-read businesses at most once per second while the Business tab is open.</summary>
+        private void RefreshBusiness(GameSnapshot s)
+        {
+            if (Time.unscaledTime >= nextBizRead)
+            {
+                nextBizRead = Time.unscaledTime + 1f;
+                bizRows = s.Loaded ? BusinessTools.ReadRows(s, out bizError) : new List<BizRow>();
+            }
+            int pagesCount = Math.Max(1, (bizRows.Count + BusinessTools.PageSize - 1) / BusinessTools.PageSize);
+            bizPage = Math.Min(bizPage, pagesCount - 1);
+            if (bizError != null) bizSummary.text = bizError;
+            else if (bizRows.Count == 0) bizSummary.text = "You don't rent or own any buildings yet.";
+            else
+            {
+                var withSat = bizRows.Where(r => r.HasSatisfaction && r.Rented).ToList();
+                bizSummary.text = bizRows.Count + " buildings" +
+                    (withSat.Count > 0 ? "   avg customer satisfaction " + withSat.Average(r => r.Overall).ToString("0") + "%" : "") +
+                    "   page " + (bizPage + 1) + "/" + pagesCount;
+            }
+            for (int i = 0; i < bizRowLabels.Length; i++)
+            {
+                BizRow r = BizAt(i);
+                if (r == null) { bizRowLabels[i].text = ""; continue; }
+                string name = r.Name.Length > 40 ? r.Name.Substring(0, 39) + "…" : r.Name;
+                string tag = r.Owned && r.Rented ? "owned + rented" : r.Owned ? "owned" : "rented";
+                bizRowLabels[i].text = "<b>" + name + "</b>  <color=#596975>" + (r.AddressText ?? "") + "  (" + tag + ")</color>\n" +
+                    (r.HasSatisfaction && r.Rented
+                        ? "Satisfaction <b>" + r.Overall + "%</b>  <color=#596975>service " + r.Service + "  price " + r.Pricing +
+                          "  clean " + r.Cleanliness + "  facility " + r.Facility + "</color>"
+                        : "<color=#596975>No customer business here</color>");
+            }
         }
 
         private bool RivalEligible(int index)
@@ -878,6 +946,7 @@ namespace AmbitionControl.UI
                 }
             if (currentTab == TabStaff && staffList != null) RefreshStaff(s);
             if (currentTab == TabRivals && rivalAllLabel != null) RefreshRivals(s);
+            if (currentTab == TabBusiness && bizSummary != null) RefreshBusiness(s);
             if (currentTab == TabQuest && questText != null)
             {
                 questText.text = s.Loaded ? QuestTools.CurrentObjectiveText() : "";
@@ -909,6 +978,7 @@ namespace AmbitionControl.UI
             else if (currentTab == TabOptions) { tabBlock = GameOptions.BlockReason(s, settings); hint = "Unlocks and tutorial may need a save reload."; }
             else if (currentTab == TabEconomy) { tabBlock = GameEconomy.BlockReason(s, settings); hint = "Values cycle through the game's Easy / Normal / Hard values."; }
             else if (currentTab == TabRivals) { tabBlock = RivalTools.BlockReason(s, settings); hint = rivalError ?? "Defeat is permanent: the game closes their businesses."; }
+            else if (currentTab == TabBusiness) { tabBlock = BusinessTools.BlockReason(s, settings); hint = bizError ?? QuestTools.TeleportBlock(TeleportTarget.Address) ?? "Go teleports you outside the business (on foot, outdoors)."; }
             else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = "Tap Skill / Level to choose, then Generate. Satisfaction changes are temporary."; }
             else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools: your own vehicle only. Skip works like sleeping; speeds above 2x are experimental."; }
             else if (currentTab == TabPlayer) { tabBlock = PlayerTools.BlockReason(s, settings); hint = "Refills are checked by reading the value back."; }

@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.11", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.12", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -22,11 +22,12 @@ namespace AmbitionControl
         internal bool EmployeeToolsEnabled = true;
         internal bool RivalToolsEnabled = true;
         internal bool QuestToolsEnabled = true;
+        internal bool BusinessToolsEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.11";
+        internal const string VersionLabel = "v0.7.0-alpha.12";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -90,6 +91,8 @@ namespace AmbitionControl
                 description: "Show the Staff tab (employee list, temporary max satisfaction).").Value;
             settings.RivalToolsEnabled = prefs.CreateEntry("RivalToolsEnabled", true,
                 description: "Show the Rivals tab (view rivals; defeat with confirmation).").Value;
+            settings.BusinessToolsEnabled = prefs.CreateEntry("BusinessToolsEnabled", true,
+                description: "Show the Business tab (your businesses, customer satisfaction, teleport to a business).").Value;
             settings.QuestToolsEnabled = prefs.CreateEntry("QuestToolsEnabled", true,
                 description: "Show the Quest tab (teleport to quest target / GPS destination; complete objective or quest with confirmation).").Value;
 
@@ -109,6 +112,7 @@ namespace AmbitionControl
             EmployeeTools.ResetSession();
             RivalTools.ClearPending();
             TimeSkip.ResetScene();
+            BusinessTools.ResetSession();
             HiringTools.ClearPending();
             QuestTools.ResetSession();
             PlayerTools.ResetSession();

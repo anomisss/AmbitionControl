@@ -57,7 +57,9 @@
 - [ ] **GOAL-01**: Complete all personal goals (game command, two-press confirm, count readback)
 - [ ] **TIME-01**: Skip hours via the game time machine (two-press, end-time readback)
 - [ ] **EMP-03**: Bulk wages to market rate (payroll preview, two-press, readback)
-- [ ] **EMP-04**: Generate candidate by skill and level (count readback)
+- [x] **EMP-04**: Generate candidate by skill and level (count readback)
+- [ ] **BIZ-01**: List rented/owned buildings with customer satisfaction
+- [ ] **BIZ-02**: Teleport to a business (address command, movement readback)
 
 Deferred; each needs API verification on build 3233 first.
 

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace AmbitionControl.Game
 {
-    internal enum TeleportTarget { QuestTarget, GpsDestination }
+    internal enum TeleportTarget { QuestTarget, GpsDestination, Address }
 
     /// <summary>
     /// Quest + teleport tools (Milestone F part 2). Build-3233 interop evidence (Il2CppBigAmbitions.dll):
@@ -31,6 +31,7 @@ namespace AmbitionControl.Game
         private static int teleportFramesLeft;
         private static Vector3 teleportFrom;
         private static TeleportTarget teleportKind;
+        private static string teleportLabel;
 
         internal static string BlockReason(GameSnapshot snap, Settings settings)
         {
@@ -94,15 +95,35 @@ namespace AmbitionControl.Game
             ClearPending();
             string block = BlockReason(snap, settings) ?? TeleportBlock(target);
             if (block != null) { Status = "Not teleported: " + block; return; }
+            StartTeleport(target, Label(target), () =>
+            {
+                if (target == TeleportTarget.QuestTarget) GameManager.Command_TeleportPlayerToQuestTarget();
+                else GameManager.Command_TeleportPlayerToDestination();
+            });
+        }
+
+        /// <summary>Teleport to a street address (GameManager.Command_TeleportPlayerToAddress); caller checks its own tab's block reason.</summary>
+        internal static void TeleportToAddress(Address address, string label)
+        {
+            ClearPending();
+            string block = TeleportBlock(TeleportTarget.Address);
+            if (block != null) { Status = "Not teleported: " + block; return; }
+            if (address == null) { Status = "Not teleported: no address."; return; }
+            StartTeleport(TeleportTarget.Address, label + " (" + address + ")",
+                () => GameManager.Command_TeleportPlayerToAddress(address.streetNumber, address.streetName));
+        }
+
+        private static void StartTeleport(TeleportTarget kind, string label, Action call)
+        {
             try
             {
                 teleportFrom = PlayerHelper.GetPosition();
-                teleportKind = target;
-                if (target == TeleportTarget.QuestTarget) GameManager.Command_TeleportPlayerToQuestTarget();
-                else GameManager.Command_TeleportPlayerToDestination();
+                teleportKind = kind;
+                teleportLabel = label;
+                call();
                 teleportFramesLeft = TeleportVerifyFrames;
-                Status = "Teleporting to " + Label(target) + "...";
-                AmbitionControlMod.Log.Msg("Teleport to " + Label(target) + " requested from " + teleportFrom);
+                Status = "Teleporting to " + label + "...";
+                AmbitionControlMod.Log.Msg("Teleport to " + label + " requested from " + teleportFrom);
             }
             catch (Exception ex)
             {
@@ -123,15 +144,15 @@ namespace AmbitionControl.Game
                 if (moved >= MinMoveMeters)
                 {
                     teleportFramesLeft = 0;
-                    Status = "Teleported to " + Label(teleportKind) + " (verified, moved " + moved.ToString("0") + " m).";
-                    AmbitionControlMod.Log.Msg("Teleport verified: " + Label(teleportKind) + ", moved " + moved.ToString("0.0") + " m to " + now);
+                    Status = "Teleported to " + teleportLabel + " (verified, moved " + moved.ToString("0") + " m).";
+                    AmbitionControlMod.Log.Msg("Teleport verified: " + teleportLabel + ", moved " + moved.ToString("0.0") + " m to " + now);
                     return;
                 }
                 if (--teleportFramesLeft == 0)
                 {
-                    Status = "Teleport to " + Label(teleportKind) + ": position did not change" +
+                    Status = "Teleport to " + teleportLabel + ": position did not change" +
                              (teleportKind == TeleportTarget.GpsDestination ? " (is a GPS destination set?)." : ".");
-                    AmbitionControlMod.Log.Warning("Teleport not confirmed: " + Label(teleportKind) + ", moved " + moved.ToString("0.0") + " m");
+                    AmbitionControlMod.Log.Warning("Teleport not confirmed: " + teleportLabel + ", moved " + moved.ToString("0.0") + " m");
                 }
             }
             catch (Exception ex)
@@ -262,6 +283,8 @@ namespace AmbitionControl.Game
                 AmbitionControlMod.Log.Error(Status);
             }
         }
+
+        internal static void SetStatus(string msg) => Status = msg;
 
         internal static string Label(TeleportTarget t) => t == TeleportTarget.QuestTarget ? "quest target" : "GPS destination";
 

@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.12] — 2026-11-20 — Milestone I: Business tab
+- New **Business** tab (nine tabs: Money | Player | Economy | World | Staff | Business | Rivals | Quest | Options).
+- Lists every building you rent or own (`GameInstance.BuildingRegistrations`, `RentedByPlayer` / `BuildingOwnedByPlayer`) with name, address, and **customer satisfaction** (`BuildingRegistration.satisfaction`: overall, service, pricing, cleanliness, facility); summary shows the average; 5 per page. Read-only.
+- **Go** button per row teleports you to that business (`GameManager.Command_TeleportPlayerToAddress(streetNumber, streetName)`), on foot and outdoors only, verified by movement (shared with the Quest teleports).
+- New preference `BusinessToolsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/16-business/16-UAT.md`.
+
 ## [0.7.0-alpha.11] — 2026-11-20 — Milestone H: skip hours, market wages, candidates
 - **Skip 1h / 4h / 8h** (World tab → Time): the game's own `TimeMachine.StartTimeMachine(goal)` — the fast-forward used for sleeping/waiting, so wages, rent, customers and needs all run. Two-press confirm, on foot only, refused while a skip is running. Readback: `isRunning` right after starting, then the time reached (`TimeHelper.Now()`) is logged when it stops.
 - **Wages to market rate** (Staff tab): each hired employee's wage set to the game's `EmployeeHelper.CalculateHourlyWageForSkill(primary skill, value)`. Preview shows how many change and payroll before → after; second press applies; each wage read back.
