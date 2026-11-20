@@ -1,5 +1,7 @@
 # Changelog
 
+> **Latest release:** [v0.6.0-alpha.2 (pre-release)](https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2) — ZIP SHA-256 `67bb8831b6d136d54faeaa7d40e0abe872a4efefb688a9c144010642d0a075a3`.
+
 ## [0.6.0-alpha.2] — 2026-11-19 — All game option switches + tabs (GSD Phase 4, plan 04-02)
 - Phone app now has **Money** and **Game options** tabs.
 - Game options tab: six switches for the game's own custom-game options — **Energy drain, Happiness drain, Aging, Vehicle damage, Vehicle fuel use, Wholesale/import limits** (`GameVariables.disableEnergy/disableHappiness/disableAging/disableVehicleDamage/disableVehicleFuel/disableWholesaleAndImportLimits`, all verified in build-3233 interop and offered by the game's custom-game screen). Each change is read back; stored in the save when the game saves.

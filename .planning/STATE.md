@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 5 — Release Packaging
+**Current focus:** v0.6.0-alpha.2 released (pre-release); optional next: FEAT-02 time controls, FEAT-04 economy tools
 
 ## Current Position
 
 Phase: 5 of 5 (Release Packaging)
-Plan: 05-01 packaged
-Status: ZIP built and verified (dist/, local); GitHub release awaits owner approval
-Last activity: 2026-11-19 — Release ZIP v0.6.0-alpha.2 packaged (05-01-SUMMARY.md)
+Plan: 05-01 complete
+Status: Milestone complete — GitHub pre-release https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2 (asset SHA-256 verified after download)
+Last activity: 2026-11-19 — Published pre-release v0.6.0-alpha.2
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Accumulated Context
 
@@ -41,5 +41,5 @@ Progress: [█████████░] 90%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: release packaged; publish decision pending
-Resume file: .planning/phases/05-release-packaging/05-01-SUMMARY.md
+Stopped at: release published
+Resume file: .planning/ROADMAP.md

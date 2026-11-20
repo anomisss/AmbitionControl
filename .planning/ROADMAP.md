@@ -10,7 +10,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [x] **Phase 2: Menu Input Isolation** - Menu clicks/scroll no longer reach the game world
 - [x] **Phase 3: Money Feature Verification** - Remove, Set, Undo, persistence and save switching verified in-game
 - [ ] **Phase 4: Expanded Features** - Player needs and time controls, each behind verified APIs
-- [ ] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
+- [x] **Phase 5: Release Packaging** - Installable package with docs, published with owner approval
 
 ## Phase Details
 
@@ -67,7 +67,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. ZIP contains only the DLL, README/install steps and SHA-256
   2. Published to GitHub only after owner approval
-**Plans**: 05-01 packaged (local); publish awaits owner approval
+**Plans**: 05-01 complete — published as GitHub pre-release v0.6.0-alpha.2
 
 ## Progress
 
@@ -77,4 +77,4 @@ Plans:
 | 2. Menu Input Isolation | 1/1 (02-01 superseded) | Complete | 2026-11-19 |
 | 3. Money Feature Verification | UAT 8/8 | Complete | 2026-11-19 |
 | 4. Expanded Features | 2/2 (+ optional) | Core complete | 2026-11-19 |
-| 5. Release Packaging | 1/1 packaged | Awaiting publish approval | - |
+| 5. Release Packaging | 1/1 | Complete (pre-release) | 2026-11-19 |

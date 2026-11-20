@@ -1,7 +1,7 @@
 ---
 phase: 05-release-packaging
 plan: 01
-status: packaged (not published)
+status: published
 completed: 2026-11-19
 requirements: [REL-01]
 ---
@@ -17,6 +17,6 @@ requirements: [REL-01]
 
 **Reproduce:** `powershell -ExecutionPolicy Bypass -File packaging\package.ps1 -Version 0.6.0-alpha.2 -ExpectedSha256 f2ef9036...`
 
-**Not done:** REL-02 — GitHub release/tag. Requires owner approval (public publish). Should be marked pre-release (alpha).
+**Published (REL-02, owner-approved 2026-11-19):** annotated tag `v0.6.0-alpha.2` → 06c7bce; GitHub pre-release https://github.com/anomisss/AmbitionControl/releases/tag/v0.6.0-alpha.2 with the ZIP as its only asset (45,080 bytes). Asset re-downloaded and SHA-256 matched `67bb8831…`.
 
 **License:** none in the repository; README says so rather than inventing one.
