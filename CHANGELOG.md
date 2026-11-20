@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0-alpha.3] — 2026-11-19 — Phase 3 UAT round 1 + staging feedback
+- UAT round 1 on build 3233 (log evidence in `.planning/phases/03-money-feature-verification/03-UAT.md`): **Remove** verified (15,145,598 → 15,144,598), **Undo** verified twice, **save → quit → reload** kept the mod's changes (reload $15,144,279 after $319 normal spending), state cleared and app re-injected after reload, Status matched the HUD, switching phone apps hides ours. Not yet run: over-removal refusal, Set, Undo expiry.
+- Fix (UX): when staging is refused (e.g. amount above the $10M-per-change limit) the phone app now shows "Can't stage: <reason>" on the preview line; previously only the status line changed and repeated Stage clicks looked dead. The message clears when the amount changes.
+- **Status:** Build verified; tests 12/12. Fix not yet runtime verified.
+
 ## [0.5.0-alpha.2] — 2026-11-19 — Phase 3 test evidence logging
 - Log lines for UAT evidence: `Session: save loaded, balance $X, day N`, `Session ended ... cleared`, `Scene loaded: <scene> (staged action and undo cleared)`, `Phone app hidden: another phone app was opened.`
 - Added Phase 3 UAT checklist (`.planning/phases/03-money-feature-verification/03-UAT.md`).

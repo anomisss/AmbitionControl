@@ -267,9 +267,9 @@ namespace AmbitionControl.UI
             {
                 long step = steps[i];
                 MakeButton(panel.transform, labels[i], x0 + i * (bw + 8f), y, bw, 46f, BtnNeutral,
-                    () => amount = MoneyCommand.ClampAmount(amount + step), null);
+                    () => { amount = MoneyCommand.ClampAmount(amount + step); money.ClearStageError(); }, null);
             }
-            MakeButton(panel.transform, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => amount = 0L, null);
+            MakeButton(panel.transform, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
             y += 58f;
 
             float tw = (full - 2 * 8f) / 3f;
@@ -371,7 +371,9 @@ namespace AmbitionControl.UI
             amountText.text = "Amount: $" + amount.ToString("N0");
 
             MoneyService.Operation op = money.Staged;
-            previewText.text = op == null ? "" :
+            previewText.text = op == null
+                ? (money.StageError != null ? "<color=#ffb04a>Can't stage: " + money.StageError + "</color>" : "")
+                :
                 "Preview: " + op.Action + " $" + op.Amount.ToString("N0") + "   $" + op.Before.ToString("N2") +
                 "  ->  $" + op.Expected.ToString("N2");
             statusText.text = money.Status;

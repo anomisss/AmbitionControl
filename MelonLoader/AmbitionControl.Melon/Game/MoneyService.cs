@@ -44,6 +44,8 @@ namespace AmbitionControl.Game
         internal Operation Staged => staged;
         internal string Status { get; private set; } = "Back up your save before changing money.";
         internal string LatchReason { get; private set; }
+        /// <summary>Why the last Stage attempt was refused (null after a successful stage, cancel or apply).</summary>
+        internal string StageError { get; private set; }
 
         /// <summary>Why writes are blocked right now, or null when they are allowed.</summary>
         internal string WriteBlockReason(GameSnapshot snap, bool writesEnabledPref, bool allowOtherBuilds)
@@ -70,6 +72,7 @@ namespace AmbitionControl.Game
             if (!MoneyCommand.TryPrepare(action, snap.Money, amount, out float delta, out string error))
             {
                 staged = null;
+                StageError = error;
                 Status = error;
                 return;
             }
@@ -77,16 +80,19 @@ namespace AmbitionControl.Game
             {
                 Action = action, Amount = amount, Before = snap.Money, Delta = delta, Session = snap.Identity()
             };
+            StageError = null;
             Status = "Review the preview, then Confirm.";
         }
 
         internal void Cancel()
         {
+            StageError = null;
             staged = null;
             confirmRequested = false;
             Status = "Cancelled.";
         }
 
+        internal void ClearStageError() { StageError = null; }
         internal void RequestConfirm() { if (staged != null) confirmRequested = true; }
         internal void RequestUndo() { undoRequested = true; }
 

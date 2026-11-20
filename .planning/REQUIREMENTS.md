@@ -24,13 +24,13 @@
 - [x] **MONEY-01**: Add stages a preview, applies on confirm, and reports Verified only after balance readback matches
 - [ ] **MONEY-02**: Remove works and is refused when the result would be negative
 - [ ] **MONEY-03**: Set works to an exact balance
-- [ ] **MONEY-04**: Undo reverses the last change only while the same save is loaded and the balance is unchanged since
-- [ ] **MONEY-05**: A verified change persists after the game saves, quits and reloads
-- [ ] **MONEY-06**: Staged/undo state clears when returning to the main menu or loading another save
+- [x] **MONEY-04**: Undo reverses the last change only while the same save is loaded and the balance is unchanged since
+- [x] **MONEY-05**: A verified change persists after the game saves, quits and reloads
+- [x] **MONEY-06**: Staged/undo state clears when returning to the main menu or loading another save
 
 ### Status (STAT)
 
-- [ ] **STAT-01**: Status tab shows day/time, money, net worth, energy, hunger, happiness matching the in-game HUD
+- [x] **STAT-01**: Status tab shows day/time, money, net worth, energy, hunger, happiness matching the in-game HUD
 
 ### Release (REL)
 
@@ -61,7 +61,8 @@ Deferred; each needs API verification on build 3233 first.
 | MENU-01..03 | Phase 1 | Complete |
 | MONEY-01 | Phase 1 | Complete |
 | MENU-04, MENU-05 | Phase 2 | Complete (phone app) |
-| MONEY-02..06, STAT-01 | Phase 3 | Pending |
+| MONEY-04..06, STAT-01 | Phase 3 | Complete (UAT round 1) |
+| MONEY-02 (refusal), MONEY-03 | Phase 3 | Pending (UAT round 2) |
 | FEAT-01..03 | Phase 4 | Pending |
 | REL-01, REL-02 | Phase 5 | Pending |
 

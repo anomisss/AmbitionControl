@@ -11,10 +11,10 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 3 of 5 (Money Feature Verification)
 Plan: UAT (03-UAT.md) — 8 owner tests
-Status: Testing — v0.5.0-alpha.2 installed (DLL 4ae7098d…), awaiting owner UAT run
-Last activity: 2026-11-19 — Phase 3 UAT checklist + evidence logging
+Status: UAT partial — 5/8 pass (03-UAT.md); round 2 needs tests 2 (over-removal refused), 3 (Set), 5 (Undo expiry). v0.5.0-alpha.3 installed (DLL 1719645d…)
+Last activity: 2026-11-19 — UAT round 1 recorded; staging-refusal message added to phone app
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Accumulated Context
 
