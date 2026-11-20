@@ -35,6 +35,8 @@ namespace AmbitionControl.UI
         private TMP_FontAsset font;
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
+        private TextMeshProUGUI energyLabel, happinessLabel;
+        private string lastMoneyStatus, lastToggleStatus, shownStatus;
         private readonly List<KeyValuePair<Button, Func<GameSnapshot, bool>>> gated =
             new List<KeyValuePair<Button, Func<GameSnapshot, bool>>>();
         private GameSnapshot lastSnap;
@@ -293,6 +295,17 @@ namespace AmbitionControl.UI
                 () => money.RequestUndo(), s => Block(s) == null && money.CanUndo(s));
             y += 62f;
 
+            if (settings == null || settings.PlayerTogglesEnabled)
+            {
+                energyLabel = MakeButton(panel.transform, "Energy drain", x0, y, hw, 50f, BtnNeutral,
+                    () => NeedToggles.Set(NeedKind.Energy, !lastSnap.EnergyDrainOff, lastSnap, settings),
+                    s => NeedToggles.BlockReason(s, settings) == null);
+                happinessLabel = MakeButton(panel.transform, "Happiness drain", x0 + hw + 8f, y, hw, 50f, BtnNeutral,
+                    () => NeedToggles.Set(NeedKind.Happiness, !lastSnap.HappinessDrainOff, lastSnap, settings),
+                    s => NeedToggles.BlockReason(s, settings) == null);
+                y += 62f;
+            }
+
             statusText = Text(panel.transform, "", x0, y, full, 70f, 22f, TextMain, TextAlignmentOptions.TopLeft);
             y += 76f;
             blockText = Text(panel.transform, "", x0, y, full, 56f, 20f, TextDim, TextAlignmentOptions.TopLeft);
@@ -324,7 +337,7 @@ namespace AmbitionControl.UI
             return tmp;
         }
 
-        private void MakeButton(Transform parent, string label, float x, float y, float w, float h, Color color,
+        private TextMeshProUGUI MakeButton(Transform parent, string label, float x, float y, float w, float h, Color color,
             Action onClick, Func<GameSnapshot, bool> enabledWhen)
         {
             var go = new GameObject("Btn_" + label);
@@ -347,8 +360,9 @@ namespace AmbitionControl.UI
                     Fail("button '" + label + "'", ex);
                 }
             }));
-            Text(go.transform, label, 0f, 0f, w, h, 20f, TextMain, TextAlignmentOptions.Center);
+            TextMeshProUGUI caption = Text(go.transform, label, 0f, 0f, w, h, 20f, TextMain, TextAlignmentOptions.Center);
             if (enabledWhen != null) gated.Add(new KeyValuePair<Button, Func<GameSnapshot, bool>>(b, enabledWhen));
+            return caption;
         }
 
         /// <summary>Top-left anchored placement in panel pixels (y grows downward).</summary>
@@ -376,7 +390,15 @@ namespace AmbitionControl.UI
                 :
                 "Preview: " + op.Action + " $" + op.Amount.ToString("N0") + "   $" + op.Before.ToString("N2") +
                 "  ->  $" + op.Expected.ToString("N2");
-            statusText.text = money.Status;
+            // Show whichever message changed most recently (money or needs).
+            if (money.Status != lastMoneyStatus) { lastMoneyStatus = money.Status; shownStatus = money.Status; }
+            if (NeedToggles.Status != lastToggleStatus) { lastToggleStatus = NeedToggles.Status; shownStatus = NeedToggles.Status; }
+            statusText.text = shownStatus ?? "";
+
+            if (energyLabel != null)
+                energyLabel.text = s.TogglesKnown ? "Energy drain: " + (s.EnergyDrainOff ? "OFF" : "ON") : "Energy drain: ?";
+            if (happinessLabel != null)
+                happinessLabel.text = s.TogglesKnown ? "Happiness drain: " + (s.HappinessDrainOff ? "OFF" : "ON") : "Happiness drain: ?";
 
             string block = Block(s);
             blockText.text = block == null

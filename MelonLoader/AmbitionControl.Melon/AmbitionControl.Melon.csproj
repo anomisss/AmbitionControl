@@ -14,8 +14,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>AmbitionControl</AssemblyName>
     <RootNamespace>AmbitionControl</RootNamespace>
-    <Version>0.5.0</Version>
-    <InformationalVersion>0.5.0-alpha.3</InformationalVersion>
+    <Version>0.6.0</Version>
+    <InformationalVersion>0.6.0-alpha.1</InformationalVersion>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>

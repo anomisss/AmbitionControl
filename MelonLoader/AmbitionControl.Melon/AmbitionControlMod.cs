@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.5.0-alpha.3", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.6.0-alpha.1", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -15,11 +15,12 @@ namespace AmbitionControl
         internal string ToggleKey = "F10";
         internal bool MoneyWritesEnabled = true;
         internal bool AllowOtherBuilds;
+        internal bool PlayerTogglesEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.5.0-alpha.3";
+        internal const string VersionLabel = "v0.6.0-alpha.1";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -71,6 +72,8 @@ namespace AmbitionControl
             MelonPreferences_Entry<bool> prefPhone = prefs.CreateEntry("PhoneApp", true,
                 description: "Add an Ambition Control app to the in-game smartphone.");
             if (prefPhone.Value) phone = new PhoneApp(money);
+            settings.PlayerTogglesEnabled = prefs.CreateEntry("PlayerTogglesEnabled", true,
+                description: "Show the energy/happiness drain switches in the phone app.").Value;
 
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);

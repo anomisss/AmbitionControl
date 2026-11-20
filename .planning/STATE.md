@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 4 — Expanded Features (scope to be chosen with owner)
+**Current focus:** Phase 4 — Expanded Features (FEAT-01 energy/happiness switches)
 
 ## Current Position
 
 Phase: 4 of 5 (Expanded Features)
-Plan: not yet planned
-Status: Ready to plan — Phase 3 complete (UAT 8/8; tests 2, 3, 5 owner-reported without log evidence)
-Last activity: 2026-11-19 — Phase 3 UAT complete
+Plan: 04-01 (1 of TBD)
+Status: Checkpoint — 0.6.0-alpha.1 installed (DLL 8bea46cc…); awaiting owner in-game test (04-01 task 3)
+Last activity: 2026-11-19 — Energy/happiness drain switches implemented (GameVariables flags)
 
 Progress: [██████░░░░] 60%
 
@@ -42,4 +42,4 @@ Progress: [██████░░░░] 60%
 
 Last session: 2026-11-19
 Stopped at: Phase 3 complete; next choose Phase 4 features
-Resume file: .planning/ROADMAP.md (Phase 4)
+Resume file: .planning/phases/04-expanded-features/04-01-PLAN.md

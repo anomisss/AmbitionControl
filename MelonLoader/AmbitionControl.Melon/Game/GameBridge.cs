@@ -23,6 +23,9 @@ namespace AmbitionControl.Game
         internal int Hour;
         internal float Minute;
         internal bool Saving;
+        internal bool TogglesKnown;
+        internal bool EnergyDrainOff;
+        internal bool HappinessDrainOff;
 
         internal bool SameSession(SaveIdentity id) =>
             Loaded && id != null && id.InstancePtr == InstancePtr &&
@@ -127,6 +130,13 @@ namespace AmbitionControl.Game
                 snap.Hour = gi.Hour;
                 snap.Minute = gi.Minute;
                 snap.Saving = SaveGameManager.SavingGameInProgress;
+                GameVariables gv = gi.gameVariables;
+                if (gv != null)
+                {
+                    snap.TogglesKnown = true;
+                    snap.EnergyDrainOff = gv.disableEnergy;
+                    snap.HappinessDrainOff = gv.disableHappiness;
+                }
                 snap.Loaded = true;
             }
             catch (Exception ex)
