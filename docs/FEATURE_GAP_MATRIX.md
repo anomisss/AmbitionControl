@@ -29,8 +29,8 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Player | Movement speed (walk/jog/run/scooter) | — | Yes | No player movement-speed member found (only editor/test scenes, `HandTruck.MoveSpeed`, `VehicleType.maxSpeed`) | — | — | Investigate | — |
 | Player | Set / change age | — | Yes | Cmd `GameManager.Command_ChangeAge(float)`; readback location not yet identified | H | 3 | Investigate | — |
 | Player | Complete personal goals | — | Yes | Cmd `PersonalGoals.Command_CompleteAll()` (+ `Command_Reset`) | H | 3 | Investigate | — |
-| Vehicles | Repair vehicle | — | Yes | `VehicleHelper.RepairVehicle()`; `VehicleController.Repair()`; `VehicleInstance.damage` | M | 2 | Missing | — |
-| Vehicles | Refuel | — | Yes | `VehicleHelper.SetFuel(int)`; `VehicleInstance.fuel` | M | 2 | Missing | — |
+| Vehicles | Repair vehicle | World tab (own vehicle only) | Yes | `VehicleHelper.RepairVehicle()`; `VehicleController.Repair()`; `VehicleInstance.damage` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
+| Vehicles | Refuel | World tab (own vehicle only; VehicleController.SetFuel(maxFuel)) | Yes | `VehicleHelper.SetFuel(int)`; `VehicleInstance.fuel` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Vehicles | Clean | — | Yes | `VehicleInstance.dirtiness` (float), `CarFeatures.Dirtiness`; no clean method found | M | 3 | Investigate | — |
 | Vehicles | Clear parking tickets | — | Yes | `VehicleInstance.parkingTickets` (List<Timestamp>) | M | 3 | Investigate | — |
 | Vehicles | Tow vehicle | — | Yes | Cmd `VehicleHelper.Command_TowVehicle(TowDestination)` | M | 3 | Missing | — |
@@ -44,16 +44,16 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Business | Revenue / income multiplier | — | Yes | No revenue multiplier in GameVariables; `baseCustomerPromotionMultiplier` exists (effect unknown) | — | — | Investigate | — |
 | Business | Urgent delivery fee multipliers | Economy tab cycle (preset values) | No | GV `wholesaleUrgentFeeMultiplier`, `importerUrgentFeeMultiplier` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Business | Market events / demand | — | No | Cmd `ProductMarketHelper.Command_CreateMarketEvent`, `Command_UpdateMarketDemand` | M | 4 | Investigate | — |
-| Gameplay | Game speed 0×–10× | — | Yes | Cmd `TimeHelper.Command_SetTimeSpeed(int percentage)` | L | 2 | Missing | — |
-| Gameplay | Pause / resume | — | Yes | via time speed 0 (game also has pause in FullMenu) | L | 2 | Missing | — |
+| Gameplay | Game speed 0×–10× | World tab 1x–10x (experimental) | Yes | Cmd `TimeHelper.Command_SetTimeSpeed(int percentage)` | L | 2 | Implemented v0.7.0-alpha.3 (experimental), awaiting UAT | — |
+| Gameplay | Pause / resume | World tab | Yes | `GameSpeedController.SetPause(bool, bool)`, `.Paused`; `TimeSpeed` = Pause, Normal, FastForward | L | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Gameplay | Skip hours | — | Yes | `Timemachine.TimeMachine.SkipTime(string)` — must confirm it runs hourly simulation | H | 2 | Investigate | — |
 | Gameplay | Set custom time | — | Yes | `TimeHelper.SetCurrentTime(Timestamp)` — direct jump may skip scheduled events | H | 4 | Investigate | — |
-| Gameplay | Traffic on/off | — | Yes | Cmd `GameManager.Command_ToggleTraffic()`; `ParkingLaneGenerator/PedestrianSpawner.Command_ToggleSpawning()` | L | 2 | Missing | — |
+| Gameplay | Traffic on/off | World tab | Yes | Cmd `GameManager.Command_ToggleTraffic()`; `ParkingLaneGenerator/PedestrianSpawner.Command_ToggleSpawning()` | L | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Gameplay | Tutorial toggle | Options switch (GV tutorialEnabled) | Yes | GV `tutorialEnabled` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
 | Gameplay | Complete quest / objective | — | Yes | Cmd `TutorialHelper.Command_CompleteQuest()`, `Command_CompleteObjective()` | H | 3 | Investigate | — |
 | Gameplay | Teleport | — | Yes | Cmd `GameManager.Command_TeleportPlayerToAddress(int, StreetName)`, `…ToDestination()`, `…ToQuestTarget()`, `…ToBusiness(…)`, `…ToWaypoint(string)` | M | 2 | Missing | — |
 | Gameplay | Deliver pending imports | — | Yes | No direct "deliver now" method found; `LogisticsManagerPlanDestination.Deliver(...)` is internal logistics | H | 4 | Investigate | — |
-| Gameplay | Save game | — | Yes | `GameManager.SaveGame(string, bool)`; `SaveGameManager.CanSave()` | M | 2 | Missing | — |
+| Gameplay | Save game | World tab (two-press confirm) | Yes | `GameManager.SaveGame(string, bool)`; `SaveGameManager.CanSave()` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Employees | View employees | — | Yes | `GameInstance.EmployeeInstances` (List<EmployeeInstance>) | L | 2 | Missing | — |
 | Employees | Set satisfaction | — | Yes | `EmployeeInstance.satisfaction` (float, direct) | M | 3 | Investigate | — |
 | Employees | Salary multiplier | Economy tab cycle (preset values) | Yes | GV `employeeHourlySalaryMultiplier` | M | 2 | Implemented v0.7.0-alpha.2, awaiting UAT | — |

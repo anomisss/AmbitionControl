@@ -28,6 +28,10 @@ namespace AmbitionControl.Game
         internal bool[] OptionDisabled = new bool[GameOptions.All.Length];
         internal float[] Econ = new float[GameEconomy.All.Length];
         internal Difficulty CurrentDifficulty;
+        internal bool InVehicle, VehicleOwned;
+        internal float VehicleFuel, VehicleMaxFuel, VehicleDamage;
+        internal bool PauseKnown, Paused, TrafficKnown, Traffic;
+        internal float TimeScale = 1f;
 
         internal bool SameSession(SaveIdentity id) =>
             Loaded && id != null && id.InstancePtr == InstancePtr &&
@@ -133,6 +137,7 @@ namespace AmbitionControl.Game
                 snap.Minute = gi.Minute;
                 snap.Saving = SaveGameManager.SavingGameInProgress;
                 snap.Invincible = PlayerTools.ReadInvincible();
+                WorldTools.ReadState(snap, gi);
                 GameVariables gv = gi.gameVariables;
                 if (gv != null)
                 {

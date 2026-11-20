@@ -36,8 +36,10 @@ namespace AmbitionControl.UI
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Economy", "Options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabOptions = 3;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabOptions = 4;
+        private TextMeshProUGUI pauseLabel, trafficLabel, saveLabel, vehicleText;
+        private string lastWorldStatus;
         private readonly TextMeshProUGUI[] econLabels = new TextMeshProUGUI[GameEconomy.All.Length];
         private readonly TextMeshProUGUI[] presetLabels = new TextMeshProUGUI[GameEconomy.Presets.Length];
         private string lastEconStatus;
@@ -363,6 +365,31 @@ namespace AmbitionControl.UI
                     BtnNeutral, () => GameEconomy.Cycle(setting, lastSnap, settings), econOk);
             }
 
+            // World page: vehicle repair/refuel (own vehicle only), pause, speed, traffic, save.
+            float wy = contentTop;
+            Transform wpage = pages[TabWorld].transform;
+            Func<GameSnapshot, bool> worldOk = s => settings != null && WorldTools.BlockReason(s, settings) == null;
+            Func<GameSnapshot, bool> vehicleOk = s => worldOk(s) && s.InVehicle && s.VehicleOwned;
+            MakeButton(wpage, "Repair vehicle", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.RepairVehicle(lastSnap, settings), vehicleOk);
+            MakeButton(wpage, "Refuel vehicle", x0 + hw + 8f, wy, hw, 50f, BtnNeutral, () => WorldTools.RefuelVehicle(lastSnap, settings), vehicleOk);
+            wy += 58f;
+            pauseLabel = MakeButton(wpage, "Pause", x0, wy, hw, 50f, BtnNeutral, () => WorldTools.TogglePause(lastSnap, settings),
+                s => worldOk(s) && s.PauseKnown);
+            trafficLabel = MakeButton(wpage, "Traffic", x0 + hw + 8f, wy, hw, 50f, BtnNeutral, () => WorldTools.ToggleTraffic(lastSnap, settings),
+                s => worldOk(s) && s.TrafficKnown);
+            wy += 58f;
+            float sw = (full - (WorldTools.SpeedPercents.Length - 1) * 8f) / WorldTools.SpeedPercents.Length;
+            for (int i = 0; i < WorldTools.SpeedPercents.Length; i++)
+            {
+                int pct = WorldTools.SpeedPercents[i];
+                MakeButton(wpage, (pct / 100f).ToString("0.#") + "x", x0 + i * (sw + 8f), wy, sw, 50f, BtnNeutral,
+                    () => WorldTools.SetSpeed(pct, lastSnap, settings), worldOk);
+            }
+            wy += 58f;
+            saveLabel = MakeButton(wpage, "Save game", x0, wy, full, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
+            wy += 58f;
+            vehicleText = Text(wpage, "", x0, wy, full, sharedTop - wy - 4f, 20f, TextDim, TextAlignmentOptions.TopLeft);
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
@@ -405,12 +432,13 @@ namespace AmbitionControl.UI
         private bool TabEnabled(int tab) =>
             settings == null ||
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
-             tab == TabEconomy ? settings.EconomyControlsEnabled : true);
+             tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled : true);
 
         private void ShowTab(int tab)
         {
             currentTab = TabEnabled(tab) ? tab : TabMoney;
             GameEconomy.ClearPending();
+            WorldTools.ClearPending();
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].SetActive(i == currentTab);
@@ -499,6 +527,7 @@ namespace AmbitionControl.UI
             if (GameOptions.Status != lastToggleStatus) { lastToggleStatus = GameOptions.Status; shownStatus = GameOptions.Status; }
             if (PlayerTools.Status != lastPlayerStatus) { lastPlayerStatus = PlayerTools.Status; shownStatus = PlayerTools.Status; }
             if (GameEconomy.Status != lastEconStatus) { lastEconStatus = GameEconomy.Status; shownStatus = GameEconomy.Status; }
+            if (WorldTools.Status != lastWorldStatus) { lastWorldStatus = WorldTools.Status; shownStatus = WorldTools.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
@@ -520,6 +549,15 @@ namespace AmbitionControl.UI
                     presetLabels[i].text = GameEconomy.PendingPreset == d ? "Confirm " + d :
                         d + (s.OptionsKnown && s.CurrentDifficulty == d ? " (current)" : " preset");
                 }
+            if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
+            if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
+            if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
+            if (vehicleText != null)
+                vehicleText.text = (!s.InVehicle ? "Not in a vehicle. Repair/refuel work in your own vehicle." :
+                    !s.VehicleOwned ? "This vehicle is not one of yours; vehicle tools are disabled." :
+                    "Your vehicle: fuel " + s.VehicleFuel.ToString("0.#") + " / " + s.VehicleMaxFuel.ToString("0.#") +
+                    ", damage " + s.VehicleDamage.ToString("0.##") + ".") +
+                    "\nTime scale " + s.TimeScale.ToString("0.##") + "x. Speeds above the game's own are experimental.";
             if (invincibleLabel != null) invincibleLabel.text = "Invincibility: " + (s.Invincible ? "ON" : "OFF");
             if (holdHungerLabel != null) holdHungerLabel.text = "Hold hunger full: " + (PlayerTools.HoldHunger ? "ON" : "OFF");
 
@@ -534,6 +572,11 @@ namespace AmbitionControl.UI
                 blockText.text = eBlock == null
                     ? "Values cycle through the game's own Easy/Normal/Hard preset values. Stored in your save when the game saves."
                     : "Economy controls unavailable: " + eBlock;
+            }
+            else if (currentTab == TabWorld)
+            {
+                string wBlock = settings == null ? "Starting..." : WorldTools.BlockReason(s, settings);
+                blockText.text = wBlock == null ? "" : "World tools unavailable: " + wBlock;
             }
             else if (currentTab == TabPlayer)
             {

@@ -45,6 +45,8 @@
 - [ ] **ECON-01**: Difficulty presets Easy/Normal/Hard from game assets (two-press confirm)
 - [ ] **ECON-02**: Nine economy settings cycle through game preset values with readback
 - [ ] **ECON-03**: Unlock courses/contacts/importer products, tutorial switches
+- [ ] **WORLD-01**: Repair / refuel own current vehicle (ownership-checked, readback)
+- [ ] **WORLD-02**: Pause/resume, game speed (experimental), traffic, save game
 
 Deferred; each needs API verification on build 3233 first.
 

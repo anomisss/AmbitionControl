@@ -1,5 +1,5 @@
 ---
-status: partial (run 1 at 21:45, game still running when read)
+status: partial — owner chose to skip remaining tests (4–8) and continue
 phase: 07-economy-controls
 build: v0.7.0-alpha.2 (DLL SHA-256 8c4703a277932a959a885389f3608221b89ab1094f9f01d0114af71b098db3a4)
 started: 2026-11-19

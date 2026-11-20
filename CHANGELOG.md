@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0-alpha.3] — 2026-11-19 — Milestone C: Vehicles & world
+- New **World** tab (tabs: Money | Player | Economy | World | Options).
+- **Repair vehicle** (`VehicleHelper.RepairVehicle()`, readback `VehicleInstance.damage`) and **Refuel vehicle** (`VehicleController.SetFuel(VehicleType.maxFuel)`, readback `VehicleInstance.fuel`). Only work while you are inside a motor vehicle **that is in your own `GameInstance.VehicleInstances`** — taxis/NPC/other vehicles are refused. No cost charged.
+- **Pause / Resume** via the game's own `GameSpeedController.SetPause` with `Paused` readback.
+- **Game speed 1x / 2x / 3x / 5x / 10x** via the game's debug command `TimeHelper.Command_SetTimeSpeed(percent)` — **experimental** (the game's normal speeds are only Normal and FastForward); logs `Time.timeScale` before/after.
+- **Traffic ON/OFF** via `GameManager.Command_ToggleTraffic()` with `spawnTraffic` readback (runtime only).
+- **Save game** (two-press confirm) runs the game's normal `GameManager.SaveGame` for the loaded save, only when `SaveGameManager.CanSave()`.
+- Cached scene lookups (no per-snapshot scene scans); new preference `WorldToolsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/08-vehicles-world/08-UAT.md`.
+
 ## [0.7.0-alpha.2] — 2026-11-19 — Milestone C/D: Economy & difficulty controls
 - New **Economy** tab (tabs: Money | Player | Economy | Options).
 - **Difficulty presets Easy / Normal / Hard**: values are read at runtime from the game's own `DifficultySetting.GetDifficultySettings(...)` assets and logged; first press shows how many of 9 settings would change, second press ("Confirm …") applies them and sets `gameVariables.difficulty`. Build 3233 has no "Brutal" preset (enum: Custom, Easy, Normal, Hard).
