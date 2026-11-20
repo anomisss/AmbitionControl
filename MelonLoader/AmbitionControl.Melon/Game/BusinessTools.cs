@@ -60,7 +60,7 @@ namespace AmbitionControl.Game
                     row.Name = System.Text.RegularExpressions.Regex.Replace(row.Name, "<.*?>", "");
                     try
                     {
-                        if (r.HasValidAddress) { row.Address = r.Address; row.AddressText = row.Address != null ? row.Address.ToString() : ""; }
+                        if (r.HasValidAddress) { row.Address = r.Address; row.AddressText = GameText.Of(row.Address); }
                     }
                     catch { }
                     try

@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 16 — Business tab (time skip from 15 still untested)
+**Current focus:** Between milestones — alpha.13 text fix installed
 
 ## Current Position
 
 Phase: 10 (Rivals)
 Plan: Phase 16 implemented
-Status: v0.7.0-alpha.12 installed (DLL 3d71a0b2…); awaiting owner UAT (16-UAT.md). Earlier alpha.11: 15-UAT: market wages + candidate PASS; time skip not run. Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
+Status: v0.7.0-alpha.13 installed (DLL 6b2b7995…). 16-UAT: business list, Go teleport, Skip 1h PASS. Earlier alpha.11: 15-UAT: market wages + candidate PASS; time skip not run. Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%

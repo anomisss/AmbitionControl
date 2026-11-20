@@ -1,5 +1,10 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.13] — 2026-11-20 — Readable addresses and times
+- Fix: addresses and times showed as `Il2Cpp.Address` / `Il2CppBigAmbitions.DayNightCycle.Timestamp` in some status and log lines (Il2Cpp objects concatenated into strings print their type name). New `GameText` helper: "45 Third Street", "Day 11 01:12"; used by the Business list, teleport-to-business and time skip.
+- alpha.12 runtime results (16-UAT): business list PASS, Go teleport PASS (2/2), Skip 1h PASS.
+- **Status:** Build verified (0 warnings); tests 12/12. Text-only change, not yet seen in game.
+
 ## [0.7.0-alpha.12] — 2026-11-20 — Milestone I: Business tab
 - New **Business** tab (nine tabs: Money | Player | Economy | World | Staff | Business | Rivals | Quest | Options).
 - Lists every building you rent or own (`GameInstance.BuildingRegistrations`, `RentedByPlayer` / `BuildingOwnedByPlayer`) with name, address, and **customer satisfaction** (`BuildingRegistration.satisfaction`: overall, service, pricing, cleanliness, facility); summary shows the average; 5 per page. Read-only.

@@ -109,7 +109,7 @@ namespace AmbitionControl.Game
             string block = TeleportBlock(TeleportTarget.Address);
             if (block != null) { Status = "Not teleported: " + block; return; }
             if (address == null) { Status = "Not teleported: no address."; return; }
-            StartTeleport(TeleportTarget.Address, label + " (" + address + ")",
+            StartTeleport(TeleportTarget.Address, label + " (" + GameText.Of(address) + ")",
                 () => GameManager.Command_TeleportPlayerToAddress(address.streetNumber, address.streetName));
         }
 

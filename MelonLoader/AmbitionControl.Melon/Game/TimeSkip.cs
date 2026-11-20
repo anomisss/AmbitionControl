@@ -66,14 +66,14 @@ namespace AmbitionControl.Game
             {
                 Timestamp now = TimeHelper.Now();
                 Timestamp goal = now.AddHours(hours);
-                watchGoal = goal.ToString();
+                watchGoal = GameText.Of(goal);
                 watchGoalMinutes = goal.GetTotalMinutes();
                 Machine().StartTimeMachine(goal);
                 if (Running)
                 {
                     watching = true;
                     Status = "Skipping " + hours + "h to " + watchGoal + "...";
-                    AmbitionControlMod.Log.Msg("Time skip started (verified running): " + now + " -> " + watchGoal);
+                    AmbitionControlMod.Log.Msg("Time skip started (verified running): " + GameText.Of(now) + " -> " + watchGoal);
                 }
                 else
                 {
@@ -100,8 +100,8 @@ namespace AmbitionControl.Game
                 Timestamp end = TimeHelper.Now();
                 float diff = watchGoalMinutes - end.GetTotalMinutes();
                 bool reached = diff <= 1f;
-                Status = reached ? "Time skipped (verified): now " + end + "." : "Time skip stopped early at " + end + " (goal " + watchGoal + ").";
-                AmbitionControlMod.Log.Msg("Time skip finished: now " + end + ", goal " + watchGoal + (reached ? " (reached)" : " (stopped early)"));
+                Status = reached ? "Time skipped (verified): now " + GameText.Of(end) + "." : "Time skip stopped early at " + GameText.Of(end) + " (goal " + watchGoal + ").";
+                AmbitionControlMod.Log.Msg("Time skip finished: now " + GameText.Of(end) + ", goal " + watchGoal + (reached ? " (reached)" : " (stopped early)"));
             }
             catch (Exception ex)
             {

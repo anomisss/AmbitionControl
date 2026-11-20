@@ -9,8 +9,8 @@ Run on a COPY of a save. Evidence = MelonLoader/Latest.log + owner observation.
 
 | # | Test | Steps | Expected | Result |
 |---|---|---|---|---|
-| 1 | Skip preview | World → Skip 1h once | Yellow status asks to confirm; button reads Confirm 1h; time unchanged | NOT RUN |
-| 2 | Skip apply | Press Confirm 1h | Game fast-forwards like sleeping; log `Time skip started (verified running)` then `Time skip finished: … (reached)` | NOT RUN |
+| 1 | Skip preview | World → Skip 1h once | Yellow status asks to confirm; button reads Confirm 1h; time unchanged | PASS — 16-UAT R1: first press previewed, second started |
+| 2 | Skip apply | Press Confirm 1h | Game fast-forwards like sleeping; log `Time skip started (verified running)` then `Time skip finished: … (reached)` | PASS — 16-UAT R1: `Time skip finished: … (reached)` (1h) |
 | 3 | Skip guard | In a vehicle | Skip buttons greyed | NOT RUN |
 | 4 | Wages preview | Staff → Wages to market rate once | Status shows count + payroll before → after; nothing changes | PASS — log 15:31:42.7 first press (preview), no change logged until confirm |
 | 5 | Wages apply | Confirm market wages | Log `Market wages: N/N verified`; MyEmployees shows new wages | PASS — 15:31:48.4 `Market wages: 2/2 verified; payroll 57.14 -> 54.84 per hour` |
@@ -18,6 +18,6 @@ Run on a COPY of a save. Evidence = MelonLoader/Latest.log + owner observation.
 | 7 | Layout | Staff and World tabs | Everything fits inside the card | PASS (Staff tab used throughout; no layout issue reported) |
 
 ## Summary
-total: 7 · pass: 4 · fail: 0 · not run: 3 (time skip)
+total: 7 · pass: 6 · fail: 0 · not run: 1 (skip guard in vehicle)
 
 Evidence: Latest.log 2026-11-20 15:31–15:32 (save day 11), no errors. Also re-verified: Max satisfaction 5/5 (2 were below max).
