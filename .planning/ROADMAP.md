@@ -58,7 +58,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Each feature's game API is confirmed from build-3233 interop before code is written
   2. Each write is verified by readback and can be disabled by preference
-**Plans**: 04-01 complete; more TBD with owner
+**Plans**: 04-01, 04-02 complete; FEAT-02 (time) and FEAT-04 (economy tools) optional
 
 ### Phase 5: Release Packaging
 **Goal**: A downloadable, documented release the owner approves
@@ -76,5 +76,5 @@ Plans:
 | 1. MelonLoader Foundation | done | Complete | 2026-11-19 |
 | 2. Menu Input Isolation | 1/1 (02-01 superseded) | Complete | 2026-11-19 |
 | 3. Money Feature Verification | UAT 8/8 | Complete | 2026-11-19 |
-| 4. Expanded Features | 1/TBD | In progress | - |
+| 4. Expanded Features | 2/2 (+ optional) | Core complete | 2026-11-19 |
 | 5. Release Packaging | 0/TBD | Not started | - |

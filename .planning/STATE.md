@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 ## Current Position
 
 Phase: 4 of 5 (Expanded Features)
-Plan: 04-02 (all six game option switches + tabs)
-Status: Checkpoint — 0.6.0-alpha.2 installed (DLL f2ef9036…); awaiting owner in-game test of the Game options tab
-Last activity: 2026-11-19 — 04-02: six game option switches, Money/Game options tabs
+Plan: 04-02 complete
+Status: Phase 4 core complete — all six option switches write/readback verified in-game; tabs fit. Next: Phase 5 release or optional FEAT-02/04
+Last activity: 2026-11-19 — 04-02 verified (04-02-SUMMARY.md)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Accumulated Context
 
@@ -41,5 +41,5 @@ Progress: [███████░░░] 70%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 3 complete; next choose Phase 4 features
-Resume file: .planning/phases/04-expanded-features/04-02-PLAN.md
+Stopped at: Phase 4 core complete
+Resume file: .planning/ROADMAP.md (Phase 5)

@@ -43,7 +43,7 @@ Deferred; each needs API verification on build 3233 first.
 
 - [x] **FEAT-01**: Energy and happiness drain switches (game options; hunger has no game option in build 3233)
 - **FEAT-02**: Time controls (skip hours / set time)
-- [ ] **FEAT-03**: Remaining game option switches (aging, vehicle damage, vehicle fuel, wholesale/import limits)
+- [x] **FEAT-03**: Remaining game option switches (aging, vehicle damage, vehicle fuel, wholesale/import limits)
 - **FEAT-04**: Additional economy tools (e.g. pay off loans/taxes) — scope TBD with owner
 
 ## Out of Scope
@@ -65,7 +65,8 @@ Deferred; each needs API verification on build 3233 first.
 | MONEY-04..06, STAT-01 | Phase 3 | Complete (UAT round 1) |
 | MONEY-02 (refusal), MONEY-03 | Phase 3 | Complete (owner-reported, no log evidence) |
 | FEAT-01 | Phase 4 | Complete (OFF verified; ON not yet exercised) |
-| FEAT-02..03 | Phase 4 | Pending |
+| FEAT-03 | Phase 4 | Complete (OFF + readback verified; effects and ON not exercised) |
+| FEAT-02, FEAT-04 | Phase 4 | Not started (optional) |
 | REL-01, REL-02 | Phase 5 | Pending |
 
 ---
