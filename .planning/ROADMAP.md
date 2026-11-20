@@ -67,7 +67,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. ZIP contains only the DLL, README/install steps and SHA-256
   2. Published to GitHub only after owner approval
-**Plans**: TBD
+**Plans**: 05-01 packaged (local); publish awaits owner approval
 
 ## Progress
 
@@ -77,4 +77,4 @@ Plans:
 | 2. Menu Input Isolation | 1/1 (02-01 superseded) | Complete | 2026-11-19 |
 | 3. Money Feature Verification | UAT 8/8 | Complete | 2026-11-19 |
 | 4. Expanded Features | 2/2 (+ optional) | Core complete | 2026-11-19 |
-| 5. Release Packaging | 0/TBD | Not started | - |
+| 5. Release Packaging | 1/1 packaged | Awaiting publish approval | - |

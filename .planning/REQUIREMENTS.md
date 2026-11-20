@@ -34,7 +34,7 @@
 
 ### Release (REL)
 
-- [ ] **REL-01**: Release package contains only the built DLL plus install/upgrade/uninstall instructions and checksum
+- [x] **REL-01**: Release package contains only the built DLL plus install/upgrade/uninstall instructions and checksum
 - [ ] **REL-02**: Changelog/version updated; release published only with owner approval
 
 ## v2 Requirements
@@ -67,7 +67,8 @@ Deferred; each needs API verification on build 3233 first.
 | FEAT-01 | Phase 4 | Complete (OFF verified; ON not yet exercised) |
 | FEAT-03 | Phase 4 | Complete (OFF + readback verified; effects and ON not exercised) |
 | FEAT-02, FEAT-04 | Phase 4 | Not started (optional) |
-| REL-01, REL-02 | Phase 5 | Pending |
+| REL-01 | Phase 5 | Complete (ZIP built from tested DLL) |
+| REL-02 | Phase 5 | Awaiting owner approval to publish |
 
 ---
 *Last updated: 2026-11-19 after GSD initialization*

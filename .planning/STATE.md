@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 4 — Expanded Features (FEAT-01 energy/happiness switches)
+**Current focus:** Phase 5 — Release Packaging
 
 ## Current Position
 
-Phase: 4 of 5 (Expanded Features)
-Plan: 04-02 complete
-Status: Phase 4 core complete — all six option switches write/readback verified in-game; tabs fit. Next: Phase 5 release or optional FEAT-02/04
-Last activity: 2026-11-19 — 04-02 verified (04-02-SUMMARY.md)
+Phase: 5 of 5 (Release Packaging)
+Plan: 05-01 packaged
+Status: ZIP built and verified (dist/, local); GitHub release awaits owner approval
+Last activity: 2026-11-19 — Release ZIP v0.6.0-alpha.2 packaged (05-01-SUMMARY.md)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Accumulated Context
 
@@ -41,5 +41,5 @@ Progress: [████████░░] 80%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 4 core complete
-Resume file: .planning/ROADMAP.md (Phase 5)
+Stopped at: release packaged; publish decision pending
+Resume file: .planning/phases/05-release-packaging/05-01-SUMMARY.md
