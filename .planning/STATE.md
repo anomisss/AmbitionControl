@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 ## Current Position
 
 Phase: 4 of 5 (Expanded Features)
-Plan: 04-01 (1 of TBD)
-Status: Checkpoint — 0.6.0-alpha.1 installed (DLL 8bea46cc…); awaiting owner in-game test (04-01 task 3)
-Last activity: 2026-11-19 — Energy/happiness drain switches implemented (GameVariables flags)
+Plan: 04-01 complete; next plan TBD with owner
+Status: 04-01 done — drain switches verified in-game (OFF; game reads flags live). Owner kept both OFF in the test save.
+Last activity: 2026-11-19 — 04-01 verified (04-01-SUMMARY.md)
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Accumulated Context
 

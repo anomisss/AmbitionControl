@@ -5,7 +5,7 @@
 - These options are part of the save: once the game saves, the setting stays with that save. Turn a switch back ON to restore normal drain.
 - Blocked on non-3233 builds (unless `AllowOtherBuilds`), with no save loaded, or while saving. New preference `PlayerTogglesEnabled` (default true).
 - Hunger has no game option in build 3233, so it is not included.
-- **Status:** Build verified; tests 12/12. **Not runtime verified** (whether the game stops drain immediately mid-session is part of the in-game test).
+- **Status:** **Runtime verified (2026-11-19, build 3233):** both switches set OFF and read back ("verified" in log); owner confirms energy and happiness stop dropping immediately (no reload) and the panel layout fits. Switching back ON not yet exercised.
 
 ## [0.5.0-alpha.3] — 2026-11-19 — Phase 3 UAT round 1 + staging feedback
 - UAT round 1 on build 3233 (log evidence in `.planning/phases/03-money-feature-verification/03-UAT.md`): **Remove** verified (15,145,598 → 15,144,598), **Undo** verified twice, **save → quit → reload** kept the mod's changes (reload $15,144,279 after $319 normal spending), state cleared and app re-injected after reload, Status matched the HUD, switching phone apps hides ours. Not yet run: over-removal refusal, Set, Undo expiry.
