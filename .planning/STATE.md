@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-11-19)
 
 Phase: 10 (Rivals)
 Plan: Phase 15 implemented
-Status: v0.7.0-alpha.11 installed (DLL d3e7c69a…); awaiting owner UAT (15-UAT.md). Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
+Status: v0.7.0-alpha.11 installed (DLL d3e7c69a…); 15-UAT: market wages + candidate PASS; time skip not run. Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
