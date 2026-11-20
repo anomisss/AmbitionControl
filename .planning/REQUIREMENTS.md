@@ -51,6 +51,8 @@
 - [x] **STAFF-02**: Temporary max satisfaction with affected-count preview and readback
 - [ ] **RIVAL-01**: Rival list per neighbourhood (name, state, weekly income)
 - [ ] **RIVAL-02**: Defeat rival / all active rivals (game method, two-press confirm, readback)
+- [ ] **QUEST-01**: Teleport to quest target / GPS destination (on foot, outdoors; position readback)
+- [ ] **QUEST-02**: Complete current objective / quest (game commands, two-press confirm, readback)
 
 Deferred; each needs API verification on build 3233 first.
 

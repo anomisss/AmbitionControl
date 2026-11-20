@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0-alpha.6] — 2026-11-20 — Milestone F (part 2): Quests & teleport
+- New **Quest** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Quest | Options); tab text 15 pt so eight fit.
+- Shows the current quest and objective ids (`TutorialHelper.currentQuest` / `currentQuestEntry`).
+- **Teleport to quest target** (`GameManager.Command_TeleportPlayerToQuestTarget`) and **Teleport to GPS destination** (`Command_TeleportPlayerToDestination`). Only on foot and outdoors (`PlayerHelper.IsUsingVehicle`, `BuildingManager.IsInsideBuilding`). Verified by checking the player moved at least 2 m (`PlayerHelper.GetPosition`) within 90 frames.
+- **Complete objective** (`TutorialHelper.Command_CompleteObjective`, readback `QuestEntry.IsAlreadyCompleted` / next objective) and **Complete whole quest** (`Command_CompleteQuest`, readback current quest changed). Both need a second press ("Confirm"); cannot be undone. Unavailable when the tutorial is off or finished.
+- New preference `QuestToolsEnabled` (default true).
+- **Status:** Build verified (0 warnings); tests 12/12. **Not runtime verified** — `.planning/phases/11-quests-teleport/11-UAT.md`.
+
 ## [0.7.0-alpha.5] — 2026-11-20 — Milestone F (part 1): Rivals
 - New **Rivals** tab (tabs: Money | Player | Economy | World | Staff | Rivals | Options). Selected tab is now highlighted in gold instead of bracketed, so seven tabs fit.
 - **Rival list**: one row per neighbourhood rival (`RivalsHelper.GetSpecialRivalByNeighborhood`), with name, area, state from the save's `specialRivalStates` (active / not active / defeated) and weekly income.

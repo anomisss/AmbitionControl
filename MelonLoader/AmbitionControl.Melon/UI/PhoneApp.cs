@@ -37,11 +37,13 @@ namespace AmbitionControl.UI
 
         private TextMeshProUGUI balanceText, amountText, previewText, statusText, infoText, blockText;
         // Tabs (index order = button order). New feature groups add a name + page here.
-        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Rivals", "Options" };
-        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabRivals = 5, TabOptions = 6;
+        private static readonly string[] TabNames = { "Money", "Player", "Economy", "World", "Staff", "Rivals", "Quest", "Options" };
+        private const int TabMoney = 0, TabPlayer = 1, TabEconomy = 2, TabWorld = 3, TabStaff = 4, TabRivals = 5, TabQuest = 6, TabOptions = 7;
         private readonly TextMeshProUGUI[] rivalRowLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private readonly TextMeshProUGUI[] rivalBtnLabels = new TextMeshProUGUI[RivalTools.Areas.Length];
         private TextMeshProUGUI rivalAllLabel;
+        private TextMeshProUGUI questText, questObjLabel, questQuestLabel;
+        private string lastQuestStatus;
         private List<RivalRow> rivalRows = new List<RivalRow>();
         private string rivalError, lastRivalStatus;
         private float nextRivalRead;
@@ -293,7 +295,7 @@ namespace AmbitionControl.UI
                 pages[i] = Page(TabNames[i].Replace(" ", "") + "Page");
                 tabLabels[i] = MakeButton(panel.transform, TabNames[i], x0 + i * (tabW + 8f), y, tabW, 46f, BtnNeutral,
                     () => ShowTab(index), null);
-                tabLabels[i].fontSize = 17f;
+                tabLabels[i].fontSize = 15f;
             }
             y += 58f;
             float contentTop = y;
@@ -434,6 +436,29 @@ namespace AmbitionControl.UI
                 () => { RivalTools.DefeatAllPressed(lastSnap, settings); nextRivalRead = 0f; },
                 s => rivalsOk(s) && rivalRows.Any(r => r.Met && r.Active && !r.Defeated));
 
+            // Quest page: current objective, teleport (quest target / GPS destination), complete objective / quest.
+            float qy = contentTop;
+            Transform qpage = pages[TabQuest].transform;
+            Func<GameSnapshot, bool> questOk = s => settings != null && QuestTools.BlockReason(s, settings) == null;
+            questText = Text(qpage, "", x0, qy, full, 64f, 20f, TextMain, TextAlignmentOptions.TopLeft);
+            qy += 72f;
+            MakeButton(qpage, "Teleport to quest target", x0, qy, hw, 50f, BtnNeutral,
+                () => QuestTools.Teleport(TeleportTarget.QuestTarget, lastSnap, settings),
+                s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.QuestTarget) == null);
+            MakeButton(qpage, "Teleport to GPS destination", x0 + hw + 8f, qy, hw, 50f, BtnNeutral,
+                () => QuestTools.Teleport(TeleportTarget.GpsDestination, lastSnap, settings),
+                s => questOk(s) && QuestTools.TeleportBlock(TeleportTarget.GpsDestination) == null);
+            qy += 62f;
+            questObjLabel = MakeButton(qpage, "Complete objective", x0, qy, hw, 50f, BtnStop,
+                () => QuestTools.CompleteObjectivePressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
+            questQuestLabel = MakeButton(qpage, "Complete whole quest", x0 + hw + 8f, qy, hw, 50f, BtnStop,
+                () => QuestTools.CompleteQuestPressed(lastSnap, settings), s => questOk(s) && QuestTools.QuestBlock() == null);
+            qy += 62f + 6f;
+            Text(qpage, "Teleport works on foot and outdoors, and is checked by confirming you actually moved. " +
+                        "Set a GPS destination in the game first for the GPS button. Completing objectives runs the " +
+                        "game's own completion actions and cannot be undone.",
+                x0, qy, full, sharedTop - qy - 4f, 18f, TextDim, TextAlignmentOptions.TopLeft);
+
             // Game options page: 2 columns x 3 rows of switches, then a note.
             float oy = contentTop;
             Transform opage = pages[TabOptions].transform;
@@ -477,7 +502,8 @@ namespace AmbitionControl.UI
             settings == null ||
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
              tab == TabEconomy ? settings.EconomyControlsEnabled : tab == TabWorld ? settings.WorldToolsEnabled :
-             tab == TabStaff ? settings.EmployeeToolsEnabled : tab == TabRivals ? settings.RivalToolsEnabled : true);
+             tab == TabStaff ? settings.EmployeeToolsEnabled : tab == TabRivals ? settings.RivalToolsEnabled :
+             tab == TabQuest ? settings.QuestToolsEnabled : true);
 
         private void ShowTab(int tab)
         {
@@ -486,6 +512,7 @@ namespace AmbitionControl.UI
             WorldTools.ClearPending();
             EmployeeTools.ClearPending();
             RivalTools.ClearPending();
+            QuestTools.ClearPending();
             nextRivalRead = 0f;
             nextStaffRead = 0f;
             for (int i = 0; i < pages.Length; i++)
@@ -651,6 +678,7 @@ namespace AmbitionControl.UI
             if (WorldTools.Status != lastWorldStatus) { lastWorldStatus = WorldTools.Status; shownStatus = WorldTools.Status; }
             if (EmployeeTools.Status != lastStaffStatus) { lastStaffStatus = EmployeeTools.Status; shownStatus = EmployeeTools.Status; }
             if (RivalTools.Status != lastRivalStatus) { lastRivalStatus = RivalTools.Status; shownStatus = RivalTools.Status; }
+            if (QuestTools.Status != lastQuestStatus) { lastQuestStatus = QuestTools.Status; shownStatus = QuestTools.Status; }
             statusText.text = shownStatus ?? "";
 
             for (int i = 0; i < optionLabels.Length; i++)
@@ -674,6 +702,12 @@ namespace AmbitionControl.UI
                 }
             if (currentTab == TabStaff && staffList != null) RefreshStaff(s);
             if (currentTab == TabRivals && rivalAllLabel != null) RefreshRivals(s);
+            if (currentTab == TabQuest && questText != null)
+            {
+                questText.text = s.Loaded ? QuestTools.CurrentObjectiveText() : "";
+                questObjLabel.text = QuestTools.PendingObjective ? "Confirm objective" : "Complete objective";
+                questQuestLabel.text = QuestTools.PendingQuest ? "Confirm quest" : "Complete whole quest";
+            }
             if (pauseLabel != null) pauseLabel.text = s.PauseKnown && s.Paused ? "Resume game" : "Pause game";
             if (trafficLabel != null) trafficLabel.text = "Traffic: " + (s.TrafficKnown ? (s.Traffic ? "ON" : "OFF") : "?");
             if (saveLabel != null) saveLabel.text = WorldTools.SavePending ? "Confirm save" : "Save game";
@@ -702,6 +736,12 @@ namespace AmbitionControl.UI
             {
                 string rBlock = settings == null ? "Starting..." : RivalTools.BlockReason(s, settings);
                 blockText.text = rBlock == null ? (rivalError ?? "Defeating a rival is permanent (the game closes their businesses). Each needs Confirm.") : "Rival tools unavailable: " + rBlock;
+            }
+            else if (currentTab == TabQuest)
+            {
+                string qBlock = settings == null ? "Starting..." : QuestTools.BlockReason(s, settings);
+                string why = qBlock ?? QuestTools.TeleportBlock(TeleportTarget.QuestTarget) ?? QuestTools.QuestBlock();
+                blockText.text = qBlock != null ? "Quest tools unavailable: " + qBlock : why ?? "";
             }
             else if (currentTab == TabStaff)
             {

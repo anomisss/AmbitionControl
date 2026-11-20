@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 10 — Rivals (+ World retest)
+**Current focus:** Phase 11 — Quests & teleport (Phase 10 defeat/refuel/save still untested)
 
 ## Current Position
 
 Phase: 10 (Rivals)
-Plan: Phase 10 implemented
-Status: v0.7.0-alpha.5 installed (DLL 106bc9ac…); 10-UAT partial — pause PASS, rivals tab opens without errors, no defeat run yet, speed PASS (owner-observed)
+Plan: Phase 11 implemented
+Status: v0.7.0-alpha.6 installed (DLL 2f685f82…); awaiting owner UAT (11-UAT.md). Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 10 awaiting in-game test
-Resume file: .planning/phases/10-rivals/10-UAT.md
+Stopped at: Phase 11 awaiting in-game test
+Resume file: .planning/phases/11-quests-teleport/11-UAT.md

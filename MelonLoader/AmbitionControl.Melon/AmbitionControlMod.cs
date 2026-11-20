@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.5", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.6", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -21,11 +21,12 @@ namespace AmbitionControl
         internal bool WorldToolsEnabled = true;
         internal bool EmployeeToolsEnabled = true;
         internal bool RivalToolsEnabled = true;
+        internal bool QuestToolsEnabled = true;
     }
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.5";
+        internal const string VersionLabel = "v0.7.0-alpha.6";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -89,6 +90,8 @@ namespace AmbitionControl
                 description: "Show the Staff tab (employee list, temporary max satisfaction).").Value;
             settings.RivalToolsEnabled = prefs.CreateEntry("RivalToolsEnabled", true,
                 description: "Show the Rivals tab (view rivals; defeat with confirmation).").Value;
+            settings.QuestToolsEnabled = prefs.CreateEntry("QuestToolsEnabled", true,
+                description: "Show the Quest tab (teleport to quest target / GPS destination; complete objective or quest with confirmation).").Value;
 
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
@@ -105,6 +108,7 @@ namespace AmbitionControl
             WorldTools.ResetScene();
             EmployeeTools.ResetSession();
             RivalTools.ClearPending();
+            QuestTools.ResetSession();
             PlayerTools.ResetSession();
             Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
             snapshot = new GameSnapshot { NotLoadedReason = "Scene loading..." };
@@ -189,6 +193,7 @@ namespace AmbitionControl
                 money.Tick(snapshot, settings.MoneyWritesEnabled, settings.AllowOtherBuilds);
                 phone?.Update(snapshot, settings);
                 PlayerTools.Tick(snapshot, settings);
+                QuestTools.Tick();
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;
                 lastUpdateError = null;
             }

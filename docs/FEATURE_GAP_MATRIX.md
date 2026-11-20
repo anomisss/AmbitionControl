@@ -50,8 +50,8 @@ Last updated: 2026-11-19 (v0.7.0 development).
 | Gameplay | Set custom time | — | Yes | `TimeHelper.SetCurrentTime(Timestamp)` — direct jump may skip scheduled events | H | 4 | Investigate | — |
 | Gameplay | Traffic on/off | World tab | Yes | Cmd `GameManager.Command_ToggleTraffic()`; `ParkingLaneGenerator/PedestrianSpawner.Command_ToggleSpawning()` | L | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Gameplay | Tutorial toggle | Options switch (GV tutorialEnabled) | Yes | GV `tutorialEnabled` | M | 3 | Implemented v0.7.0-alpha.2, awaiting UAT | — |
-| Gameplay | Complete quest / objective | — | Yes | Cmd `TutorialHelper.Command_CompleteQuest()`, `Command_CompleteObjective()` | H | 3 | Investigate | — |
-| Gameplay | Teleport | — | Yes | Cmd `GameManager.Command_TeleportPlayerToAddress(int, StreetName)`, `…ToDestination()`, `…ToQuestTarget()`, `…ToBusiness(…)`, `…ToWaypoint(string)` | M | 2 | Missing | — |
+| Gameplay | Complete quest / objective | Quest tab, two-press confirm | Yes | Cmd `TutorialHelper.Command_CompleteQuest()`, `Command_CompleteObjective()`; readback `QuestEntry.IsAlreadyCompleted(bool)`, `TutorialHelper.currentQuest/currentQuestEntry` | H | 3 | Implemented v0.7.0-alpha.6, awaiting UAT | — |
+| Gameplay | Teleport | Quest tab: quest target, GPS destination (on foot, outdoors) | Yes | Cmd `GameManager.Command_TeleportPlayerToQuestTarget()`, `…ToDestination()`; readback `PlayerHelper.GetPosition()`; also `…ToAddress(int, StreetName)`, `…ToBusiness(…)`, `…ToWaypoint(string)` not yet used | M | 2 | Partial — implemented v0.7.0-alpha.6 (quest target, GPS), awaiting UAT | — |
 | Gameplay | Deliver pending imports | — | Yes | No direct "deliver now" method found; `LogisticsManagerPlanDestination.Deliver(...)` is internal logistics | H | 4 | Investigate | — |
 | Gameplay | Save game | World tab (two-press confirm) | Yes | `GameManager.SaveGame(string, bool)`; `SaveGameManager.CanSave()` | M | 2 | Implemented v0.7.0-alpha.3, awaiting UAT | — |
 | Employees | View employees | Staff tab (read-only, paged) | Yes | `GameInstance.EmployeeInstances` (List<EmployeeInstance>) | L | 2 | Verified | 09-UAT: `5 hired` list (log) |
