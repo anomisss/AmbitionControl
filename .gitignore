@@ -14,3 +14,10 @@ Assets/_BaDependencies/GameDlls/
 **/ModsLocal/
 **/settings.json
 **/api-candidates.txt
+
+# MelonLoader project (SDK Unity rules above ignore *.csproj/*.sln)
+!MelonLoader/**/*.csproj
+!MelonLoader/**/*.sln
+**/bin/
+**/obj/
+dist/

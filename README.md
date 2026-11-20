@@ -2,7 +2,11 @@
 
 A **Big Ambitions** in-game utility/trainer. Versioned source maintained in GitHub.
 
-## Current: v0.3.0 — Native money controls (untested in-game)
+## MelonLoader build: v0.4.0-alpha.1 (branch `compat/ea-0.9.3233-melonloader`)
+
+For players running **MelonLoader 0.7.x on Big Ambitions build 3233 (IL2CPP)**. Compiles against the real game interop; **not yet tested in-game**. Install, usage, test checklist and build steps: [docs/MELONLOADER.md](docs/MELONLOADER.md).
+
+## SDK variant: v0.3.0 — Native money controls (untested in-game)
 
 - Open F10 to display a draggable Unity IMGUI menu.
 - **Money:** see live balance; stage Add, Remove, or Set; review expected outcome; confirm to book a native game transaction. One-step undo, available only while the save and balance remain unchanged.

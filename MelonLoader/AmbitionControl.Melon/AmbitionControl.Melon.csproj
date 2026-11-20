@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Ambition Control - MelonLoader build for Big Ambitions EA 0.9 build 3233 (IL2CPP, MelonLoader 0.7.x, net6).
+    References come from YOUR game folder; nothing proprietary is committed.
+    Point GamePath at the folder containing "Big Ambitions.exe" by one of:
+      - dotnet build -p:GamePath="C:\path\to\game"
+      - environment variable BIG_AMBITIONS_DIR
+      - a local, git-ignored file GamePath.props.user next to this csproj (see docs/MELONLOADER.md)
+    Add -p:DeployToGame=true to copy the built DLL into <GamePath>\Mods.
+  -->
+  <Import Project="GamePath.props.user" Condition="Exists('GamePath.props.user')" />
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>AmbitionControl</AssemblyName>
+    <RootNamespace>AmbitionControl</RootNamespace>
+    <Version>0.4.0</Version>
+    <InformationalVersion>0.4.0-alpha.1</InformationalVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>embedded</DebugType>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GamePath Condition="'$(GamePath)' == ''">$(BIG_AMBITIONS_DIR)</GamePath>
+    <MelonDir>$(GamePath)\MelonLoader</MelonDir>
+  </PropertyGroup>
+
+  <Target Name="CheckGamePath" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(GamePath)' == '' Or !Exists('$(MelonDir)\net6\MelonLoader.dll')"
+           Text="GamePath is not set or MelonLoader (net6) was not found. Set -p:GamePath=&quot;...\game&quot; (folder containing 'Big Ambitions.exe'). Current: '$(GamePath)'" />
+    <Error Condition="!Exists('$(MelonDir)\Il2CppAssemblies\Il2CppBigAmbitions.dll')"
+           Text="Generated Il2Cpp assemblies not found. Launch the game once with MelonLoader so it generates MelonLoader\Il2CppAssemblies." />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="MelonLoader"><HintPath>$(MelonDir)\net6\MelonLoader.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(MelonDir)\net6\Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(MelonDir)\net6\Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="$(MelonDir)\Il2CppAssemblies\*.dll" Private="false" />
+  </ItemGroup>
+
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)\Mods" />
+    <Message Importance="high" Text="Deployed $(TargetFileName) to $(GamePath)\Mods" />
+  </Target>
+</Project>
