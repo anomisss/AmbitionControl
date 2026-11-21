@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.14", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.15", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -27,7 +27,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.14";
+        internal const string VersionLabel = "v0.7.0-alpha.15";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -96,6 +96,9 @@ namespace AmbitionControl
             settings.QuestToolsEnabled = prefs.CreateEntry("QuestToolsEnabled", true,
                 description: "Show the Quest tab (teleport to quest target / GPS destination; complete objective or quest with confirmation).").Value;
 
+            RevenueBoost.Init(prefs, HarmonyInstance, settings);
+            SatisfactionHold.Apply(HarmonyInstance);
+
             blockClickThrough = prefBlock.Value;
             if (blockClickThrough) InputBlocker.Apply(HarmonyInstance);
             else Log.Msg("Click-through blocking is off (BlockClickThrough=false).");
@@ -115,6 +118,9 @@ namespace AmbitionControl
             AgeTools.ClearPending();
             BusinessTools.ResetSession();
             HiringTools.ClearPending();
+            VehicleSpawn.ClearPending();
+            SatisfactionHold.ResetSession();
+            RevenueBoost.ResetSession();
             QuestTools.ResetSession();
             PlayerTools.ResetSession();
             Log.Msg("Scene loaded: " + sceneName + " (staged action and undo cleared).");
@@ -176,6 +182,8 @@ namespace AmbitionControl
                     if (snapshot.Loaded && !fresh.SameSession(snapshot.Identity()))
                     {
                         PlayerTools.ResetSession();
+                        SatisfactionHold.ResetSession();
+                        RevenueBoost.ResetSession();
                         money.ResetForSessionChange();
                         Log.Msg("Session ended (save closed or switched); staged action and undo cleared.");
                     }
@@ -201,6 +209,8 @@ namespace AmbitionControl
                 phone?.Update(snapshot, settings);
                 PlayerTools.Tick(snapshot, settings);
                 TimeSkip.Tick();
+                RevenueBoost.Tick();
+                SatisfactionHold.Tick(snapshot, settings);
                 QuestTools.Tick();
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;
                 lastUpdateError = null;

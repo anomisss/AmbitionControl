@@ -62,6 +62,11 @@
 - [x] **BIZ-02**: Teleport to a business (address command, movement readback)
 - [ ] **AGE-01**: Change age ±1 year (game command, bounded, two-press, days readback)
 - [ ] **TP-02**: Mark a spot and return to it (game waypoint, movement readback)
+- [ ] **MONEY-KEY-01**: Type a custom amount on an on-screen keypad (no game keystrokes)
+- [ ] **WAGE-02**: Change one employee's wage (bounded $1-$500/h, readback)
+- [ ] **BIZ-03**: Hold customer satisfaction at 100% (session only, re-applied after game recalculation)
+- [ ] **REV-01**: Multiply business sales revenue (Revenue transactions only, readback)
+- [ ] **VEH-01**: Get a vehicle (game command, two-press, vehicle-list readback)
 
 Deferred; each needs API verification on build 3233 first.
 

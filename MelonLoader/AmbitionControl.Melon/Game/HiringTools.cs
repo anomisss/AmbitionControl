@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmbitionControl.Core;
 using Il2Cpp;
 using Il2CppBigAmbitions.Characters.Skills;
 using Il2CppEntities;
@@ -111,6 +112,65 @@ namespace AmbitionControl.Game
             catch (Exception ex)
             {
                 WagePending = false;
+                Status = "Wage change failed: " + ex.GetBaseException().Message;
+                AmbitionControlMod.Log.Error(Status);
+            }
+        }
+
+        /// <summary>Market wage for the UI; -1 when the game can't give a sane value.</summary>
+        internal static float TryMarketWage(EmployeeInstance e)
+        {
+            try { float w = MarketWage(e); return CheatMath.IsUsableMarketWage(w) ? w : -1f; }
+            catch { return -1f; }
+        }
+
+        private static EmployeeInstance FindHired(GameInstance gi, string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (EmployeeInstance e in Hired(gi))
+                if (e.id == id) return e;
+            return null;
+        }
+
+        /// <summary>
+        /// Individual wage edit (Milestone K): one step (-10%, -$1, +$1, +10%) or the game's market rate, for one
+        /// employee. Bounded to $1-$500/h (CheatMath), single press (small, reversible), read back.
+        /// </summary>
+        internal static void AdjustWage(string id, WageStep? step, GameSnapshot snap, Settings settings)
+        {
+            WagePending = false;
+            string block = EmployeeTools.BlockReason(snap, settings);
+            if (block != null) { Status = "Wage not changed: " + block; return; }
+            try
+            {
+                GameInstance gi = SessionInstance(snap);
+                if (gi == null) { Status = "Wage not changed: the save changed."; return; }
+                EmployeeInstance e = FindHired(gi, id);
+                if (e == null) { Status = "Wage not changed: select an employee in the list first."; return; }
+                string name = StripTags(e.GetEmployeeNameWithInfo());
+                float before = e.hourlyWage;
+                float target;
+                if (step.HasValue)
+                {
+                    if (!CheatMath.TryStepWage(before, step.Value, out target, out string err)) { Status = "Wage not changed for " + name + ": " + err; return; }
+                }
+                else
+                {
+                    target = TryMarketWage(e);
+                    if (target < 0f) { Status = "Wage not changed for " + name + ": the game gave no usable market rate."; return; }
+                    if (Math.Abs(target - before) < 0.01f) { Status = name + " already earns the market rate ($" + before.ToString("0.00") + "/h)."; return; }
+                }
+                e.hourlyWage = target;
+                float after = e.hourlyWage;
+                bool ok = Math.Abs(after - target) < 0.01f;
+                Status = ok
+                    ? "Wage (verified): " + name + " $" + before.ToString("0.00") + " -> $" + after.ToString("0.00") + "/h."
+                    : "Wage for " + name + " did not stick (read back $" + after.ToString("0.00") + ").";
+                AmbitionControlMod.Log.Msg("Wage " + (step.HasValue ? step.Value.ToString() : "MarketRate") + ": " + name + " " +
+                                           before.ToString("0.00") + " -> " + after.ToString("0.00") + (ok ? " (verified)" : " (NOT as expected)"));
+            }
+            catch (Exception ex)
+            {
                 Status = "Wage change failed: " + ex.GetBaseException().Message;
                 AmbitionControlMod.Log.Error(Status);
             }

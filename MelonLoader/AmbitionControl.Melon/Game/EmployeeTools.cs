@@ -9,7 +9,9 @@ namespace AmbitionControl.Game
 {
     internal sealed class EmployeeRow
     {
+        internal string Id;
         internal string Name;
+        internal float Market = -1f;
         internal float Wage;
         internal float Satisfaction;
         internal bool Absent;
@@ -78,8 +80,8 @@ namespace AmbitionControl.Game
                     try { assigned = e.IsAssignedToAnyBusiness(); } catch { assigned = false; }
                     rows.Add(new EmployeeRow
                     {
-                        Name = StripTags(name), Wage = e.hourlyWage, Satisfaction = e.satisfaction,
-                        Absent = e.isAbsent, Assigned = assigned
+                        Id = e.id, Name = StripTags(name), Wage = e.hourlyWage, Satisfaction = e.satisfaction,
+                        Absent = e.isAbsent, Assigned = assigned, Market = HiringTools.TryMarketWage(e)
                     });
                 }
                 LogScaleOnce(rows);

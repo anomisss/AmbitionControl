@@ -23,6 +23,7 @@ From a verified-loading MelonLoader mod with one proven money operation, to a me
 - [ ] **Phase 15: Staff part 2 & skip time** - Skip hours, market wages, generate candidates
 - [x] **Phase 16: Business tab** - Your businesses, customer satisfaction, teleport to business
 - [ ] **Phase 17: Age & marked spot** - Age ±1 year, mark/return to a spot
+- [ ] **Phase 18: Remaining features + bulk test** - Keypad, individual wages, satisfaction hold, revenue multiplier, get vehicle; one bulk UAT for everything not yet run
 - [ ] **Phase 7+: Trainer expansion** - Game-variable controls, vehicles/time, business, employees, rivals (see docs/FEATURE_GAP_MATRIX.md)
 
 ## Phase Details

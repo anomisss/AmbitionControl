@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-11-19)
 
 **Core value:** Money changes apply through the game's own transaction path, are verified by readback, and never corrupt a save.
-**Current focus:** Phase 17 — age and marked spot
+**Current focus:** Phase 18 — remaining features + bulk test (owner prefers bulk testing)
 
 ## Current Position
 
 Phase: 10 (Rivals)
 Plan: Phase 16 implemented
-Status: v0.7.0-alpha.14 installed (DLL 886cb724…); awaiting owner UAT (17-UAT.md). 16-UAT: business list, Go teleport, Skip 1h PASS. Earlier alpha.11: 15-UAT: market wages + candidate PASS; time skip not run. Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
+Status: v0.7.0-alpha.15 installed (DLL 966fd628…); awaiting owner bulk UAT (18-UAT.md, includes 17-UAT). 16-UAT: business list, Go teleport, Skip 1h PASS. Earlier alpha.11: 15-UAT: market wages + candidate PASS; time skip not run. Style (alpha.10) approved by owner. Earlier alpha.8: 13-UAT partial (all tabs open, no errors; visual not confirmed); 12-UAT not run. Previously v0.7.0-alpha.6: 11-UAT partial: tabs, quest display, complete quest PASS; teleport + complete objective not run. Phase 10: pause + 10x speed PASS; rival defeat, refuel, save not run.
 Last activity: 2026-11-20 — Rivals tab (list, guarded defeat)
 
 Progress: [██████████] 100%
@@ -41,5 +41,5 @@ Progress: [██████████] 100%
 ## Session Continuity
 
 Last session: 2026-11-19
-Stopped at: Phase 17 awaiting in-game test
-Resume file: .planning/phases/17-age-spot/17-UAT.md
+Stopped at: Phase 18 awaiting bulk in-game test
+Resume file: .planning/phases/18-bulk/18-UAT.md

@@ -48,7 +48,7 @@ namespace AmbitionControl.UI
         private List<RivalRow> rivalRows = new List<RivalRow>();
         private string rivalError, lastRivalStatus;
         private float nextRivalRead;
-        private TextMeshProUGUI staffSummary, staffList, staffMaxLabel;
+        private TextMeshProUGUI staffSummary, staffMaxLabel;
         private int staffPage;
         private float nextStaffRead;
         private List<EmployeeRow> staffRows = new List<EmployeeRow>();
@@ -58,6 +58,12 @@ namespace AmbitionControl.UI
         private TextMeshProUGUI wageLabel, skillLabel, levelLabel;
         private TextMeshProUGUI bizSummary;
         private TextMeshProUGUI ageText, ageDownLabel, ageUpLabel;
+        private TextMeshProUGUI keypadLabel, revenueLabel, holdSatLabel, spawnTypeLabel, spawnLabel;
+        private GameObject presetRow, keypadRow;
+        private bool keypadMode;
+        private readonly TextMeshProUGUI[] staffRowLabels = new TextMeshProUGUI[EmployeeTools.PageSize];
+        private string selectedStaffId;
+        private string lastRevenueStatus, lastHoldStatus, lastSpawnStatus;
         private string lastAgeStatus;
         private readonly TextMeshProUGUI[] bizRowLabels = new TextMeshProUGUI[BusinessTools.PageSize];
         private List<BizRow> bizRows = new List<BizRow>();
@@ -453,19 +459,31 @@ namespace AmbitionControl.UI
             balanceText = Text(page, "", x0, y, full, 36f, 26f, TextMain, TextAlignmentOptions.Left);
             y += 42f;
             y = Header(page, "Amount", x0, y, full);
-            amountText = Text(page, "", x0, y, full, 30f, 22f, TextDim, TextAlignmentOptions.Left);
-            y += 34f;
+            amountText = Text(page, "", x0, y, full - 268f, 30f, 22f, TextDim, TextAlignmentOptions.Left);
+            MakeButton(page, "Clear", x0 + full - 260f, y - 4f, 100f, 38f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
+            keypadLabel = MakeButton(page, "Keypad", x0 + full - 152f, y - 4f, 152f, 38f, BtnNeutral, ToggleKeypad, null);
+            y += 40f;
+            // Presets and the on-screen keypad share one row; the keypad never sends keystrokes to the game.
+            presetRow = Group(page, "Presets");
             long[] steps = { 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L };
             string[] labels = { "+1K", "+10K", "+100K", "+1M", "+10M" };
-            float bw = (full - 5 * 8f) / 6f;
+            float bw = (full - 4 * 8f) / 5f;
             for (int i = 0; i < steps.Length; i++)
             {
                 long step = steps[i];
-                MakeButton(page, labels[i], x0 + i * (bw + 8f), y, bw, 46f, BtnNeutral,
+                MakeButton(presetRow.transform, labels[i], x0 + i * (bw + 8f), y, bw, 46f, BtnNeutral,
                     () => { amount = MoneyCommand.ClampAmount(amount + step); money.ClearStageError(); }, null);
             }
-            MakeButton(page, "Clear", x0 + 5 * (bw + 8f), y, bw, 46f, BtnNeutral, () => { amount = 0L; money.ClearStageError(); }, null);
-            y += 56f;
+            keypadRow = Group(page, "Keypad");
+            string[] keys = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "000", "Del" };
+            float kw = (full - (keys.Length - 1) * 6f) / keys.Length;
+            for (int i = 0; i < keys.Length; i++)
+            {
+                string key = keys[i];
+                MakeButton(keypadRow.transform, key, x0 + i * (kw + 6f), y, kw, 46f, BtnNeutral, () => KeypadPressed(key), null);
+            }
+            keypadRow.SetActive(false);
+            y += 50f;
             y = Header(page, "Change", x0, y, full);
             MakeButton(page, "Stage Add", x0, y, tw, 50f, BtnNeutral,
                 () => money.Stage(MoneyAction.Add, amount, lastSnap), s => CanStage(s) && amount > 0);
@@ -531,6 +549,9 @@ namespace AmbitionControl.UI
                 econLabels[i] = MakeButton(epage, GameEconomy.Label(setting), x0 + (i % 2) * (hw + 8f), ey + (i / 2) * 56f, hw, 48f,
                     BtnNeutral, () => GameEconomy.Cycle(setting, lastSnap, settings), econOk);
             }
+            int ri = GameEconomy.All.Length;
+            revenueLabel = MakeButton(epage, "Sales revenue (mod)", x0 + (ri % 2) * (hw + 8f), ey + (ri / 2) * 56f, hw, 48f, BtnNeutral,
+                () => RevenueBoost.Cycle(lastSnap, settings), s => settings != null && RevenueBoost.BlockReason(s, settings) == null);
 
             // World page.
             float wy = contentTop;
@@ -565,8 +586,11 @@ namespace AmbitionControl.UI
                     () => TimeSkip.SkipPressed(hrs, lastSnap, settings), s => settings != null && TimeSkip.Block(s, settings) == null);
             }
             wy += 62f;
-            wy = Header(wpage, "Game", x0, wy, full);
-            saveLabel = MakeButton(wpage, "Save game", x0, wy, full, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
+            wy = Header(wpage, "Game and vehicles", x0, wy, full);
+            saveLabel = MakeButton(wpage, "Save game", x0, wy, tw, 50f, BtnGo, () => WorldTools.SaveGame(lastSnap, settings), worldOk);
+            spawnTypeLabel = MakeButton(wpage, "Vehicle type", x0 + tw + 8f, wy, tw, 50f, BtnNeutral, () => VehicleSpawn.NextType(), worldOk);
+            spawnLabel = MakeButton(wpage, "Get vehicle", x0 + 2 * (tw + 8f), wy, tw, 50f, BtnNeutral,
+                () => VehicleSpawn.GetPressed(lastSnap, settings), s => settings != null && VehicleSpawn.Block(s, settings) == null);
 
             // Staff page.
             float sy = contentTop;
@@ -574,15 +598,37 @@ namespace AmbitionControl.UI
             sy = Header(spage, "Employees", x0, sy, full);
             staffSummary = Text(spage, "", x0, sy, full, 30f, 20f, TextMain, TextAlignmentOptions.Left);
             sy += 34f;
-            staffList = Text(spage, "", x0, sy, full, EmployeeTools.PageSize * 30f, 18f, TextDim, TextAlignmentOptions.TopLeft);
-            sy += EmployeeTools.PageSize * 30f + 8f;
             Func<GameSnapshot, bool> staffOk = s => settings != null && EmployeeTools.BlockReason(s, settings) == null;
-            MakeButton(spage, "< Prev", x0, sy, tw, 50f, BtnNeutral, () => { staffPage = Math.Max(0, staffPage - 1); nextStaffRead = 0f; }, null);
-            MakeButton(spage, "Next >", x0 + tw + 8f, sy, tw, 50f, BtnNeutral, () => { staffPage++; nextStaffRead = 0f; }, null);
-            staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (tw + 8f), sy, tw, 50f, BtnNeutral,
-                () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
+            for (int i = 0; i < EmployeeTools.PageSize; i++)
+            {
+                int slot = i;
+                staffRowLabels[i] = MakeButton(spage, "Row " + (i + 1), x0, sy, full, 28f, BtnTab, () => SelectStaff(slot), null);
+                staffRowLabels[i].enableAutoSizing = false;
+                staffRowLabels[i].fontSize = 17f;
+                staffRowLabels[i].alignment = TextAlignmentOptions.Left;
+                staffRowLabels[i].enableWordWrapping = false;
+                staffRowLabels[i].overflowMode = TextOverflowModes.Ellipsis;
+                staffRowLabels[i].text = "";
+                sy += 30f;
+            }
+            sy += 8f;
+            Func<GameSnapshot, bool> staffSelOk = s => staffOk(s) && SelectedStaff() != null;
+            string[] wageCaps = { "-10%", "-$1", "Market", "+$1", "+10%" };
+            WageStep?[] wageSteps = { WageStep.MinusTenPercent, WageStep.MinusOne, null, WageStep.PlusOne, WageStep.PlusTenPercent };
+            float fw = (full - 4 * 8f) / 5f;
+            for (int i = 0; i < wageCaps.Length; i++)
+            {
+                WageStep? step = wageSteps[i];
+                MakeButton(spage, wageCaps[i], x0 + i * (fw + 8f), sy, fw, 50f, BtnNeutral,
+                    () => { HiringTools.AdjustWage(selectedStaffId, step, lastSnap, settings); nextStaffRead = 0f; }, staffSelOk);
+            }
             sy += 58f;
-            wageLabel = MakeButton(spage, "Wages to market rate", x0, sy, full, 50f, BtnNeutral,
+            float qw = (full - 3 * 8f) / 4f;
+            MakeButton(spage, "< Prev", x0, sy, qw, 50f, BtnNeutral, () => { staffPage = Math.Max(0, staffPage - 1); nextStaffRead = 0f; }, null);
+            MakeButton(spage, "Next >", x0 + qw + 8f, sy, qw, 50f, BtnNeutral, () => { staffPage++; nextStaffRead = 0f; }, null);
+            staffMaxLabel = MakeButton(spage, "Max satisfaction", x0 + 2 * (qw + 8f), sy, qw, 50f, BtnNeutral,
+                () => { EmployeeTools.MaxSatisfaction(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
+            wageLabel = MakeButton(spage, "All to market", x0 + 3 * (qw + 8f), sy, qw, 50f, BtnNeutral,
                 () => { HiringTools.MarketWagesPressed(lastSnap, settings); nextStaffRead = 0f; }, staffOk);
             sy += 58f;
             sy = Header(spage, "Hire a candidate", x0, sy, full);
@@ -609,8 +655,10 @@ namespace AmbitionControl.UI
                 by += 52f;
             }
             by += 6f;
-            MakeButton(bpage, "< Prev", x0, by, hw, 50f, BtnNeutral, () => { bizPage = Math.Max(0, bizPage - 1); nextBizRead = 0f; }, null);
-            MakeButton(bpage, "Next >", x0 + hw + 8f, by, hw, 50f, BtnNeutral, () => { bizPage++; nextBizRead = 0f; }, null);
+            MakeButton(bpage, "< Prev", x0, by, tw, 50f, BtnNeutral, () => { bizPage = Math.Max(0, bizPage - 1); nextBizRead = 0f; }, null);
+            MakeButton(bpage, "Next >", x0 + tw + 8f, by, tw, 50f, BtnNeutral, () => { bizPage++; nextBizRead = 0f; }, null);
+            holdSatLabel = MakeButton(bpage, "Hold satisfaction 100%", x0 + 2 * (tw + 8f), by, tw, 50f, BtnNeutral,
+                () => { SatisfactionHold.Toggle(lastSnap, settings); nextBizRead = 0f; }, bizOk);
 
             // Rivals page.
             float ry = contentTop;
@@ -705,6 +753,48 @@ namespace AmbitionControl.UI
             return go;
         }
 
+        /// <summary>A full-size child of a page, so a set of buttons can be shown/hidden together at page coordinates.</summary>
+        private static GameObject Group(Transform parent, string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            RectTransform rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            return go;
+        }
+
+        private void ToggleKeypad()
+        {
+            keypadMode = !keypadMode;
+            if (keypadMode) amount = 0L; // start typing from zero
+            money.ClearStageError();
+            presetRow.SetActive(!keypadMode);
+            keypadRow.SetActive(keypadMode);
+        }
+
+        private void KeypadPressed(string key)
+        {
+            money.ClearStageError();
+            if (key == "Del") { amount = CheatMath.Backspace(amount); return; }
+            if (CheatMath.TryAppendDigits(amount, key, out long next)) amount = next;
+            else shownStatus = "Can't type more: the largest amount is $" + MoneyCommand.MaxBalance.ToString("N0") + ".";
+        }
+
+        private EmployeeRow SelectedStaff() =>
+            selectedStaffId == null ? null : staffRows.FirstOrDefault(r => r.Id == selectedStaffId);
+
+        private void SelectStaff(int slot)
+        {
+            int i = staffPage * EmployeeTools.PageSize + slot;
+            if (i < 0 || i >= staffRows.Count) return;
+            string id = staffRows[i].Id;
+            selectedStaffId = selectedStaffId == id ? null : id;
+            nextRefresh = 0f;
+        }
+
         private bool TabEnabled(int tab) =>
             settings == null ||
             (tab == TabPlayer ? settings.PlayerToolsEnabled : tab == TabOptions ? settings.PlayerTogglesEnabled :
@@ -724,6 +814,7 @@ namespace AmbitionControl.UI
             TimeSkip.ClearPending();
             AgeTools.ClearPending();
             HiringTools.ClearPending();
+            VehicleSpawn.ClearPending();
             nextRivalRead = 0f;
             nextStaffRead = 0f;
             nextBizRead = 0f;
@@ -749,32 +840,24 @@ namespace AmbitionControl.UI
 
             int pages = Math.Max(1, (staffRows.Count + EmployeeTools.PageSize - 1) / EmployeeTools.PageSize);
             staffPage = Math.Min(staffPage, pages - 1);
-            if (staffError != null)
-            {
-                staffSummary.text = staffError;
-                staffList.text = "";
-            }
-            else if (staffRows.Count == 0)
-            {
-                staffSummary.text = "No hired employees.";
-                staffList.text = "";
-            }
+            if (staffError != null) staffSummary.text = staffError;
+            else if (staffRows.Count == 0) staffSummary.text = "No hired employees.";
             else
-            {
                 staffSummary.text = staffRows.Count + " employees   avg satisfaction " +
                     staffRows.Average(r => r.Satisfaction).ToString("0") + "   wages $" +
                     staffRows.Sum(r => r.Wage).ToString("N0") + "/h   page " + (staffPage + 1) + "/" + pages;
-                var sb = new System.Text.StringBuilder();
-                foreach (EmployeeRow r in staffRows.Skip(staffPage * EmployeeTools.PageSize).Take(EmployeeTools.PageSize))
-                {
-                    string name = r.Name.Length > 34 ? r.Name.Substring(0, 33) + "…" : r.Name;
-                    sb.Append(name).Append("  $").Append(r.Wage.ToString("0.##")).Append("/h  sat ")
-                      .Append(r.Satisfaction.ToString("0"));
-                    if (r.Absent) sb.Append("  (absent)");
-                    if (!r.Assigned) sb.Append("  (unassigned)");
-                    sb.Append('\n');
-                }
-                staffList.text = sb.ToString();
+            if (selectedStaffId != null && staffError == null && SelectedStaff() == null) selectedStaffId = null; // left or fired
+            for (int i = 0; i < staffRowLabels.Length; i++)
+            {
+                int idx = staffPage * EmployeeTools.PageSize + i;
+                EmployeeRow r = staffError == null && idx < staffRows.Count ? staffRows[idx] : null;
+                if (r == null) { staffRowLabels[i].text = ""; continue; }
+                bool sel = r.Id != null && r.Id == selectedStaffId;
+                string name = r.Name.Length > 30 ? r.Name.Substring(0, 29) + "…" : r.Name;
+                staffRowLabels[i].color = sel ? TextMain : TextDim;
+                staffRowLabels[i].text = (sel ? "<b>> " : "") + name + "  $" + r.Wage.ToString("0.00") + "/h" +
+                    (r.Market > 0f ? " (market $" + r.Market.ToString("0.00") + ")" : "") + "  sat " + r.Satisfaction.ToString("0") +
+                    (r.Absent ? "  (absent)" : "") + (!r.Assigned ? "  (unassigned)" : "") + (sel ? "</b>" : "");
             }
             if (staffMaxLabel != null) staffMaxLabel.text = EmployeeTools.ConfirmPending ? "Confirm" : "Max satisfaction";
         }
@@ -921,6 +1004,13 @@ namespace AmbitionControl.UI
             if (s == null) return;
             balanceText.text = s.Loaded ? "Balance: $" + s.Money.ToString("N2") : s.NotLoadedReason;
             amountText.text = "Amount: $" + amount.ToString("N0");
+            if (keypadLabel != null) keypadLabel.text = keypadMode ? "Presets" : "Keypad";
+            if (revenueLabel != null)
+                revenueLabel.text = "Sales revenue (mod): " + RevenueBoost.Label() +
+                    (RevenueBoost.ExtraTotal >= 0.5d ? "  +$" + RevenueBoost.ExtraTotal.ToString("N0") : "");
+            if (holdSatLabel != null) holdSatLabel.text = "Hold satisfaction 100%: " + (SatisfactionHold.On ? "ON" : "OFF");
+            if (spawnTypeLabel != null) spawnTypeLabel.text = VehicleSpawn.TypeLabel;
+            if (spawnLabel != null) spawnLabel.text = VehicleSpawn.Pending ? "Confirm get" : "Get vehicle";
 
             MoneyService.Operation op = money.Staged;
             previewText.text = op == null
@@ -940,6 +1030,9 @@ namespace AmbitionControl.UI
             if (AgeTools.Status != lastAgeStatus) { lastAgeStatus = AgeTools.Status; shownStatus = AgeTools.Status; }
             if (TimeSkip.Status != lastSkipStatus) { lastSkipStatus = TimeSkip.Status; shownStatus = TimeSkip.Status; }
             if (HiringTools.Status != lastHireStatus) { lastHireStatus = HiringTools.Status; shownStatus = HiringTools.Status; }
+            if (RevenueBoost.Status != lastRevenueStatus) { lastRevenueStatus = RevenueBoost.Status; shownStatus = RevenueBoost.Status; }
+            if (SatisfactionHold.Status != lastHoldStatus) { lastHoldStatus = SatisfactionHold.Status; shownStatus = SatisfactionHold.Status; }
+            if (VehicleSpawn.Status != lastSpawnStatus) { lastSpawnStatus = VehicleSpawn.Status; shownStatus = VehicleSpawn.Status; }
             statusText.text = shownStatus ?? "Ready.";
             ApplyStatusStyle(shownStatus);
 
@@ -962,7 +1055,7 @@ namespace AmbitionControl.UI
                     presetLabels[i].text = GameEconomy.PendingPreset == d ? "Confirm " + d :
                         d + (s.OptionsKnown && s.CurrentDifficulty == d ? " (current)" : " preset");
                 }
-            if (currentTab == TabStaff && staffList != null) RefreshStaff(s);
+            if (currentTab == TabStaff && staffSummary != null) RefreshStaff(s);
             if (currentTab == TabRivals && rivalAllLabel != null) RefreshRivals(s);
             if (currentTab == TabBusiness && bizSummary != null) RefreshBusiness(s);
             if (currentTab == TabQuest && questText != null)
@@ -979,7 +1072,7 @@ namespace AmbitionControl.UI
             for (int i = 0; i < skipLabels.Length; i++)
                 if (skipLabels[i] != null)
                     skipLabels[i].text = TimeSkip.PendingHours == TimeSkip.Hours[i] ? "Confirm " + TimeSkip.Hours[i] + "h" : "Skip " + TimeSkip.Hours[i] + "h";
-            if (wageLabel != null) wageLabel.text = HiringTools.WagePending ? "Confirm market wages" : "Wages to market rate";
+            if (wageLabel != null) wageLabel.text = HiringTools.WagePending ? "Confirm all" : "All to market";
             if (skillLabel != null) skillLabel.text = HiringTools.SkillLabel;
             if (levelLabel != null) levelLabel.text = "Level " + HiringTools.LevelLabel;
             if (vehicleText != null)
@@ -1000,18 +1093,18 @@ namespace AmbitionControl.UI
             string tabBlock = null, hint = "";
             if (settings == null) tabBlock = "Starting...";
             else if (currentTab == TabOptions) { tabBlock = GameOptions.BlockReason(s, settings); hint = "Unlocks and tutorial may need a save reload."; }
-            else if (currentTab == TabEconomy) { tabBlock = GameEconomy.BlockReason(s, settings); hint = "Values cycle through the game's Easy / Normal / Hard values."; }
+            else if (currentTab == TabEconomy) { tabBlock = GameEconomy.BlockReason(s, settings); hint = "Game values cycle through Easy / Normal / Hard. Sales revenue (mod) multiplies business sales income."; }
             else if (currentTab == TabRivals) { tabBlock = RivalTools.BlockReason(s, settings); hint = rivalError ?? "Defeat is permanent: the game closes their businesses."; }
-            else if (currentTab == TabBusiness) { tabBlock = BusinessTools.BlockReason(s, settings); hint = bizError ?? QuestTools.TeleportBlock(TeleportTarget.Address) ?? "Go teleports you outside the business (on foot, outdoors)."; }
-            else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = "Tap Skill / Level to choose, then Generate. Satisfaction changes are temporary."; }
-            else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools: your own vehicle only. Skip works like sleeping; speeds above 2x are experimental."; }
+            else if (currentTab == TabBusiness) { tabBlock = BusinessTools.BlockReason(s, settings); hint = bizError ?? QuestTools.TeleportBlock(TeleportTarget.Address) ?? "Go teleports you outside (on foot, outdoors). The hold lasts this session only."; }
+            else if (currentTab == TabStaff) { tabBlock = EmployeeTools.BlockReason(s, settings); hint = SelectedStaff() == null ? "Tap an employee to change their wage ($1-$500/h)." : "Wage buttons change the selected employee only."; }
+            else if (currentTab == TabWorld) { tabBlock = WorldTools.BlockReason(s, settings); hint = "Vehicle tools: your own vehicle. Tap the vehicle type to choose, then Get vehicle (on foot, outdoors)."; }
             else if (currentTab == TabPlayer) { tabBlock = PlayerTools.BlockReason(s, settings); hint = "Refills are checked by reading the value back."; }
             else if (currentTab == TabQuest)
             {
                 tabBlock = QuestTools.BlockReason(s, settings);
                 hint = QuestTools.TeleportBlock(TeleportTarget.QuestTarget) ?? QuestTools.QuestBlock() ?? "Set a GPS destination in the game before using the GPS teleport.";
             }
-            else { tabBlock = Block(s); hint = "Limits: $10M per change, balance $0-$100M."; }
+            else { tabBlock = Block(s); hint = keypadMode ? "Type the amount on the keypad. Limits: $10M per change, balance $0-$100M." : "Limits: $10M per change, balance $0-$100M."; }
             blockText.text = tabBlock != null ? "<color=#ffb04a>Unavailable: " + tabBlock + "</color>" : hint;
 
             infoText.text = s.Loaded

@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AmbitionControl.Melon\Core\MoneyCommand.cs" Link="Core\MoneyCommand.cs" />
+    <Compile Include="..\AmbitionControl.Melon\Core\CheatMath.cs" Link="Core\CheatMath.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
