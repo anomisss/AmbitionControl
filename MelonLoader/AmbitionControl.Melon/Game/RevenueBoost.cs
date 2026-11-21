@@ -1,93 +1,49 @@
 using System;
-using System.Linq;
-using System.Reflection;
 using AmbitionControl.Core;
 using Il2Cpp;
 using MelonLoader;
+using UnityEngine;
 
 namespace AmbitionControl.Game
 {
     /// <summary>
-    /// Revenue multiplier (Milestone K). Build-3233 interop evidence:
-    ///   GameManager.ChangeMoney(float, Transaction.TransactionType, Transaction.DataHolder, Nullable&lt;int&gt;, Address)
-    ///   GameManager.ChangeMoneySafe(float, Transaction.TransactionType, DataHolder, Nullable&lt;int&gt;, Address, bool, bool)
-    ///   Transaction.TransactionType.Revenue — the game's own tag for business sales income (Cheat, Wage, Rent, ItemSold,
-    ///   RentRevenue … are separate types and are never touched).
-    /// A Harmony prefix on both money entry points multiplies positive Revenue amounts before the game records them, so
-    /// the boosted amount shows in the game's own transaction history. A re-entrancy flag stops a double boost if one
-    /// entry point calls the other. Readback: balance before/after the call is compared with the boosted amount for the
-    /// first sales of each session. The mod's own money changes use TransactionType.Cheat, so they are unaffected.
-    /// The multiplier is a mod preference (RevenueMultiplier, default 1x = off), not part of the save.
-    /// The hooks are installed only when a multiplier above 1x is first used (at start-up if the saved preference is
-    /// above 1x), so players who never use the feature run the game's money code untouched.
+    /// Sales revenue multiplier (Milestone K, reworked in alpha.16). Build-3233 interop evidence:
+    ///   GameInstance.Transactions : Queue&lt;Transaction&gt; — the game's own transaction history (newest last)
+    ///   Transaction.amount, .transactionType (Transaction.TransactionType.Revenue = business sales income)
+    ///   GameManager.ChangeMoneySafe(…, TransactionType.Cheat, …) — the same path the Money tab uses (runtime-verified)
+    /// alpha.15 hooked GameManager.ChangeMoney with Harmony; in-game that crashed Il2CppInterop's native->managed
+    /// trampoline (Nullable&lt;int&gt; parameter) and broke every money change while installed. This version installs NO
+    /// hooks: once a second it reads the new Revenue entries in the game's history and credits the extra
+    /// (amount × (multiplier − 1), capped per sale) as one combined "Cheat" transaction, without a popup.
+    /// Credits wait while the game is saving or a Money-tab change is being verified, and are read back.
+    /// The first scan after load or after turning it on only sets a baseline, so past sales are never boosted.
     /// </summary>
     internal static class RevenueBoost
     {
         internal static string Status { get; private set; }
         internal static float Multiplier { get; private set; } = 1f;
-        internal static int PatchesApplied { get; private set; }
         internal static int SalesSeen { get; private set; }
         internal static int SalesBoosted { get; private set; }
         internal static double ExtraTotal { get; private set; }
 
+        private const float MaxCreditPerBatch = MoneyCommand.MaxAdjustment;
         private static MelonPreferences_Entry<float> pref;
-        private static Settings settings;
-        private static HarmonyLib.Harmony harmonyRef;
-        private static bool hookAttempted;
-        private static bool active;        // re-entrancy guard (main thread only)
-        private static float balanceBefore;
-        private static float expectedDelta;
-        private static int verifiedLogs;
-        private static bool loggedFirstSeen;
+        private static IntPtr sessionPtr;
+        private static IntPtr lastSeenPtr;
+        private static bool baselineSet;
+        private static double pendingExtra;
+        private static float nextScan;
+        private static int creditsLogged;
+        private static bool broken;
 
-        internal static void Init(MelonPreferences_Category prefs, HarmonyLib.Harmony harmony, Settings s)
+        internal static void Init(MelonPreferences_Category prefs, Settings s)
         {
-            settings = s;
             pref = prefs.CreateEntry("RevenueMultiplier", 1f,
                 description: "Multiplier for business sales revenue (1 = off; allowed 1, 1.5, 2, 3, 5, 10). Set from the phone app's Economy tab.");
             Multiplier = CheatMath.NormalizeRevenue(pref.Value);
             if (Math.Abs(Multiplier - pref.Value) > 0.001f)
                 AmbitionControlMod.Log.Warning("RevenueMultiplier " + pref.Value + " is not an allowed value; using " + Multiplier + "x.");
-
-            harmonyRef = harmony;
-            if (Multiplier > 1f && !EnsureHooked())
-            {
-                Multiplier = 1f;
-                AmbitionControlMod.Log.Warning("Revenue multiplier disabled for this run: the money hooks could not be installed.");
-            }
-            else AmbitionControlMod.Log.Msg("Revenue multiplier: " + Label() + (Multiplier > 1f ? "" : " (hooks not installed until used)") + ".");
-        }
-
-        /// <summary>Install both money hooks once. True if at least one is active.</summary>
-        private static bool EnsureHooked()
-        {
-            if (hookAttempted) return PatchesApplied > 0;
-            hookAttempted = true;
-            HarmonyLib.Harmony harmony = harmonyRef;
-            const BindingFlags S = BindingFlags.Public | BindingFlags.Static;
-            foreach (string name in new[] { "ChangeMoney", "ChangeMoneySafe" })
-            {
-                try
-                {
-                    MethodInfo target = typeof(GameManager).GetMethods(S).FirstOrDefault(m =>
-                    {
-                        if (m.Name != name) return false;
-                        ParameterInfo[] p = m.GetParameters();
-                        return p.Length >= 2 && p[0].ParameterType == typeof(float) && p[1].ParameterType == typeof(Transaction.TransactionType);
-                    });
-                    if (target == null) throw new MissingMethodException("GameManager", name);
-                    harmony.Patch(target,
-                        prefix: new HarmonyLib.HarmonyMethod(typeof(RevenueBoost).GetMethod(nameof(Prefix), BindingFlags.NonPublic | BindingFlags.Static)),
-                        postfix: new HarmonyLib.HarmonyMethod(typeof(RevenueBoost).GetMethod(nameof(Postfix), BindingFlags.NonPublic | BindingFlags.Static)));
-                    PatchesApplied++;
-                }
-                catch (Exception ex)
-                {
-                    AmbitionControlMod.Log.Warning("Revenue multiplier: could not hook GameManager." + name + ": " + ex.GetBaseException().Message);
-                }
-            }
-            AmbitionControlMod.Log.Msg("Revenue multiplier: " + PatchesApplied + "/2 money hooks installed.");
-            return PatchesApplied > 0;
+            AmbitionControlMod.Log.Msg("Revenue multiplier: " + Label() + " (reads the game's transaction history; no hooks).");
         }
 
         internal static string Label() => Multiplier <= 1f ? "off (1x)" : "x" + Multiplier.ToString("0.#");
@@ -96,7 +52,7 @@ namespace AmbitionControl.Game
         {
             string b = GameEconomy.BlockReason(snap, s);
             if (b != null) return b;
-            if (hookAttempted && PatchesApplied == 0) return "the game's money functions could not be hooked (see log).";
+            if (broken) return "stopped after an error this session (see log).";
             return null;
         }
 
@@ -107,85 +63,122 @@ namespace AmbitionControl.Game
             if (block != null) { Status = "Revenue multiplier not changed: " + block; return; }
             float before = Multiplier;
             float next = CheatMath.NextRevenue(Multiplier);
-            if (next > 1f && !EnsureHooked()) { Status = "Revenue multiplier not changed: the game's money functions could not be hooked (see log)."; return; }
             pref.Value = next;
             MelonPreferences.Save();
             Multiplier = CheatMath.NormalizeRevenue(pref.Value);
+            if (before <= 1f && Multiplier > 1f) baselineSet = false; // sales before turning it on are never boosted
+            if (Multiplier <= 1f) pendingExtra = 0d;
             bool ok = Math.Abs(Multiplier - next) < 0.001f;
             Status = ok
-                ? "Revenue multiplier: " + (before <= 1f ? "off" : "x" + before.ToString("0.#")) + " -> " + Label() +
-                  " (verified). Applies to new sales; " + SalesSeen + " sales seen this session."
+                ? "Sales revenue: " + (before <= 1f ? "off" : "x" + before.ToString("0.#")) + " -> " + Label() +
+                  " (verified). New business sales get the extra as a separate credit."
                 : "Revenue multiplier did not stick (read back " + Multiplier + ").";
-            AmbitionControlMod.Log.Msg("Revenue multiplier set to " + Multiplier + " (" + (ok ? "verified" : "NOT as expected") +
-                                       "); hooks " + PatchesApplied + "/2, sales seen " + SalesSeen + ", boosted " + SalesBoosted + ".");
+            AmbitionControlMod.Log.Msg("Revenue multiplier set to " + Multiplier + " (" + (ok ? "verified" : "NOT as expected") + ").");
         }
 
-        private static bool Allowed()
+        /// <summary>Every frame from OnUpdate; scans once a second.</summary>
+        internal static void Tick(GameSnapshot snap, Settings settings, bool moneyIdle)
         {
-            if (settings == null || !settings.EconomyControlsEnabled) return false;
-            int? build = GameBridge.BuildNumber;
-            if (!build.HasValue || (build.Value != GameBridge.TargetBuild && !settings.AllowOtherBuilds)) return false;
-            return SaveGameManager.Current != null && !SaveGameManager.SavingGameInProgress;
-        }
-
-        // Harmony prefix on both entry points: __0 = amount, __1 = transaction type.
-        private static void Prefix(ref float __0, Transaction.TransactionType __1, out bool __state)
-        {
-            __state = false;
+            if (broken || Multiplier <= 1f || Time.unscaledTime < nextScan) return;
+            nextScan = Time.unscaledTime + 1f;
+            if (snap == null || !snap.Loaded || GameEconomy.BlockReason(snap, settings) != null) return;
             try
             {
-                if (active || __1 != Transaction.TransactionType.Revenue) return;
-                active = true;
-                __state = true;
-                SalesSeen++;
-                if (!loggedFirstSeen)
-                {
-                    loggedFirstSeen = true;
-                    AmbitionControlMod.Log.Msg("Revenue hook: first sale seen this session ($" + __0.ToString("0.00") + ", multiplier " + Label() + ").");
-                }
-                expectedDelta = float.NaN;
-                if (!Allowed() || !CheatMath.TryBoost(__0, Multiplier, out float boosted)) return;
-                balanceBefore = SaveGameManager.Current.Money;
-                expectedDelta = boosted;
-                SalesBoosted++;
-                ExtraTotal += boosted - __0;
-                if (verifiedLogs < 3)
-                    AmbitionControlMod.Log.Msg("Revenue x" + Multiplier.ToString("0.#") + ": sale $" + __0.ToString("0.00") + " -> $" + boosted.ToString("0.00"));
-                __0 = boosted;
+                GameInstance gi = SaveGameManager.Current;
+                if (gi == null || gi.Pointer != snap.InstancePtr) return;
+                if (gi.Pointer != sessionPtr) { ResetSession(); sessionPtr = gi.Pointer; }
+                Scan(gi);
+                if (pendingExtra >= 0.01d && moneyIdle && !SaveGameManager.SavingGameInProgress) Credit(gi);
             }
             catch (Exception ex)
             {
-                AmbitionControlMod.Log.Warning("Revenue multiplier skipped a sale: " + ex.GetBaseException().Message);
+                broken = true;
+                Status = "Sales revenue multiplier stopped: " + ex.GetBaseException().Message;
+                AmbitionControlMod.Log.Error(Status);
             }
         }
 
-        private static void Postfix(bool __state)
+        private static void Scan(GameInstance gi)
         {
-            if (!__state) return;
-            active = false;
-            try
+            var queue = gi.Transactions;
+            if (queue == null || queue.Count == 0) return;
+            var arr = queue.ToArray();
+            int n = arr.Length;
+            if (n == 0) return;
+            Transaction newest = arr[n - 1];
+            if (newest == null) return;
+            if (!baselineSet)
             {
-                if (float.IsNaN(expectedDelta) || verifiedLogs >= 3) return;
-                verifiedLogs++;
-                float delta = SaveGameManager.Current.Money - balanceBefore;
-                bool ok = MoneyCommand.BalanceMatches(delta, expectedDelta);
-                AmbitionControlMod.Log.Msg("Revenue readback: balance +" + delta.ToString("0.00") + ", expected +" + expectedDelta.ToString("0.00") +
-                                           (ok ? " (verified)" : " (NOT as expected)"));
+                baselineSet = true;
+                lastSeenPtr = newest.Pointer;
+                AmbitionControlMod.Log.Msg("Revenue multiplier: baseline set (" + n + " past transactions not boosted).");
+                return;
             }
-            catch { /* readback is diagnostic only */ }
+            if (newest.Pointer == lastSeenPtr) return;
+            int start = -1;
+            for (int i = n - 1; i >= 0; i--)
+                if (arr[i] != null && arr[i].Pointer == lastSeenPtr) { start = i + 1; break; }
+            if (start < 0)
+            {
+                // Our marker fell out of the game's history (very many transactions at once); skip rather than guess.
+                AmbitionControlMod.Log.Warning("Revenue multiplier: history moved past the last seen entry; new baseline set.");
+                lastSeenPtr = newest.Pointer;
+                return;
+            }
+            for (int i = start; i < n; i++)
+            {
+                Transaction t = arr[i];
+                if (t == null || t.transactionType != Transaction.TransactionType.Revenue) continue;
+                SalesSeen++;
+                if (!CheatMath.TryBoost(t.amount, Multiplier, out float boosted)) continue;
+                SalesBoosted++;
+                pendingExtra += boosted - t.amount;
+                if (SalesBoosted <= 3)
+                    AmbitionControlMod.Log.Msg("Revenue x" + Multiplier.ToString("0.#") + ": sale $" + t.amount.ToString("0.00") +
+                                               " -> extra $" + (boosted - t.amount).ToString("0.00"));
+            }
+            lastSeenPtr = newest.Pointer;
         }
 
-        /// <summary>Called every frame: a stuck re-entrancy flag (exception inside the game call) never outlives a frame.</summary>
-        internal static void Tick() => active = false;
+        private static void Credit(GameInstance gi)
+        {
+            float extra = (float)Math.Min(pendingExtra, MaxCreditPerBatch);
+            float before = gi.Money;
+            if ((double)before + extra > MoneyCommand.MaxBalance)
+            {
+                pendingExtra = 0d;
+                Status = "Sales revenue extra skipped: balance would exceed $100M.";
+                return;
+            }
+            bool accepted = GameManager.ChangeMoneySafe(extra, Transaction.TransactionType.Cheat, new Transaction.DataHolder(),
+                new Il2CppSystem.Nullable<int>(), null, false, false);
+            float after = gi.Money;
+            bool ok = accepted && MoneyCommand.BalanceMatches(after, (double)before + extra);
+            if (!ok)
+            {
+                broken = true;
+                Status = "Sales revenue multiplier stopped: the extra $" + extra.ToString("0.00") + " was not credited (balance $" +
+                         before.ToString("0.00") + " -> $" + after.ToString("0.00") + ").";
+                AmbitionControlMod.Log.Error(Status);
+                return;
+            }
+            pendingExtra -= extra;
+            ExtraTotal += extra;
+            if (creditsLogged++ < 3)
+                AmbitionControlMod.Log.Msg("Revenue extra credited (verified): +$" + extra.ToString("0.00") + ", balance $" +
+                                           before.ToString("0.00") + " -> $" + after.ToString("0.00"));
+        }
 
         internal static void ResetSession()
         {
-            active = false;
-            SalesSeen = 0;
-            SalesBoosted = 0;
+            sessionPtr = IntPtr.Zero;
+            lastSeenPtr = IntPtr.Zero;
+            baselineSet = false;
+            pendingExtra = 0d;
+            SalesSeen = SalesBoosted = 0;
             ExtraTotal = 0d;
-            verifiedLogs = 0;
-            loggedFirstSeen = false;
+            creditsLogged = 0;
+            broken = false;
         }
     }
 }

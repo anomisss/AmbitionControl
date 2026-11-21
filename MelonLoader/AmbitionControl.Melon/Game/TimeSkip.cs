@@ -11,7 +11,10 @@ namespace AmbitionControl.Game
     /// Skip hours (Milestone H). Build-3233 interop evidence:
     ///   TimeMachine.StartTimeMachine(Timestamp goal) — the game's own fast-forward (used for sleeping/waiting); it plays
     ///   time forward quickly rather than jumping, so the normal simulation keeps running. TimeMachine.isRunning.
-    ///   TimeHelper.Now() : Timestamp; Timestamp.AddHours(int), GetTotalMinutes(), ToString().
+    ///   TimeHelper.Now() : Timestamp (a class); new Timestamp(float totalMinutes), GetTotalMinutes().
+    ///   alpha.16: the goal is built as a NEW Timestamp from total minutes. alpha.11-15 called now.AddHours(h), and the
+    ///   alpha.15 log ("Day 11 04:02 -> Day 11 04:02") showed that call changes the object it is called on, which may be
+    ///   the game's live clock. The game's current time is now re-read after building the goal to prove it was untouched.
     /// Two-press confirm; on foot only. Readback: isRunning right after starting, and the time reached when it stops.
     /// </summary>
     internal static class TimeSkip
@@ -24,6 +27,7 @@ namespace AmbitionControl.Game
         private static bool watching;
         private static string watchGoal;
         private static float watchGoalMinutes;
+        private static float watchStartReal;
 
         private static TimeMachine Machine()
         {
@@ -65,15 +69,25 @@ namespace AmbitionControl.Game
             try
             {
                 Timestamp now = TimeHelper.Now();
-                Timestamp goal = now.AddHours(hours);
+                float nowMinutes = now.GetTotalMinutes();
+                string nowText = GameText.Of(now);
+                var goal = new Timestamp(nowMinutes + hours * 60f);
+                float recheck = TimeHelper.Now().GetTotalMinutes();
+                if (Math.Abs(recheck - nowMinutes) > 0.5f)
+                {
+                    Status = "Time skip refused: the game clock changed while preparing (" + nowMinutes + " -> " + recheck + " min).";
+                    AmbitionControlMod.Log.Warning(Status);
+                    return;
+                }
                 watchGoal = GameText.Of(goal);
                 watchGoalMinutes = goal.GetTotalMinutes();
+                watchStartReal = UnityEngine.Time.unscaledTime;
                 Machine().StartTimeMachine(goal);
                 if (Running)
                 {
                     watching = true;
                     Status = "Skipping " + hours + "h to " + watchGoal + "...";
-                    AmbitionControlMod.Log.Msg("Time skip started (verified running): " + GameText.Of(now) + " -> " + watchGoal);
+                    AmbitionControlMod.Log.Msg("Time skip started (verified running): " + nowText + " -> " + watchGoal + " (" + hours * 60 + " game minutes)");
                 }
                 else
                 {
@@ -101,7 +115,8 @@ namespace AmbitionControl.Game
                 float diff = watchGoalMinutes - end.GetTotalMinutes();
                 bool reached = diff <= 1f;
                 Status = reached ? "Time skipped (verified): now " + GameText.Of(end) + "." : "Time skip stopped early at " + GameText.Of(end) + " (goal " + watchGoal + ").";
-                AmbitionControlMod.Log.Msg("Time skip finished: now " + GameText.Of(end) + ", goal " + watchGoal + (reached ? " (reached)" : " (stopped early)"));
+                AmbitionControlMod.Log.Msg("Time skip finished: now " + GameText.Of(end) + ", goal " + watchGoal + (reached ? " (reached)" : " (stopped early)") +
+                                           " after " + (UnityEngine.Time.unscaledTime - watchStartReal).ToString("0.0") + " s real time");
             }
             catch (Exception ex)
             {

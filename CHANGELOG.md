@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## [0.7.0-alpha.16] — 2026-11-21 — Fixes from bulk test run 1
+- **Fix (critical): revenue multiplier no longer hooks the game's money code.** In alpha.15 the Harmony hook on `GameManager.ChangeMoney` crashed Il2CppInterop's native->managed trampoline (`Nullable<int>` parameter), so every money change failed while it was installed (seen in game: Money tab add refused, readback guard disabled writes). Now the mod reads new `Revenue` entries in the game's own history (`GameInstance.Transactions`) once a second and credits `amount × (multiplier − 1)` (capped per sale) as one combined Cheat transaction without a popup. The first scan only sets a baseline; credits wait while saving or while a Money-tab change is verified; every credit is read back and any mismatch stops the feature for the session.
+- **Fix: time skip goal.** `Timestamp.AddHours` changes the object it is called on; the goal is now a new `Timestamp(totalMinutes)`, the game clock is re-read to prove it was untouched, and the log shows game minutes and real seconds taken. The earlier "Skip 1h PASS" is re-opened (it may have been a direct jump).
+- Staff: selecting an employee is logged; employees without an id are refused with a message.
+- **Status:** Build verified (0 warnings); tests 46/46. Not runtime verified.
+
 ## [0.7.0-alpha.15] — 2026-11-21 — Milestone K: remaining features
 - **Money keypad** (Money tab): a Keypad / Presets switch next to the amount. The on-screen keypad (0-9, 000, Del) types the amount without sending any keystroke to the game, so game hotkeys cannot fire. Capped at $100M; the existing $10M-per-change and $0-$100M balance limits still apply at staging. Pure logic in `Core/CheatMath` with unit tests.
 - **Individual wages** (Staff tab): tap an employee row to select it, then -10% / -$1 / Market / +$1 / +10% for that employee only. Writes `EmployeeInstance.hourlyWage`, bounded to $1-$500/h, rounded to cents, read back. Rows now show the game's market rate (`EmployeeHelper.CalculateHourlyWageForSkill`). "Wages to market rate" became "All to market" (still two-press).

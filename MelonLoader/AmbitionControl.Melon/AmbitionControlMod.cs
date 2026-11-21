@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.15", "anomisss")]
+[assembly: MelonInfo(typeof(AmbitionControl.AmbitionControlMod), "Ambition Control", "0.7.0-alpha.16", "anomisss")]
 [assembly: MelonGame("Hovgaard Games", "Big Ambitions")]
 
 namespace AmbitionControl
@@ -27,7 +27,7 @@ namespace AmbitionControl
 
     public sealed class AmbitionControlMod : MelonMod
     {
-        internal const string VersionLabel = "v0.7.0-alpha.15";
+        internal const string VersionLabel = "v0.7.0-alpha.16";
         internal static MelonLogger.Instance Log;
 
         private const float SnapshotInterval = 0.25f;
@@ -96,7 +96,7 @@ namespace AmbitionControl
             settings.QuestToolsEnabled = prefs.CreateEntry("QuestToolsEnabled", true,
                 description: "Show the Quest tab (teleport to quest target / GPS destination; complete objective or quest with confirmation).").Value;
 
-            RevenueBoost.Init(prefs, HarmonyInstance, settings);
+            RevenueBoost.Init(prefs, settings);
             SatisfactionHold.Apply(HarmonyInstance);
 
             blockClickThrough = prefBlock.Value;
@@ -209,7 +209,7 @@ namespace AmbitionControl
                 phone?.Update(snapshot, settings);
                 PlayerTools.Tick(snapshot, settings);
                 TimeSkip.Tick();
-                RevenueBoost.Tick();
+                RevenueBoost.Tick(snapshot, settings, money.CurrentPhase == MoneyService.Phase.Idle);
                 SatisfactionHold.Tick(snapshot, settings);
                 QuestTools.Tick();
                 if (money.CurrentPhase == MoneyService.Phase.Verifying) nextSnapshot = 0f;

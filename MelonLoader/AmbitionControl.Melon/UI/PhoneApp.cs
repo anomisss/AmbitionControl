@@ -791,7 +791,9 @@ namespace AmbitionControl.UI
             int i = staffPage * EmployeeTools.PageSize + slot;
             if (i < 0 || i >= staffRows.Count) return;
             string id = staffRows[i].Id;
+            if (string.IsNullOrEmpty(id)) { shownStatus = "This employee has no id in the save; their wage can't be edited here."; return; }
             selectedStaffId = selectedStaffId == id ? null : id;
+            AmbitionControlMod.Log.Msg("Staff: " + (selectedStaffId == null ? "deselected " : "selected ") + staffRows[i].Name);
             nextRefresh = 0f;
         }
 
